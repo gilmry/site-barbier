@@ -10,8 +10,17 @@
     },
     "config": {
         "vendor-dir": "app/vendor",
-        "platform": {"php": "8.4.0"},
+        "platform": {
+            "php": "8.4.0"
+        },
         "sort-packages": true,
-        "optimize-autoloader": true
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "cyclonedx/cyclonedx-php-composer": true
+        }
+    },
+    "require-dev": {
+        "cyclonedx/cyclonedx-php-composer": "^5.2",
+        "phpstan/phpstan": "^2.1"
     }
 }

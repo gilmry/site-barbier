@@ -1,0 +1,12 @@
+# Règles par défaut de Gitleaks + exceptions documentées (jamais pour masquer un vrai secret).
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Mots de passe de la base de dev éphémère locale, fixtures de test, dépendances"
+paths = [
+  '''harness/lib\.sh''',
+  '''app/vendor/''',
+  '''frontend/node_modules/''',
+  '''dist/''',
+]

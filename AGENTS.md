@@ -48,7 +48,7 @@ Prérequis : Docker seulement (aucun PHP local). Images : `site-barbier-php:8.4`
 | `unit` + `bdd` | `bash harness/run-phpunit.sh` (un test : `--filter RouterTest`) — suite `bdd` ajoutée en 1.1 | non | 0.1 |
 | `integration` (MySQL réelle, 8.4 puis 8.0 : migrations up → down → up, suite PHPUnit `Integration` avec réponses validées contre la spec) | `bash harness/run-integration.sh` (`BARBIER_DB_VERSIONS="8.4"` pour une seule) | oui (auto) | 0.1 |
 | `e2e` (smoke HTTP via le contrôleur frontal) | `bash harness/e2e-smoke.sh` | oui (auto) | 0.1 |
-| **tous** | `bash harness/ci.sh` | oui (auto) | 0.1 |
+| **tous** (miroir de `.github/workflows/ci.yml`) | `bash harness/ci.sh` | oui (auto) | 0.1 |
 | preuve de sensibilité (chaque gate bloque une dérive) | `bash harness/prove-sensitivity.sh` | oui (auto) | 0.1 |
 | `contrat` (parité routes ↔ spec, objets fermés, 400 déclaré, client TS à jour) | `bash harness/run-contract.sh` | non | 0.2 |
 | `e2e` navigateur (chaque parcours de `journeys/`, bureau + mobile) | `bash harness/run-e2e.sh` (`JOURNEY=<id>` pour un seul) | oui (auto) | 0.3 |
@@ -56,7 +56,8 @@ Prérequis : Docker seulement (aucun PHP local). Images : `site-barbier-php:8.4`
 | `doc-vivante` (cadence 1 action/1 s, captures + vidéo, **non bloquant**) | `bash harness/run-demo.sh` → `harness/demo/vitrine/index.html` | oui (auto) | 0.3 |
 | `hebergement` (paquet reproductible, sans fichier interdit, installé dans `php:8.4-apache`, durcissement `.htaccess`) | `bash harness/run-hosting.sh` | oui (auto) | 0.4 |
 | paquet de déploiement | `bash harness/package.sh` → `dist/site-barbier-<version>.zip` (procédure : `docs/deploiement.md`) | non | 0.4 |
-| `plancher` sécurité (secrets, SBOM, SCA) + CI distante | à venir | | 0.5 |
+| `plancher` sécurité (Gitleaks arbre + historique, SBOM CycloneDX PHP + npm ; conteneur N/A) | `bash harness/run-plancher.sh` → `dist/sbom/` | non | 0.5 |
+| `jalon` (**rapports non bloquants** : composer/npm audit, SAST SARIF, PHPStan 8) | `bash harness/run-jalon.sh` → `dist/reports/` | non | 0.5 |
 
 Les gates s'ajoutent à cette table **dans la même PR** que la story qui les crée.
 
@@ -79,6 +80,16 @@ Les gates s'ajoutent à cette table **dans la même PR** que la story qui les cr
   régénérée — sans attendre qu'on le demande.
 - Un golden ne se réécrit que pour un changement de rendu **voulu** (`VISUAL_MODE=capture`), jamais pour
   faire passer un rouge.
+
+## CI et hooks
+
+- `.github/workflows/ci.yml` rejoue **les mêmes scripts** que `harness/ci.sh` (push `main`/`story/**`, PR,
+  hebdomadaire). Artefacts : SBOM, vitrine, paquet, rapports de jalon (SARIF remonté à la forge).
+- Hooks versionnés dans `.githooks/` (installés par `./go`) : `pre-commit` = Gitleaks + `verify` + `unit` ;
+  `pre-push` = CI complète.
+- Protection de la branche `main` (revue + CI verte obligatoires) : **à poser par le PO** à la création du
+  dépôt distant (point irréversible).
+- Signalement des failles : `SECURITY.md`.
 
 ## Règles de l'agent
 

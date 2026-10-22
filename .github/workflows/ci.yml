@@ -1,0 +1,79 @@
+# CI — mêmes commandes qu'en local (harness/*.sh, Docker), du plancher vers le sommet.
+# Bloquant : plancher, verify, contrat, unit, integration (MySQL 8.0 et 8.4), e2e, visuel, hébergement.
+# Non bloquant : doc vivante (vitrine en artefact), jalon (rapports SCA/SAST/qualité en artefact).
+name: ci
+on:
+  push:
+    branches: [main, 'story/**']
+  pull_request:
+  schedule:
+    - cron: '17 4 * * 1'   # hebdomadaire : SCA et SBOM même sans commit (plan de vulnérabilités §2)
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plancher:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - run: bash harness/run-plancher.sh
+      - uses: actions/upload-artifact@v4
+        with: { name: sbom, path: dist/sbom/ }
+
+  structure-contrat-unit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash harness/run-verify.sh
+      - run: bash harness/run-contract.sh
+      - run: bash harness/run-phpunit.sh
+
+  integration:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash harness/run-integration.sh
+      - run: bash harness/e2e-smoke.sh
+
+  navigateur:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash harness/run-e2e.sh
+      - run: bash harness/run-visual.sh
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with: { name: visuel-diffs, path: harness/visual/test-results/ }
+      - run: bash harness/run-demo.sh
+        continue-on-error: true
+      - uses: actions/upload-artifact@v4
+        with: { name: vitrine, path: harness/demo/vitrine/ }
+
+  hebergement:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash harness/run-hosting.sh
+      - run: PACKAGE_VERSION=${{ github.sha }} bash harness/package.sh
+      - uses: actions/upload-artifact@v4
+        with: { name: paquet, path: 'dist/site-barbier-*.zip*' }
+
+  jalon:
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash harness/run-jalon.sh
+      - uses: actions/upload-artifact@v4
+        with: { name: jalon, path: dist/reports/ }
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always() && hashFiles('dist/reports/sast.sarif') != ''
+        with: { sarif_file: dist/reports/sast.sarif }

@@ -48,6 +48,7 @@ open(p,'w').write(s.replace('Require all denied', 'Require all granted').replace
 PY
 }
 drift_repro() { sed -i 's/$epoch = mktime(0, 0, 0, 1, 1, 2020);/$epoch = time() + random_int(1, 999);/' harness/package/build.php; }
+drift_secret() { printf '<?php\n$k = "AKIA%s";\n' "$(printf 'Q%.0s' {1..16})" > app/src/cle.php; }
 drift_e2e()  { sed -i "s#'/api/v1/health'#'/api/v1/sante'#" app/src/Kernel.php; }
 
 # --- Moteur ----------------------------------------------------------------------------------------
@@ -84,6 +85,7 @@ probe "integration : réponse hors contrat" drift_resp run-integration.sh
 probe "e2e : santé cassée"         drift_e2e    e2e-smoke.sh
 probe "hébergement : uploads exécutables" drift_uploads run-hosting.sh
 probe "hébergement : paquet non reproductible" drift_repro run-hosting.sh
+probe "plancher : secret commité"   drift_secret run-plancher.sh
 probe "J1 parcours recopié"        drift_j1     run-verify.sh
 probe "e2e navigateur : attente fausse" drift_journey run-e2e.sh
 probe "visuel : rendu différent du golden" drift_golden run-visual.sh

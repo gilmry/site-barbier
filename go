@@ -4,6 +4,7 @@
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/harness/lib.sh"
 PORT="${FOYER_PORT:-8080}"
+git -C "$BARBIER_ROOT" config core.hooksPath .githooks 2>/dev/null || true   # hooks DRY avec la CI
 ensure_php_image
 ensure_vendor
 ensure_db

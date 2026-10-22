@@ -30,12 +30,13 @@ ensure_php_image() {
     -f "$BARBIER_ROOT/docker/php.Dockerfile" "$BARBIER_ROOT/docker" >/dev/null
 }
 
-# Dépendances embarquées (app/vendor, verrouillées par composer.lock) : installées à froid si absentes.
+# Dépendances (app/vendor, verrouillées par composer.lock) : installées à froid si absentes, outils de dev
+# compris (SBOM, PHPStan). Le paquet de déploiement, lui, réinstalle sans les outils de dev.
 ensure_vendor() {
-  [ -f "$BARBIER_ROOT/app/vendor/autoload.php" ] && return 0
+  [ -f "$BARBIER_ROOT/app/vendor/autoload.php" ] && [ -d "$BARBIER_ROOT/app/vendor/phpstan" ] && return 0
   echo "[harnais] composer install (dépendances verrouillées)…" >&2
   docker run --rm -v "$BARBIER_ROOT":/app -w /app -u "$(id -u):$(id -g)" -e COMPOSER_HOME=/tmp/composer \
-    "$BARBIER_PHP_IMAGE" composer install --no-interaction --no-progress --no-dev >/dev/null 2>&1
+    "$BARBIER_PHP_IMAGE" composer install --no-interaction --no-progress >/dev/null 2>&1
 }
 
 # MySQL éphémère (image publique officielle), prête à recevoir des connexions.
