@@ -1,0 +1,5 @@
+# Réécriture vers le contrôleur frontal (même règle que harness/dev-router.php).
+# Le durcissement complet (HTTPS, en-têtes, refus de app/) est porté par la Story 0.4.
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [QSA,L]

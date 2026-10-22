@@ -1,0 +1,13 @@
+# Configuration réelle avec secrets — jamais versionnée (gate G1).
+/app/config.php
+# Dépendances (réinstallables) et caches.
+/vendor/
+/app/vendor/
+node_modules/
+/harness/.phpunit.cache/
+# Données d'exécution (journaux, jetons d'urgence, uploads de dev).
+/app/var/
+/www/uploads/*
+!/www/uploads/.htaccess
+# Paquets de déploiement (artefacts CI).
+/dist/
