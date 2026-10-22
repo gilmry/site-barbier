@@ -1,0 +1,9 @@
+DROP TABLE salon;
+DROP TABLE opening_hours;
+DROP TABLE barber_service;
+DROP TABLE barber;
+DROP TABLE service;
+DROP TABLE category;
+DROP TABLE section;
+DROP TABLE media;
+DROP TABLE translation;

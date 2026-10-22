@@ -54,7 +54,7 @@ Prérequis : Docker seulement (aucun PHP local). Images : `site-barbier-php:8.4`
 | `front` (îlots compilés `www/islands/` = sources `frontend/`) | `bash harness/run-front.sh` — recompiler : `bash harness/build-front.sh` | non | 1.1 |
 | `e2e` navigateur (chaque parcours de `journeys/`, bureau + mobile) | `bash harness/run-e2e.sh` (`JOURNEY=<id>` pour un seul) | oui (auto) | 0.3 |
 | `visuel` (goldens par parcours et taille d'écran, tolérance 0,5 %) | `bash harness/run-visual.sh` — `VISUAL_MODE=capture` pour réécrire **consciemment** les goldens | oui (auto) | 0.3 |
-| `doc-vivante` (cadence 1 action/1 s, captures + vidéo, **non bloquant**) | `bash harness/run-demo.sh` → `harness/demo/vitrine/index.html` | oui (auto) | 0.3 |
+| `doc-vivante` (cadence 1 action/1 s, captures + vidéo, **non bloquant**) | `bash harness/run-demo.sh` → `harness/demo/vitrine/index.html` (non versionné, artefact CI) | oui (auto) | 0.3 |
 | `hebergement` (paquet reproductible, sans fichier interdit, installé dans `php:8.4-apache`, durcissement `.htaccess`) | `bash harness/run-hosting.sh` | oui (auto) | 0.4 |
 | paquet de déploiement | `bash harness/package.sh` → `dist/site-barbier-<version>.zip` (procédure : `docs/deploiement.md`) | non | 0.4 |
 | `plancher` sécurité (Gitleaks arbre + historique, SBOM CycloneDX PHP + npm ; conteneur N/A) | `bash harness/run-plancher.sh` → `dist/sbom/` | non | 0.5 |
@@ -102,6 +102,17 @@ Les gates s'ajoutent à cette table **dans la même PR** que la story qui les cr
 - Actions sensibles : `AccessController::guard($r, [FULL], recentTotp: true)` (code TOTP de moins de 10 min).
 - Réinitialisation d'urgence : déposer `app/var/reset-2fa.token` en SFTP, puis `/install/reset-2fa`.
 - Dev/test : clé et code d'installation fixes dans `harness/lib.sh` (jamais en production).
+
+## Vitrine (Epic 2)
+
+- Pages publiques : gabarits PHP (`app/templates/`), URL `/{fr|nl|en}/…`, libellés dans `app/i18n/*.php`
+  (repli FR). Sorties : `$e()` échappé, `$t()` libellé échappé, `$html()` **SafeHtml uniquement** (V1).
+- Contenus éditables : table `translation` (FR obligatoire, repli FR) ; champs autorisés par section dans
+  `Domain/Vitrine/SectionCatalog` ; texte enrichi sûr par `RichText` (gras, italique, liens https/tel/mailto).
+- Contenu initial : migration `0004_contenu_initial` (maquette Le Corbeau, FR/NL/EN).
+- Images : `GdImageProcessor` (type par contenu, ré-encodage WebP ≤ 1600 px, EXIF retiré) → `www/uploads/`.
+- Polices auto-hébergées (`frontend/scripts/copy-fonts.mjs` → `www/assets/fonts/`), aucun tiers (ADR-007).
+- Garde-fous agenda sur le contenu : port `Application/Vitrine/AgendaGuard` (implémenté en 3.11).
 
 ## Règles de l'agent
 

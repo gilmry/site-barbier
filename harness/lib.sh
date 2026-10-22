@@ -99,7 +99,7 @@ start_web() {
   DB_NAME="$db" php_run "$BARBIER_PHP_IMAGE" php app/bin/migrate.php up >/dev/null
   [ -f "$BARBIER_ROOT/app/bin/seed.php" ] && DB_NAME="$db" php_run "$BARBIER_PHP_IMAGE" php app/bin/seed.php >/dev/null
   docker rm -f "$BARBIER_WEB_CONTAINER" >/dev/null 2>&1 || true
-  docker run -d --rm --name "$BARBIER_WEB_CONTAINER" --network host -v "$BARBIER_ROOT":/app -w /app \
+  docker run -d --rm --name "$BARBIER_WEB_CONTAINER" --network host -v "$BARBIER_ROOT":/app -w /app -u "$(id -u):$(id -g)" \
     -e DB_HOST=127.0.0.1 -e DB_PORT="$BARBIER_DB_PORT" -e DB_USER=root -e DB_PASSWORD="$BARBIER_DB_ROOT_PASSWORD" \
     -e DB_NAME="$db" -e BARBIER_ENV=test -e APP_KEY="$BARBIER_TEST_APP_KEY" -e INSTALL_CODE="$BARBIER_TEST_INSTALL_CODE" \
     ${BARBIER_WEB_ENV:-} "$BARBIER_PHP_IMAGE" \

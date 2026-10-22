@@ -36,3 +36,25 @@ code.secret { word-break: break-all; font-size: 15px; }
   .shell nav .hint { margin: 0; flex: 1; }
   .shell main { padding: 16px; }
 }
+
+.panel { background: var(--charbon); border: 1px solid var(--graphite); padding: 16px 20px; margin: 16px 0; }
+.panel h2 { margin: 0 0 8px; font-size: 19px; }
+.split { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 24px; align-items: start; }
+.list { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
+.list button { width: 100%; text-align: left; background: transparent; color: var(--argent-clair); border: 1px solid transparent; padding: 8px 10px; font-weight: 500; }
+.list button[aria-current] { border-color: var(--fer); background: var(--charbon); color: var(--os); }
+.badge { margin-left: 8px; font-size: 11px; color: var(--warn); font-weight: 600; }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--graphite); vertical-align: middle; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.check { display: flex; align-items: center; gap: 8px; color: var(--os); }
+.check input { width: auto; }
+button.small { padding: 6px 12px; font-size: 14px; }
+button.danger { border-color: var(--ko); color: var(--ko); }
+.cards, .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.gallery img { width: 100%; height: auto; display: block; }
+.gallery figcaption { color: var(--argent); font-size: 14px; margin-top: 6px; }
+.services { border: 1px solid var(--graphite); padding: 8px 12px; margin-top: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 4px; }
+.services legend { color: var(--argent); }
+.upload input { margin-top: 8px; }
+@media (max-width: 760px) { .split, .grid2 { grid-template-columns: minmax(0, 1fr); } }

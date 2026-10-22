@@ -112,10 +112,11 @@ foreach ($journeys as $file) {
     }
 }
 
-// V1 — gabarits : toute sortie passe par l'échappement ($e) ou par la traduction échappée ($t).
+// V1 — gabarits : toute sortie passe par $e (échappement), $t (traduction échappée) ou $html (SafeHtml seul) ;
+// jamais d'echo/print.
 foreach (rglob($root . '/app/templates') as $file) {
     foreach (file($file) ?: [] as $n => $line) {
-        if (preg_match_all('/<\?=(?!\s*\$e\(|\s*\$t\()/', $line) > 0) {
+        if (preg_match_all('/<\?=(?!\s*\$e\(|\s*\$t\(|\s*\$html\()/', $line) > 0 || preg_match('/<\?php\s+(echo|print)\b/', $line) === 1) {
             $failures[] = 'V1: sortie non échappée dans ' . substr($file, strlen($root) + 1) . ':' . ($n + 1);
         }
     }
@@ -128,8 +129,11 @@ foreach (rglob($root . '/app/src') as $file) {
         continue;
     }
     $code = strip_php_comments((string) file_get_contents($file));
-    if (preg_match('/->(query|exec|prepare)\(\s*(\$|[\'"][^\'"]*[\'"]\s*\.\s*\$)/', $code) === 1
-        || preg_match('/->(query|exec|prepare)\(\s*"[^"]*\{?\$[a-z]/i', $code) === 1) {
+    // Interdit : variable concaténée (« . $x ») ou interpolée (« "…$x" ») dans l'appel ; une requête passée
+    // en variable doit être un littéral (ternaire de littéraux admis).
+    if (preg_match('/->(query|exec|prepare)\((?:[^;]*?)\.\s*\$/', $code) === 1
+        || preg_match('/->(query|exec|prepare)\(\s*"[^"]*\{?\$[a-z]/i', $code) === 1
+        || preg_match('/->(query|exec|prepare)\(\s*\$[a-zA-Z_]+\s*\)/', $code) === 1) {
         $failures[] = 'S1: requête SQL construite par concaténation/interpolation : ' . substr($file, strlen($root) + 1);
     }
 }

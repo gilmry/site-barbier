@@ -69,17 +69,19 @@ for (const [path, ops] of Object.entries(spec.paths ?? {})) {
     const pathParams = (op.parameters ?? []).filter((p) => p.in === 'path');
     const queryParams = (op.parameters ?? []).filter((p) => p.in === 'query');
     const body = op.requestBody?.content?.['application/json']?.schema;
+    const multipart = !!op.requestBody?.content?.['multipart/form-data'];
     const [code, resp] = success(op);
     const ret = code === '204' || !resp?.content ? 'void' : tsType(resp.content['application/json']?.schema);
     const args = [
       ...pathParams.map((p) => `${ident(p.name)}: string`),
       body ? `input: ${tsType(body)}` : null,
+      multipart ? 'form: FormData' : null,
       queryParams.length
         ? `query${queryParams.some((p) => p.required) ? '' : '?'}: { ${queryParams.map((p) => `${JSON.stringify(p.name)}${p.required ? '' : '?'}: ${tsType(p.schema)}`).join('; ')} }`
         : null,
     ].filter(Boolean).join(', ');
     const url = path.replace(/\{([^}]+)\}/g, (_, n) => `\${encodeURIComponent(${ident(n)})}`);
-    const opts = [`method: '${http.toUpperCase()}'`, body ? 'body: JSON.stringify(input)' : null, queryParams.length ? 'query' : null].filter(Boolean).join(', ');
+    const opts = [`method: '${http.toUpperCase()}'`, body ? 'body: JSON.stringify(input)' : null, multipart ? 'form' : null, queryParams.length ? 'query' : null].filter(Boolean).join(', ');
     methods.push(`    /** ${op.summary ?? ''} */\n    ${op.operationId}: (${args}): Promise<${ret}> =>\n      transport(\`${url}\`, { ${opts} }) as Promise<${ret}>,`);
   }
 }
@@ -90,7 +92,7 @@ const out = `// GÉNÉRÉ depuis openapi/site-barbier.openapi.json par frontend/
 
 export type Transport = (
   url: string,
-  options: { method: string; body?: string; query?: Record<string, string | undefined> },
+  options: { method: string; body?: string; form?: FormData; query?: Record<string, string | undefined> },
 ) => Promise<unknown>;
 
 ${types}

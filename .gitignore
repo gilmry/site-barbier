@@ -12,3 +12,5 @@ node_modules/
 # Paquets de déploiement (artefacts CI).
 /dist/
 /harness/visual/test-results/
+# Doc vivante : régénérée à chaque passage, publiée en artefact CI (pas versionnée : idempotence du dépôt).
+/harness/demo/vitrine/

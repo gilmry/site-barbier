@@ -14,6 +14,7 @@ final class Request
      * @param array<string,mixed>  $query
      * @param array<string,string> $headers
      * @param array<string,string> $cookies
+     * @param array<string, array{name:string, tmp_name:string, size:int, error:int}> $files
      */
     public function __construct(
         private readonly string $method,
@@ -23,6 +24,7 @@ final class Request
         array $headers = [],
         private readonly array $cookies = [],
         private readonly string $clientIp = '127.0.0.1',
+        private readonly array $files = [],
     ) {
         $this->headers = array_change_key_case($headers, CASE_LOWER);
     }
@@ -49,6 +51,7 @@ final class Request
             $headers,
             array_filter($_COOKIE, 'is_string'),
             (string) ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'),
+            array_filter($_FILES, static fn ($f): bool => is_array($f) && is_string($f['tmp_name'] ?? null)),
         );
     }
 
@@ -84,6 +87,12 @@ final class Request
     public function cookie(string $name): ?string
     {
         return $this->cookies[$name] ?? null;
+    }
+
+    /** @return array<string, array{name:string, tmp_name:string, size:int, error:int}> */
+    public function files(): array
+    {
+        return $this->files;
     }
 
     public function clientIp(): string

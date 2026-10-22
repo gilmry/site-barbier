@@ -71,8 +71,16 @@ final class StrictJson
         // Corps.
         $body = null;
         $bodySpec = $op['requestBody']['content']['application/json'] ?? null;
+        $multipart = isset($op['requestBody']['content']['multipart/form-data']);
         $raw = trim($request->rawBody());
-        if ($bodySpec === null) {
+        if ($multipart) {
+            // Envoi de fichier : le contrôleur valide le fichier lui-même (type par contenu, taille).
+            if (!str_starts_with(strtolower($request->header('content-type') ?? ''), 'multipart/form-data')) {
+                $errors[] = ['field' => 'body', 'message' => 'Content-Type multipart/form-data attendu'];
+            } elseif ($request->files() === []) {
+                $errors[] = ['field' => 'file', 'message' => 'fichier manquant'];
+            }
+        } elseif ($bodySpec === null) {
             if ($raw !== '') {
                 $errors[] = ['field' => 'body', 'message' => 'aucun corps attendu'];
             }

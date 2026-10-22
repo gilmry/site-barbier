@@ -95,11 +95,54 @@ final class Migrator
         }
     }
 
-    /** Découpe un fichier SQL en instructions (pas de « ; » dans les littéraux de nos migrations). @return list<string> */
-    private static function statements(string $sql): array
+    /**
+     * Découpe un fichier SQL en instructions : « ; » et commentaires « -- » ne comptent qu'en dehors des
+     * chaînes ('…', avec '' et \' échappés) — les contenus traduits contiennent des points-virgules.
+     *
+     * @return list<string>
+     */
+    public static function statements(string $sql): array
     {
-        $sql = (string) preg_replace('/--[^\r\n]*/', '', $sql);
+        $out = [];
+        $buf = '';
+        $len = strlen($sql);
+        $inString = false;
+        for ($i = 0; $i < $len; $i++) {
+            $c = $sql[$i];
+            if ($inString) {
+                $buf .= $c;
+                if ($c === '\\' && $i + 1 < $len) {
+                    $buf .= $sql[++$i];
+                } elseif ($c === "'") {
+                    if ($i + 1 < $len && $sql[$i + 1] === "'") {
+                        $buf .= $sql[++$i];
+                    } else {
+                        $inString = false;
+                    }
+                }
+                continue;
+            }
+            if ($c === "'") {
+                $inString = true;
+                $buf .= $c;
+            } elseif ($c === '-' && $i + 1 < $len && $sql[$i + 1] === '-') {
+                while ($i < $len && $sql[$i] !== "\n") {
+                    $i++;
+                }
+                $buf .= "\n";
+            } elseif ($c === ';') {
+                if (trim($buf) !== '') {
+                    $out[] = trim($buf);
+                }
+                $buf = '';
+            } else {
+                $buf .= $c;
+            }
+        }
+        if (trim($buf) !== '') {
+            $out[] = trim($buf);
+        }
 
-        return array_values(array_filter(array_map('trim', explode(';', $sql)), static fn (string $s): bool => $s !== ''));
+        return $out;
     }
 }

@@ -23,12 +23,13 @@ export function setCsrf(token: string | undefined): void {
   csrfToken = token ?? '';
 }
 
-export const transport: Transport = async (url, { method, body, query }) => {
+export const transport: Transport = async (url, { method, body, form, query }) => {
   const qs = query ? new URLSearchParams(Object.entries(query).filter(([, v]) => v !== undefined) as [string, string][]).toString() : '';
   const headers: Record<string, string> = { Accept: 'application/json', 'X-Requested-With': 'barbier' };
   if (body !== undefined) headers['Content-Type'] = 'application/json';
   if (csrfToken && method !== 'GET') headers['X-CSRF-Token'] = csrfToken;
-  const res = await fetch(qs ? `${url}?${qs}` : url, { method, body, headers, credentials: 'same-origin' });
+  // FormData : le navigateur pose lui-même Content-Type multipart avec sa frontière.
+  const res = await fetch(qs ? `${url}?${qs}` : url, { method, body: form ?? body, headers, credentials: 'same-origin' });
   if (res.status === 204) return undefined;
   const type = res.headers.get('Content-Type') ?? '';
   const data = type.includes('json') ? await res.json() : await res.text();

@@ -48,7 +48,8 @@ abstract class IntegrationCase extends TestCase
     /** @return array<string,mixed> */
     protected static function config(): array
     {
-        return ['env' => 'test', 'db' => self::dbConfig(), 'app_key' => (string) getenv('APP_KEY'), 'install_code' => (string) getenv('INSTALL_CODE')];
+        return ['env' => 'test', 'db' => self::dbConfig(), 'app_key' => (string) getenv('APP_KEY'), 'install_code' => (string) getenv('INSTALL_CODE'),
+            'uploads_dir' => dirname(__DIR__, 2) . '/app/var/test-uploads'];
     }
 
     protected function kernel(): Kernel
@@ -56,6 +57,33 @@ abstract class IntegrationCase extends TestCase
         self::pdo();
 
         return new Kernel(self::config(), $this->clock);
+    }
+
+    /**
+     * Ouvre directement une session d'administration complète (sans passer par l'UI) et renvoie l'en-tête CSRF.
+     *
+     * @return array<string,string>
+     */
+    protected function asEditor(): array
+    {
+        $k = $this->kernel();
+        $editor = $k->access()->isInstalled() ? null : $k->access()->install('gerant@salon.be', 'Cèdre-lame-serviette-9', 'Cèdre-lame-serviette-9', (string) getenv('INSTALL_CODE'), (string) getenv('INSTALL_CODE'));
+        $id = $editor ?? (string) self::pdo()->query('SELECT id FROM editor LIMIT 1')->fetchColumn();
+        [$session, $cookie] = $k->sessions()->open($id, \Barbier\Http\AdminSession::FULL, true);
+        preg_match('/^([^=]+)=([^;]*)/', $cookie, $m);
+        $this->jar[$m[1]] = $m[2];
+
+        return ['X-CSRF-Token' => $session->csrf];
+    }
+
+    /** Remet le contenu initial : tables de la vitrine vidées, puis migration 0004 (contenu) rejouée. */
+    protected static function resetContent(): void
+    {
+        self::truncate('barber_service', 'barber', 'service', 'category', 'translation', 'section', 'salon', 'opening_hours', 'media');
+        $sql = (string) file_get_contents(dirname(__DIR__, 2) . '/app/migrations/0004_contenu_initial.up.sql');
+        foreach (\Barbier\Adapter\Persistence\Migrator::statements($sql) as $st) {
+            self::pdo()->exec($st);
+        }
     }
 
     /** Vide les tables métier entre deux tests (le schéma reste migré). */
