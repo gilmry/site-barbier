@@ -2,16 +2,16 @@
 livrable: Architecture technique
 persona: 03-architecte (BMAD, TOGAF Phases C-D)
 projet: site-barbier
-version: 0.1 (à valider)
+version: 1.0 (validé)
 source: 02-prd.md v1.0 (validé 2026-10-22)
 redige_le: 2026-10-22
 redige_par: agent (Claude Code, pilote Foyer)
 annexe: 03b-plan-vulnerabilites.md
 signature_humaine:
-  nom: <à signer>
+  nom: gilmry
   role: PO
-  date: <AAAA-MM-JJ>
-  verdict: <validé | à reprendre>
+  date: 2026-10-22
+  verdict: validé
 ---
 
 # Architecture technique — site-barbier

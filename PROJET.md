@@ -32,8 +32,8 @@
 
 ## Position courante
 
-- **Phase / étape** : Phase A · Conception BMAD · étape 3/5 (Architecte → architecture v0.1 + plan de vulnérabilités rédigés)
-- **Prochaine action attendue** : le PO valide l'architecture v0.1 (ADR-004/005/008 tranchés) → Scrum Master (epics & stories)
+- **Phase / étape** : Phase A · Conception BMAD · étape 4/5 (Scrum Master → epics & stories)
+- **Prochaine action attendue** : le PO valide le backlog → Validateur (rapport PASS/CONCERNS/FAIL)
 - **Rôle à jouer** : `pilote/roles/conception-bmad.md`
 
 ## Livrables de conception
@@ -42,7 +42,7 @@
 |---|---|---|---|
 | 1 | Product Brief | `docs/conception/01-product-brief.md` | ✅ v1.0 validé (gilmry, 2026-10-22) |
 | 2 | PRD | `docs/conception/02-prd.md` | ✅ v1.0 validé (gilmry, 2026-10-22) |
-| 3 | Architecture + ADR + plan vulnérabilités | `docs/conception/03-architecture.md` + `03b-plan-vulnerabilites.md` | 🟡 v0.1 à valider (9 ADR) |
+| 3 | Architecture + ADR + plan vulnérabilités | `docs/conception/03-architecture.md` + `03b-plan-vulnerabilites.md` | ✅ v1.0 validé (gilmry, 2026-10-22) |
 | 4 | Epics & stories | `docs/conception/04-epics-stories.md` | ⚪ |
 | 5 | Validation | `docs/conception/05-validation.md` | ⚪ |
 
@@ -78,9 +78,7 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 
 ### 🔴 En attente (l'humain doit trancher une MODALITÉ)
 
-- **Point** : validation de l'architecture v0.1 dans son ensemble (sortie de l'étape Architecte)
-  - **Preuve jointe** : `docs/conception/03-architecture.md` + `03b-plan-vulnerabilites.md`
-  - **À compléter par le PO** : suppléant sécurité, adresse de signalement (plan §1 et §6)
+- *(aucun)*
 
 ### ✅ Tranchés
 
@@ -95,6 +93,7 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 | Outillage serveur | Léger (vanilla), réversible vers API Platform | gilmry | 2026-10-22 | ADR-004 |
 | Stockage | SQL sur mesure (CQRS), pas d'ORM | gilmry | 2026-10-22 | ADR-005 |
 | Environnements | Recette `test.<domaine>` puis production, envoi SFTP/FTPS par le PO | gilmry | 2026-10-22 | ADR-008 |
+| Architecture v1.0 + plan de vulnérabilités | Validés ; responsable sécurité Gilles seul (sans suppléant, mesure compensatoire), signalement gilmry+abuse@gmail.com | gilmry | 2026-10-22 | — |
 
 ### Défauts annoncés (réversibles, non votés)
 
@@ -110,3 +109,4 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 - 2026-10-22 — Brief validé (v1.0) ; PRD v0.1 rédigé : 26 FR, 9 NFR, 4 parcours de référence, contrat API v1 esquissé (commit `10d4115`)
 - 2026-10-22 — PRD validé (v1.0) ; architecture v0.1 (7 couches, 9 ADR, données et flux) + plan de vulnérabilités
 - 2026-10-22 — PO tranche ADR-004 (léger), ADR-005 (SQL sur mesure), ADR-008 (avec site de test)
+- 2026-10-22 — architecture v1.0 et plan de vulnérabilités validés

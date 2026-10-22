@@ -2,14 +2,14 @@
 livrable: Plan de gestion des vulnérabilités
 persona: 03-architecte (annexe de 03-architecture.md, couche 7)
 projet: site-barbier
-version: 0.1 (à valider)
+version: 1.0 (validé)
 redige_le: 2026-10-22
 redige_par: agent (Claude Code, pilote Foyer)
 signature_humaine:
-  nom: <à signer>
+  nom: gilmry
   role: PO
-  date: <AAAA-MM-JJ>
-  verdict: <validé | à reprendre>
+  date: 2026-10-22
+  verdict: validé
 ---
 
 # Plan de gestion des vulnérabilités — site-barbier
@@ -23,10 +23,10 @@ signature_humaine:
   paquet de déploiement.
 - **Hors périmètre** : plateforme mutualisée (PHP, Apache, MariaDB, système) → portée par l'hébergeur, à
   vérifier au choix de l'offre (version de PHP maintenue, correctifs) ; poste du PO → documents d'organisation.
-- **Responsable** : gilmry. **Porteur unique** : mesure compensatoire = les gates bloquent mécaniquement
+- **Responsable** : Gilles (gilmry), **seul porteur, sans suppléant** (choix du PO, 2026-10-22). Mesure compensatoire = les gates bloquent mécaniquement
   (secrets, SBOM, tests `@security`) sans dépendre d'une vigilance humaine, le bot de montée de version ouvre les
-  PR seul, et l'agent rappelle les findings ouverts à chaque gate review ; suppléant à nommer avant la mise en ligne
-  `[à compléter par le PO]`.
+  PR seul, et l'agent rappelle les findings ouverts à chaque gate review. Absence de suppléant acceptée et
+  réexaminée à chaque gate review (PR.AA-05.6).
 
 ## 2. Identifier
 
@@ -71,7 +71,7 @@ Réponses : corriger · mitiger (désactiver la fonction, règle `.htaccess`) ·
 ## 6. Divulgation coordonnée
 
 Publiée dans `SECURITY.md` à la racine du dépôt (Sprint 0) :
-- **Canal** : signalement privé de la forge (GitHub Security Advisories) ou adresse dédiée `[à fournir par le PO]` ; jamais d'issue publique.
+- **Canal** : signalement privé de la forge (GitHub Security Advisories) ou **gilmry+abuse@gmail.com** ; jamais d'issue publique.
 - **Accusé de réception** : 5 jours ouvrés.
 - **Divulgation** : après correction, ou à 90 jours au plus tard, d'un commun accord ; crédit au rapporteur s'il le souhaite.
 - **Recours** : le CCB coordonne la CVD en Belgique.
