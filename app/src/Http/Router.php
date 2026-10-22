@@ -4,19 +4,33 @@ declare(strict_types=1);
 
 namespace Barbier\Http;
 
+use Barbier\Http\Contract\ContractViolation;
+use Barbier\Http\Contract\StrictJson;
+
 /**
- * Table de routes explicite : (méthode, motif) → gestionnaire. La table est introspectable
- * (routes()) pour le gate de parité routes ↔ spec (Story 0.2).
+ * Table de routes explicite : (méthode, motif) → gestionnaire. Les routes d'API (« contract »)
+ * sont validées par StrictJson AVANT le gestionnaire ; les pages rendues côté serveur ne le sont pas.
+ * La table est introspectable (routes()) pour le gate de parité routes ↔ spec.
+ *
+ * Gestionnaire : fn(Request, array{path:array, query:array, body:mixed}): Response
  */
 final class Router
 {
-    /** @var list<array{method:string, pattern:string, handler:callable(Request, array<string,string>):Response}> */
+    /** @var list<array{method:string, pattern:string, handler:callable, contract:bool}> */
     private array $routes = [];
 
-    /** @param callable(Request, array<string,string>):Response $handler */
-    public function add(string $method, string $pattern, callable $handler): void
+    public function __construct(private readonly ?StrictJson $strict = null)
     {
-        $this->routes[] = ['method' => strtoupper($method), 'pattern' => $pattern, 'handler' => $handler];
+    }
+
+    public function api(string $method, string $pattern, callable $handler): void
+    {
+        $this->routes[] = ['method' => strtoupper($method), 'pattern' => $pattern, 'handler' => $handler, 'contract' => true];
+    }
+
+    public function page(string $method, string $pattern, callable $handler): void
+    {
+        $this->routes[] = ['method' => strtoupper($method), 'pattern' => $pattern, 'handler' => $handler, 'contract' => false];
     }
 
     public function dispatch(Request $request): Response
@@ -28,9 +42,19 @@ final class Router
                 continue;
             }
             $pathMatched = true;
-            if ($route['method'] === $request->method()) {
-                return ($route['handler'])($request, $params);
+            if ($route['method'] !== $request->method()) {
+                continue;
             }
+            $input = ['path' => $params, 'query' => $request->query(), 'body' => null];
+            if ($route['contract'] && $this->strict !== null) {
+                try {
+                    $input = $this->strict->validateRequest($route['method'], $route['pattern'], $request, $params);
+                } catch (ContractViolation $e) {
+                    return Response::problem(400, 'Requête invalide', null, $e->errors);
+                }
+            }
+
+            return ($route['handler'])($request, $input);
         }
 
         return $pathMatched
@@ -38,10 +62,13 @@ final class Router
             : Response::problem(404, 'Ressource introuvable');
     }
 
-    /** @return list<array{method:string, pattern:string}> */
+    /** @return list<array{method:string, pattern:string, contract:bool}> */
     public function routes(): array
     {
-        return array_map(static fn (array $r): array => ['method' => $r['method'], 'pattern' => $r['pattern']], $this->routes);
+        return array_map(
+            static fn (array $r): array => ['method' => $r['method'], 'pattern' => $r['pattern'], 'contract' => $r['contract']],
+            $this->routes,
+        );
     }
 
     /**

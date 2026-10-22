@@ -1,0 +1,16 @@
+{
+  "name": "site-barbier-frontend",
+  "private": true,
+  "type": "module",
+  "description": "Îlots Svelte 5 (réservation, administration) — compilés en JS statique dans www/islands/.",
+  "scripts": {
+    "gen:api": "node scripts/gen-api.mjs",
+    "prebuild": "node scripts/gen-api.mjs",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "5.0.3",
+    "svelte": "5.19.0",
+    "vite": "6.0.11"
+  }
+}

@@ -14,8 +14,8 @@ final class RouterTest extends TestCase
     private function router(): Router
     {
         $r = new Router();
-        $r->add('GET', '/api/v1/barbers/{id}', static fn (Request $q, array $p): Response => Response::json(['id' => $p['id']]));
-        $r->add('GET', '/api/v1/health', static fn (): Response => Response::json(['status' => 'ok']));
+        $r->api('GET', '/api/v1/barbers/{id}', static fn (Request $q, array $in): Response => Response::json(['id' => $in['path']['id']]));
+        $r->page('GET', '/api/v1/health', static fn (): Response => Response::json(['status' => 'ok']));
 
         return $r;
     }
@@ -54,7 +54,7 @@ final class RouterTest extends TestCase
     public function testMotifEstLitteral(): void
     {
         $r = new Router();
-        $r->add('GET', '/a.b', static fn (): Response => Response::json([]));
+        $r->page('GET', '/a.b', static fn (): Response => Response::json([]));
         self::assertSame(404, $r->dispatch(new Request('GET', '/axb'))->status);
         self::assertSame(200, $r->dispatch(new Request('GET', '/a.b'))->status);
     }
@@ -62,7 +62,7 @@ final class RouterTest extends TestCase
     public function testTableDeRoutesIntrospectable(): void
     {
         self::assertSame(
-            [['method' => 'GET', 'pattern' => '/api/v1/barbers/{id}'], ['method' => 'GET', 'pattern' => '/api/v1/health']],
+            [['method' => 'GET', 'pattern' => '/api/v1/barbers/{id}', 'contract' => true], ['method' => 'GET', 'pattern' => '/api/v1/health', 'contract' => false]],
             $this->router()->routes(),
         );
     }

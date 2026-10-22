@@ -63,8 +63,31 @@ if (!is_file($root . '/www/index.php') || !is_dir($root . '/app/src')) {
     $failures[] = 'L1: disposition attendue absente (www/index.php, app/src/).';
 }
 
+// C1 — contrat matérialisé présent : la spec (source de vérité) et le client généré.
+foreach (['openapi/site-barbier.openapi.json', 'frontend/src/generated/api.ts'] as $f) {
+    if (!is_file($root . '/' . $f)) {
+        $failures[] = "C1: contrat matérialisé incomplet, absent : $f";
+    }
+}
+
+// F1 — les îlots ne parlent au serveur QUE par le client généré : aucun appel réseau à la main hors
+// du transport commun, aucune URL d'API en dur hors du code généré.
+foreach (rglob($root . '/frontend/src', ['js', 'ts', 'svelte', 'mjs']) as $file) {
+    $rel = substr($file, strlen($root) + 1);
+    if (str_starts_with($rel, 'frontend/src/generated/')) {
+        continue;
+    }
+    $code = (string) file_get_contents($file);
+    if ($rel !== 'frontend/src/shared/transport.ts' && preg_match('/\bfetch\s*\(|XMLHttpRequest|axios/', $code)) {
+        $failures[] = "F1: appel réseau à la main hors du transport commun : $rel";
+    }
+    if (preg_match('#[\'"`]/api/#', $code)) {
+        $failures[] = "F1: URL d'API en dur hors du client généré : $rel";
+    }
+}
+
 if ($failures === []) {
-    fwrite(STDOUT, "verify: 🟢 G1 G2 H1 L1 verts.\n");
+    fwrite(STDOUT, "verify: 🟢 G1 G2 H1 L1 C1 F1 verts.\n");
     exit(0);
 }
 fwrite(STDERR, "verify: 🔴\n - " . implode("\n - ", $failures) . "\n");
@@ -87,8 +110,11 @@ function strip_php_comments(string $code): string
     return $out;
 }
 
-/** @return list<string> */
-function rglob(string $dir): array
+/**
+ * @param list<string> $extensions
+ * @return list<string>
+ */
+function rglob(string $dir, array $extensions = ['php']): array
 {
     if (!is_dir($dir)) {
         return [];
@@ -96,7 +122,7 @@ function rglob(string $dir): array
     $out = [];
     $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS));
     foreach ($it as $f) {
-        if ($f->isFile() && str_ends_with($f->getFilename(), '.php')) {
+        if ($f->isFile() && in_array(strtolower($f->getExtension()), $extensions, true)) {
             $out[] = $f->getPathname();
         }
     }

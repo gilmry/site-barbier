@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Barbier;
 
 use Barbier\Adapter\Persistence\Database;
+use Barbier\Http\Contract\Spec;
+use Barbier\Http\Contract\StrictJson;
 use Barbier\Http\Request;
 use Barbier\Http\Response;
 use Barbier\Http\Router;
@@ -26,8 +28,8 @@ final class Kernel
 
     public function router(): Router
     {
-        $router = new Router();
-        $router->add('GET', '/api/v1/health', fn (): Response => $this->health());
+        $router = new Router(new StrictJson(Spec::default()));
+        $router->api('GET', '/api/v1/health', fn (): Response => $this->health());
 
         return $router;
     }

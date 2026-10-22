@@ -1,0 +1,21 @@
+{
+  "openapi": "3.1.0",
+  "info": {"title": "fixture", "version": "1"},
+  "paths": {
+    "/things/{id}": {
+      "post": {
+        "operationId": "postThing",
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "pattern": "^[a-z0-9-]{1,36}$"}},
+          {"name": "lang", "in": "query", "schema": {"type": "string", "enum": ["fr", "nl", "en"]}}
+        ],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Thing"}}}},
+        "responses": {"201": {"description": "ok", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Thing"}}}}}
+      }
+    }
+  },
+  "components": {"schemas": {"Thing": {
+    "type": "object", "additionalProperties": false, "required": ["name", "price"],
+    "properties": {"name": {"type": "string", "minLength": 1, "maxLength": 20}, "price": {"type": "integer", "minimum": 0}}
+  }}}
+}

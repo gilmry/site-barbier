@@ -44,18 +44,29 @@ Prérequis : Docker seulement (aucun PHP local). Images : `site-barbier-php:8.4`
 
 | Gate | Commande | Base requise | Depuis |
 |---|---|---|---|
-| `verify` / `plancher` structurel (lint PHP 8.4, G1 G2 H1 L1) | `bash harness/run-verify.sh` | non | 0.1 |
+| `verify` / `plancher` structurel (lint PHP 8.4, G1 G2 H1 L1 C1 F1) | `bash harness/run-verify.sh` | non | 0.1 |
 | `unit` + `bdd` | `bash harness/run-phpunit.sh` (un test : `--filter RouterTest`) — suite `bdd` ajoutée en 1.1 | non | 0.1 |
-| `integration` (MySQL réelle, 8.4 puis 8.0 : up → down → up) | `bash harness/run-integration.sh` (`BARBIER_DB_VERSIONS="8.4"` pour une seule) | oui (auto) | 0.1 |
+| `integration` (MySQL réelle, 8.4 puis 8.0 : migrations up → down → up, suite PHPUnit `Integration` avec réponses validées contre la spec) | `bash harness/run-integration.sh` (`BARBIER_DB_VERSIONS="8.4"` pour une seule) | oui (auto) | 0.1 |
 | `e2e` (smoke HTTP via le contrôleur frontal) | `bash harness/e2e-smoke.sh` | oui (auto) | 0.1 |
 | **tous** | `bash harness/ci.sh` | oui (auto) | 0.1 |
 | preuve de sensibilité (chaque gate bloque une dérive) | `bash harness/prove-sensitivity.sh` | oui (auto) | 0.1 |
-| `contrat` (spec ↔ client généré ↔ routes) | à venir | | 0.2 |
+| `contrat` (parité routes ↔ spec, objets fermés, 400 déclaré, client TS à jour) | `bash harness/run-contract.sh` | non | 0.2 |
 | `e2e` navigateur, `visuel`, `doc-vivante` | à venir | | 0.3 |
 | `hebergement` (paquet en hébergement simulé) | à venir | | 0.4 |
 | `plancher` sécurité (secrets, SBOM, SCA) + CI distante | à venir | | 0.5 |
 
 Les gates s'ajoutent à cette table **dans la même PR** que la story qui les crée.
+
+## Contrat API (ADR-002)
+
+- Source de vérité : `openapi/site-barbier.openapi.json` (OpenAPI 3.1), **écrite à la main avant le code**.
+- Le serveur valide chaque requête d'API contre la spec (`StrictJson`, `opis/json-schema`) : champ inconnu,
+  type faux ou paramètre non déclaré → 400 `problem+json` avec `errors[]`.
+- Routes : `$router->api(...)` (contrat, validées) ou `$router->page(...)` (pages rendues côté serveur).
+- Client des îlots : `frontend/src/generated/api.ts`, généré par `(cd frontend && npm run gen:api)` —
+  **jamais édité à la main** ; seul `frontend/src/shared/transport.ts` appelle le réseau (invariant F1).
+- Toute nouvelle opération : spec d'abord (avec `operationId`, réponse 400, objets `additionalProperties:
+  false`, paramètres de requête en chaînes), puis route, puis régénération du client.
 
 ## Règles de l'agent
 

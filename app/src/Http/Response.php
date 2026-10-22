@@ -25,17 +25,36 @@ final class Response
     }
 
     /** Erreur au format RFC 9457 (problem+json). */
-    public static function problem(int $status, string $title, ?string $detail = null): self
+    /** @param list<array{field:string, message:string}> $errors */
+    public static function problem(int $status, string $title, ?string $detail = null, array $errors = []): self
     {
         $data = ['type' => 'about:blank', 'title' => $title, 'status' => $status];
         if ($detail !== null) {
             $data['detail'] = $detail;
+        }
+        if ($errors !== []) {
+            $data['errors'] = $errors;
         }
 
         return new self($status, self::encode($data), [
             'Content-Type' => 'application/problem+json; charset=utf-8',
             'Cache-Control' => 'no-store',
         ]);
+    }
+
+    public static function html(string $html, int $status = 200): self
+    {
+        return new self($status, $html, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    public static function noContent(): self
+    {
+        return new self(204, '', []);
+    }
+
+    public function withHeader(string $name, string $value): self
+    {
+        return new self($this->status, $this->body, [...$this->headers, $name => $value]);
     }
 
     public function send(): void

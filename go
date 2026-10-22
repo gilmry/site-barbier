@@ -5,6 +5,7 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/harness/lib.sh"
 PORT="${FOYER_PORT:-8080}"
 ensure_php_image
+ensure_vendor
 ensure_db
 php_run "$BARBIER_PHP_IMAGE" php app/bin/migrate.php up
 if [ "${1:-}" = "--no-serve" ]; then echo "✓ prêt (sans serveur)"; exit 0; fi

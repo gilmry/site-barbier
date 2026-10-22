@@ -6,5 +6,6 @@
   <testsuites>
     <testsuite name="Unit"><directory>../tests/Unit</directory></testsuite>
     <!-- La suite « Application » (bdd) est ajoutée par la première story métier (1.1). -->
+    <testsuite name="Integration"><directory>../tests/Integration</directory></testsuite>
   </testsuites>
 </phpunit>
