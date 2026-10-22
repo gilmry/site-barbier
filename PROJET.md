@@ -32,8 +32,8 @@
 
 ## Position courante
 
-- **Phase / étape** : Phase A · Conception BMAD · étape 4/5 (Scrum Master → epics & stories)
-- **Prochaine action attendue** : le PO valide le backlog → Validateur (rapport PASS/CONCERNS/FAIL)
+- **Phase / étape** : Phase A · Conception BMAD · étape 5/5 (Validateur)
+- **Prochaine action attendue** : verdict du Validateur ; si PASS, le PO valide la sortie de BMAD → Phase A bis (pilotage)
 - **Rôle à jouer** : `pilote/roles/conception-bmad.md`
 
 ## Livrables de conception
@@ -43,7 +43,7 @@
 | 1 | Product Brief | `docs/conception/01-product-brief.md` | ✅ v1.0 validé (gilmry, 2026-10-22) |
 | 2 | PRD | `docs/conception/02-prd.md` | ✅ v1.0 validé (gilmry, 2026-10-22) |
 | 3 | Architecture + ADR + plan vulnérabilités | `docs/conception/03-architecture.md` + `03b-plan-vulnerabilites.md` | ✅ v1.0 validé (gilmry, 2026-10-22) |
-| 4 | Epics & stories | `docs/conception/04-epics-stories.md` | 🟡 v0.1 à valider (31 stories, ≈ 28 j) |
+| 4 | Epics & stories | `docs/conception/04-epics-stories.md` | ✅ v1.0 validé (gilmry, 2026-10-22) |
 | 5 | Validation | `docs/conception/05-validation.md` | ⚪ |
 
 Référence visuelle : `docs/design/reference-le-corbeau.md`.
@@ -78,10 +78,7 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 
 ### 🔴 En attente (l'humain doit trancher une MODALITÉ)
 
-- **Point** : validation du backlog v0.1 + **découpage de release** (estimation ≈ 28 j vs target 15 j)
-  - **Preuve jointe** : `docs/conception/04-epics-stories.md` (estimation chiffrée)
-  - **Question (métier)** : mettre d'abord le site vitrine en ligne (R1 ≈ 18 j) puis la réservation (R2 ≈ 10 j), ou tout livrer d'un coup (≈ 28 j) ?
-  - **Options** : A. deux releases (recommandé) · B. une seule release
+- *(aucun)*
 
 ### ✅ Tranchés
 
@@ -96,6 +93,7 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 | Outillage serveur | Léger (vanilla), réversible vers API Platform | gilmry | 2026-10-22 | ADR-004 |
 | Stockage | SQL sur mesure (CQRS), pas d'ORM | gilmry | 2026-10-22 | ADR-005 |
 | Environnements | Recette `test.<domaine>` puis production, envoi SFTP/FTPS par le PO | gilmry | 2026-10-22 | ADR-008 |
+| Découpage de release | Une seule release (≈ 28 j) ; target recalée 15 → 28 j | gilmry | 2026-10-22 | — |
 | Architecture v1.0 + plan de vulnérabilités | Validés ; responsable sécurité Gilles seul (sans suppléant, mesure compensatoire), signalement gilmry+abuse@gmail.com | gilmry | 2026-10-22 | — |
 
 ### Défauts annoncés (réversibles, non votés)
@@ -114,3 +112,4 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 - 2026-10-22 — PO tranche ADR-004 (léger), ADR-005 (SQL sur mesure), ADR-008 (avec site de test)
 - 2026-10-22 — architecture v1.0 et plan de vulnérabilités validés
 - 2026-10-22 — backlog v0.1 : 31 stories, ≈ 28 j (recalage ×1,9 vs prior du Brief), proposition R1/R2
+- 2026-10-22 — backlog validé, une seule release (≈ 28 j)

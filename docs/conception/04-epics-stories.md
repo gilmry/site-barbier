@@ -2,15 +2,15 @@
 livrable: Epics & User Stories
 persona: 04-scrum-master (BMAD, TOGAF Phase E)
 projet: site-barbier
-version: 0.1 (à valider)
+version: 1.0 (validé)
 source: 03-architecture.md v1.0 (validé 2026-10-22)
 redige_le: 2026-10-22
 redige_par: agent (Claude Code, pilote Foyer)
 signature_humaine:
-  nom: <à signer>
+  nom: gilmry
   role: PO
-  date: <AAAA-MM-JJ>
-  verdict: <validé | à reprendre>
+  date: 2026-10-22
+  verdict: validé — une seule release (≈ 28 j)
 ---
 
 # Epics & User Stories — site-barbier
@@ -258,3 +258,5 @@ registre `PROJET.md` à jour (tours, tokens, wall-clock) · un commit par étape
 | **R2 — Réservation en ligne** | Agenda + Notification (+ rejouer 5.1) | 3.x, 4.x (12) | ≈ 10 j | les clients réservent seuls |
 
 Alternative : **une seule release** (≈ 28 j), rien en ligne avant la fin.
+
+**Décision du PO (2026-10-22) : une seule release, ≈ 28 j.** La target de challenge est recalée de 15 j à 28 j.
