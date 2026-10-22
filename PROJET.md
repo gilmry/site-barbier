@@ -32,8 +32,8 @@
 
 ## Position courante
 
-- **Phase / étape** : Vague V0 · passe 1 : 0.1 ✅ (branche) · 0.0 en cours (étude des offres)
-- **Prochaine action attendue** : grille d'hébergement remplie → choix de l'offre par le PO (0.0) ; puis passe 2 : 0.2 (contrat) ∥ 0.3 (triple harnais)
+- **Phase / étape** : Vague V0 · passe 1 terminée : 0.0 ✅ et 0.1 ✅ (branches, promotion à B0)
+- **Prochaine action attendue** : passe 2 : Story 0.2 (contrat) ∥ Story 0.3 (triple harnais) ; en parallèle, le PO fait confirmer les 6 points par OVH puis commande
 - **Rôle à jouer** : `pilote/roles/harnais.md` + `pilote/roles/gate-runner.md`
 
 ## Livrables de conception
@@ -55,7 +55,7 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 | plancher (secrets · SBOM · conteneur · migrations si stateful) | 🟡 partiel : migrations réversibles (G2) 🟢 ; secrets/SBOM en 0.5 ; conteneur N/A | 2026-10-22 | `bash harness/run-verify.sh` |
 | verify structurel | 🟢 G1 G2 H1 L1 (+ lint PHP 8.4) | 2026-10-22 | `bash harness/run-verify.sh` |
 | contrat (anti-drift) | ⚪ | | |
-| tests 4 couches | 🟢 unit (10 tests) · integration (migrations up→down→up, MariaDB 10.11) | 2026-10-22 | `bash harness/run-phpunit.sh` · `bash harness/run-integration.sh` |
+| tests 4 couches | 🟢 unit (10 tests) · integration (migrations up→down→up, MySQL 8.4 et 8.0) | 2026-10-22 | `bash harness/run-phpunit.sh` · `bash harness/run-integration.sh` |
 | E2E (correctness) | 🟢 smoke HTTP (4 vérifications) ; navigateur en 0.3 | 2026-10-22 | `bash harness/e2e-smoke.sh` |
 | régression visuelle | ⚪ | | |
 | doc vivante (preuve de valeur) | ⚪ | | non bloquant |
@@ -164,3 +164,4 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 - 2026-10-22 — B0 : kit-php vert à froid (verify, unit, integration CQRS+Doctrine, e2e vanilla+API Platform, visuel) ; aucun résidu
 - 2026-10-22 — Story 0.1 faite sur `story/0.1-socle` : CI socle verte depuis un clone neuf, sensibilité prouvée (7 dérives détectées), `./go` idempotent ; promotion arbitrée par le PO à la barrière B0
 - 2026-10-22 — Story 0.0 : 5 offres conformes comparées ; PO retient **OVH Perso 48 mois (GRA)** → base MySQL 8 au lieu de MariaDB, conception v1.2 (mentions MariaDB → MySQL), ADR-010 en résidu accepté
+- 2026-10-22 — socle passé sur MySQL 8 : CI verte sur 8.4 et 8.0, sensibilité reprouvée (commit `7419690` sur `story/0.1-socle`)

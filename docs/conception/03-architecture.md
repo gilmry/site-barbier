@@ -148,7 +148,7 @@ Pas de serveur à piloter : l'hébergeur porte la plateforme. Ce que le projet p
   si elle doit vivre sous la racine), `php.ini`/`.user.ini` si l'hébergeur l'admet (`expose_php=Off`, sessions).
 - **Contrôle d'environnement** : `/install` et la page « santé » de l'admin vérifient version PHP, extensions,
   droits d'écriture, HTTPS, migrations en attente.
-- **Hébergement simulé** (gate `hebergement`) : `php:8.4-apache` + `mariadb:10.11`, racine web fixe, aucune CLI
+- **Hébergement simulé** (gate `hebergement`) : `php:8.4-apache` + `mysql:8.x` (version d'OVH), racine web fixe, aucune CLI
   dans le conteneur applicatif ; on y dépose le paquet, on rejoue `/install` puis P1 — seule preuve de FR-042/NFR-02.
 
 **Mapping ISO 27001 → mise en œuvre**
@@ -169,7 +169,7 @@ Pas de serveur à piloter : l'hébergeur porte la plateforme. Ce que le projet p
   n'est **pas** créé par l'agent (action externe) : à faire par le PO au moment voulu.
 - **Mêmes commandes en local et en CI** (`harness/*.sh`, Docker) ; hook `pre-commit` (gitleaks, `verify`,
   `unit`) et `pre-push` (CI complète), DRY avec la CI.
-- **Images épinglées** : `php:8.4-cli` / `php:8.4-apache` + `mariadb:10.11` + `node:22` (Vite, Playwright).
+- **Images épinglées** : `php:8.4-cli` / `php:8.4-apache` + `mysql:8.x` (version d'OVH) + `node:22` (Vite, Playwright).
 
 | Gate | Registre | Commande (cible) |
 |---|---|---|
