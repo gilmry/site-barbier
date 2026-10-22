@@ -19,7 +19,7 @@ jobs:
   plancher:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0 }
       - run: bash harness/run-plancher.sh
       - uses: actions/upload-artifact@v4
@@ -28,7 +28,7 @@ jobs:
   structure-contrat-unit:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: bash harness/run-verify.sh
       - run: bash harness/run-contract.sh
       - run: bash harness/run-front.sh
@@ -37,14 +37,14 @@ jobs:
   integration:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: bash harness/run-integration.sh
       - run: bash harness/e2e-smoke.sh
 
   navigateur:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: bash harness/run-e2e.sh
       - run: bash harness/run-visual.sh
       - if: failure()
@@ -58,7 +58,7 @@ jobs:
   hebergement:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: bash harness/run-hosting.sh
       - run: PACKAGE_VERSION=${{ github.sha }} bash harness/package.sh
       - uses: actions/upload-artifact@v4
@@ -71,7 +71,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: bash harness/run-jalon.sh
       - uses: actions/upload-artifact@v4
         with: { name: jalon, path: dist/reports/ }
