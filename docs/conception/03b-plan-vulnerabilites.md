@@ -21,7 +21,7 @@ signature_humaine:
 - **Couverts** : code applicatif PHP, gabarits, îlots Svelte, dépendances embarquées (Composer : PHPMailer,
   validateur JSON Schema ; npm : Svelte, Vite et leurs dépendances de build), `.htaccess` / `.user.ini`,
   paquet de déploiement.
-- **Hors périmètre** : plateforme mutualisée (PHP, Apache, MariaDB, système) → portée par l'hébergeur, à
+- **Hors périmètre** : plateforme mutualisée (PHP, Apache, MySQL, système) → portée par l'hébergeur, à
   vérifier au choix de l'offre (version de PHP maintenue, correctifs) ; poste du PO → documents d'organisation.
 - **Responsable** : Gilles (gilmry), **seul porteur, sans suppléant** (choix du PO, 2026-10-22). Mesure compensatoire = les gates bloquent mécaniquement
   (secrets, SBOM, tests `@security`) sans dépendre d'une vigilance humaine, le bot de montée de version ouvre les

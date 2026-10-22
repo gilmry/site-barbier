@@ -30,7 +30,7 @@ Base : `kit-php` (dépôt Foyer), adapté à un hébergement mutualisé.*
              │  │ Http : front controller, routeur, StrictJson (valide    │  │
              │  │        contre la spec), session, CSRF, en-têtes, i18n   │  │
              │  │  ┌──────────────────────────────────────────────────┐  │  │
-             │  │  │ Adapter : PDO/MariaDB (CQRS), SMTP, GD, horloge, │  │  │
+             │  │  │ Adapter : PDO/MySQL (CQRS), SMTP, GD, horloge, │  │  │
              │  │  │           TOTP, sodium, fichiers, journal        │  │  │
              │  │  │  ┌────────────────────────────────────────────┐  │  │  │
              │  │  │  │ Application : use cases + ports + DTO      │  │  │  │
@@ -97,7 +97,7 @@ DTO d'entrée/sortie typés ; les pages publiques et l'API appellent **les même
 
 ## Couche 3 — Infrastructure backend *(LSP, DIP)*
 
-- **Persistance** : CQRS SQL pur sur PDO/MariaDB 10.11 (InnoDB, `utf8mb4`), `*Queries` / `*Commands` séparés,
+- **Persistance** : CQRS SQL pur sur PDO/MySQL 8 (CI : 8.0 et 8.4) (InnoDB, `utf8mb4`), `*Queries` / `*Commands` séparés,
   mapping ligne↔entité isolé — **ADR-005**. Heures stockées en UTC (`DATETIME`), converties au bord.
 - **Sérialisation de l'agenda** — **ADR-006** : toute écriture qui touche l'agenda d'un barbier passe par
   `AgendaLock` (`SELECT … FOR UPDATE` sur la ligne `barber`, en transaction), et les réservations occupent
@@ -116,7 +116,7 @@ DTO d'entrée/sortie typés ; les pages publiques et l'API appellent **les même
   EXIF retiré, nom aléatoire ; `www/uploads/.htaccess` interdit toute exécution.
 - **Sécurité** : `password_hash` (Argon2id si disponible, sinon bcrypt) ; TOTP RFC 6238 (implémentation
   locale testée sur les vecteurs de la RFC) ; secret TOTP chiffré par `sodium_crypto_secretbox` (clé dans `config.php`).
-- **Comptes MariaDB** — ADR-010 : si l'hébergeur le permet, deux comptes (applicatif : `SELECT/INSERT/UPDATE/DELETE` ;
+- **Comptes MySQL** — ADR-010 : si l'hébergeur le permet, deux comptes (applicatif : `SELECT/INSERT/UPDATE/DELETE` ;
   migrations : DDL, identifiants séparés dans `config.php`, utilisé seulement par `/install` et l'action « appliquer les
   migrations ») ; sinon un compte unique, résidu accepté.
 - **Sauvegarde** — FR-044 : `ExportBackup` écrit un dump SQL en flux (`php://output`), sans fichier intermédiaire.
@@ -156,7 +156,7 @@ Pas de serveur à piloter : l'hébergeur porte la plateforme. Ce que le projet p
 | Contrôle | Mise en œuvre |
 |---|---|
 | A.5.9 / A.8 Inventaire des actifs | SBOM CycloneDX (PHP + npm) attachés à chaque paquet ; section *Données et flux* |
-| A.5.15 / A.8.2 Contrôle d'accès | éditeur unique, TOTP, verrou progressif, deux comptes MariaDB (DML / DDL) si l'hébergeur le permet — ADR-010 |
+| A.5.15 / A.8.2 Contrôle d'accès | éditeur unique, TOTP, verrou progressif, deux comptes MySQL (DML / DDL) si l'hébergeur le permet — ADR-010 |
 | A.8.24 Cryptographie | HTTPS/HSTS, secret TOTP chiffré (sodium), jetons hachés, mots de passe Argon2id/bcrypt |
 | A.8.9 Configuration | `.htaccess` et `.user.ini` versionnés, vérifiés par le gate `hebergement` |
 | A.8.15 Journalisation | journal applicatif hors racine web, sans donnée personnelle en clair, rotation |
@@ -177,7 +177,7 @@ Pas de serveur à piloter : l'hébergeur porte la plateforme. Ce que le projet p
 | `verify` : H1 pureté, échappement, **aucune concaténation SQL** (requêtes préparées seulement), pas d'URL tierce, pas de chaîne en dur, pas de `fetch` hors client généré | bloquant | idem |
 | `unit` + `bdd` (domaine + application, nommés en Gherkin) | bloquant | `bash harness/run-phpunit.sh` |
 | `contrat` : client régénéré = commité ; parité routes ↔ spec | bloquant | `bash harness/run-contract.sh` |
-| `integration` (MariaDB 10.11 réelle, réponses validées contre la spec, tests de concurrence) | bloquant | `bash harness/run-integration.sh` |
+| `integration` (MySQL 8 (CI : 8.0 et 8.4) réelle, réponses validées contre la spec, tests de concurrence) | bloquant | `bash harness/run-integration.sh` |
 | `e2e` (Playwright, P1–P4, axe a11y) | bloquant | `bash harness/run-e2e.sh` |
 | `visuel` (goldens, tolérance 0,5 %) | bloquant à la bascule | `bash harness/run-visual.sh` |
 | `hebergement` (paquet installé en hébergement simulé) | bloquant | `bash harness/run-hosting.sh` |
@@ -234,7 +234,7 @@ Version `v1` dans le chemin ; toute rupture = point irréversible (validation hu
 ## Stratégie de tests
 
 Pyramide : **Unit** (domaine pur, dont `SlotCalculator` en tests de propriétés sur les changements d'heure) →
-**Application/BDD** (cas d'usage en Gherkin, fakes) → **Integration** (MariaDB réelle, HTTP, concurrence) →
+**Application/BDD** (cas d'usage en Gherkin, fakes) → **Integration** (MySQL réelle, HTTP, concurrence) →
 **E2E** (Playwright sur P1–P4) → **visuel** + **vitrine** sur les mêmes parcours (`journeys/*.journey.ts`,
 importés par les trois harnais — invariant anti-dette). Couverture cible : domaine ≥ 95 %, application ≥ 90 %.
 
@@ -244,7 +244,7 @@ importés par les trois harnais — invariant anti-dette). Couverture cible : do
 |---|---|---|---|
 | `@happy` | parcours nominal | invariants, cas d'usage | P1–P4 |
 | `@negative` | entrées invalides → message | exceptions domaine | désérialisation stricte (400) |
-| `@edge` | bornes | propriétés | **concurrence sur MariaDB** : 20 réservations simultanées = 1 confirmée ; réservation ↔ absence ↔ changement d'horaires simultanés ; annulation ↔ nouvelle réservation ; **changements d'heure** fin mars / fin octobre |
+| `@edge` | bornes | propriétés | **concurrence sur MySQL** : 20 réservations simultanées = 1 confirmée ; réservation ↔ absence ↔ changement d'horaires simultanés ; annulation ↔ nouvelle réservation ; **changements d'heure** fin mars / fin octobre |
 | `@security` | abus, autorisation | injection | XSS stockée, CSRF, upload polyglotte, énumération de jetons, injection d'en-têtes e-mail, verrou de connexion, accès admin sans session |
 
 ## Données et flux *(obligatoire à Essential)*
@@ -253,15 +253,15 @@ importés par les trois harnais — invariant anti-dette). Couverture cible : do
 
 | Donnée | Classification | Personnelle | Où | Chiffrée au repos |
 |---|---|---|---|---|
-| Contenu du site (textes, carte, équipe, horaires) | public | non (prénoms des barbiers publiés de leur plein gré) | MariaDB | non (public) |
+| Contenu du site (textes, carte, équipe, horaires) | public | non (prénoms des barbiers publiés de leur plein gré) | MySQL | non (public) |
 | Photos | public | oui si visages (barbiers consentants) | `www/uploads/` | non (public) |
-| Réservations (nom, téléphone, e-mail, rendez-vous, langue) | **confidentiel** | **oui** | MariaDB, 6 mois max | non applicatif — base de l'hébergeur ; accès restreint, purge ; à réexaminer en gate review |
-| Compteurs de limitation de débit | interne | pseudonymisé (IP **hachée** avec sel secret) | MariaDB, purgés chaque jour | haché |
+| Réservations (nom, téléphone, e-mail, rendez-vous, langue) | **confidentiel** | **oui** | MySQL, 6 mois max | non applicatif — base de l'hébergeur ; accès restreint, purge ; à réexaminer en gate review |
+| Compteurs de limitation de débit | interne | pseudonymisé (IP **hachée** avec sel secret) | MySQL, purgés chaque jour | haché |
 | Sauvegardes exportées par le gérant | **confidentiel** | **oui** | poste du gérant (hors produit), **6 mois au plus** (politique de confidentialité) | à la charge du gérant — avertissement à l'export ; restauration avec le `config.php` d'origine (clé sodium) |
-| Jetons d'annulation | confidentiel | lié | MariaDB | **haché** (SHA-256) |
-| Compte éditeur (e-mail, hash, secret TOTP, codes de secours) | **confidentiel** | oui | MariaDB | hash / **chiffré** (sodium) / hachés |
-| Sessions admin | confidentiel | lié | MariaDB | identifiant seul, données minimales |
-| Journal des e-mails | confidentiel | oui (destinataire) | MariaDB, purgé avec la réservation ; **aucun corps d'e-mail stocké** | non — destinataire masqué à l'affichage |
+| Jetons d'annulation | confidentiel | lié | MySQL | **haché** (SHA-256) |
+| Compte éditeur (e-mail, hash, secret TOTP, codes de secours) | **confidentiel** | oui | MySQL | hash / **chiffré** (sodium) / hachés |
+| Sessions admin | confidentiel | lié | MySQL | identifiant seul, données minimales |
+| Journal des e-mails | confidentiel | oui (destinataire) | MySQL, purgé avec la réservation ; **aucun corps d'e-mail stocké** | non — destinataire masqué à l'affichage |
 | Journal applicatif | interne | pseudonymisé | `app/var/log/` | non — aucune coordonnée en clair |
 | Secrets (DB, SMTP, clé sodium, code d'installation) | **confidentiel** | non | `app/config.php` hors racine, jamais commité | fichier protégé (droits 600 si l'hébergeur le permet) |
 
@@ -270,7 +270,7 @@ importés par les trois harnais — invariant anti-dette). Couverture cible : do
 | De → vers | Protocole | Données | Chiffré | Autorisé par |
 |---|---|---|---|---|
 | Navigateur → site (pages, îlots, API) | HTTPS 443 (HSTS) | toutes catégories ci-dessus selon l'écran | oui | ADR-004, FR-041 |
-| PHP → MariaDB | socket local / TCP interne de l'hébergeur | toutes | selon l'hébergeur (réseau interne) | configuration hébergeur |
+| PHP → MySQL | socket local / TCP interne de l'hébergeur | toutes | selon l'hébergeur (réseau interne) | configuration hébergeur |
 
 **Flux externes**
 
@@ -345,7 +345,7 @@ Prix : contrat plus faible (résidu ADR-002). Alternative : API Platform dès le
 lourd. Question posée au PO (modalité, langage clair) : « On garde un site léger et simple à envoyer, quitte à passer plus
 tard sur l'outillage plus lourd si le projet grandit ? » → « Léger ».
 
-### ADR-005 — Persistance CQRS SQL pur sur MariaDB — **retenu** (PO gilmry, 2026-10-22 : « Sur mesure »)
+### ADR-005 — Persistance CQRS SQL pur sur MySQL — **retenu** (PO gilmry, 2026-10-22 : « Sur mesure »)
 Décision proposée : `*Queries`/`*Commands` en PDO, migrations `up`/`down` SQL, pas d'ORM.
 Contexte : modèle de ~15 tables, requêtes d'agenda précises (verrous, cellules) qu'un ORM masquerait ; Doctrine
 ajouterait un cache de métadonnées inscriptible et un paquet lourd. La raison n'est **pas** « zéro Composer » :
@@ -360,11 +360,11 @@ après `SELECT … FOR UPDATE` sur sa ligne `barber` ; les écritures à l'éche
 horaires du salon, **dépublication ou suppression d'une prestation**) verrouillent **toutes** les lignes `barber`
 dans l'ordre des identifiants (pas d'interblocage). `BookSlot` relit l'état publié de la prestation et l'état actif
 du barbier **sous le verrou**. Les réservations confirmées occupent leurs cellules de **5 min** dans `booking_slot` avec `UNIQUE(barber_id, slot_start)` : filet en base si un chemin de code oubliait
-le verrou. Annulation et purge libèrent les cellules **dans la même transaction**. Contexte : MariaDB n'a pas de
+le verrou. Annulation et purge libèrent les cellules **dans la même transaction**. Contexte : MySQL n'a pas de
 contrainte d'exclusion d'intervalles ; les conflits réservation↔absence↔horaires (FR-010/020/021) doivent être
 sérialisés avec les réservations, pas seulement les réservations entre elles. Alternatives écartées : verrou
 applicatif fichier (fragile sur mutualisé) ; vérification sans verrou (course possible). Preuve : tests `@edge`
-de concurrence sur MariaDB 10.11 en CI.
+de concurrence sur MySQL 8 (CI : 8.0 et 8.4) en CI.
 
 ### ADR-007 — Aucun tiers côté navigateur — **retenu**
 Polices Cinzel, Cormorant Garamond, UnifrakturMaguntia (OFL) auto-hébergées ; pas d'analytics, de CDN ni de
@@ -384,7 +384,7 @@ configurer chez l'hébergeur (story de mise en ligne). La réservation ne dépen
 ### ADR-011 — Barreau Scrum — **retenu** (PO gilmry, 2026-10-22)
 Voir `docs/pilotage/gantt.md` §5 : un flux, une personne qui tranche, au plus deux branches ; Nexus et SAFe sans objet.
 
-### ADR-010 — Comptes MariaDB séparés quand l'hébergeur le permet — **retenu**
+### ADR-010 — Comptes MySQL séparés quand l'hébergeur le permet — **retenu ; résidu accepté sur OVH Perso** (un seul utilisateur par base, PO 2026-10-22)
 Décision : un compte applicatif limité au DML et un compte de migration (DDL), tous deux dans `config.php` ; le
 second n'est chargé que par `/install` et l'action « appliquer les migrations » (session admin + TOTP récent).
 Contexte : beaucoup d'offres mutualisées n'attribuent **qu'un** utilisateur par base ; le moindre privilège n'est

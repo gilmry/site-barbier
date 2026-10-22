@@ -29,7 +29,7 @@ Les 33 stories du backlog, aucune non classée. Chaque dépendance porte sa rais
 | 0.1 Socle | L | — | point de départ |
 | 0.2 Contrat | M | 0.1 | le harnais contrat se branche sur le socle et ses gates |
 | 0.3 Triple harnais | M | 0.1 | Playwright rejoue un parcours sur l'app du socle |
-| 0.4 Paquet + hébergement simulé | M | 0.0, 0.1 | la simulation reproduit l'offre retenue (versions, `.htaccess`, comptes MariaDB) |
+| 0.4 Paquet + hébergement simulé | M | 0.0, 0.1 | la simulation reproduit l'offre retenue (versions, `.htaccess`, comptes MySQL) |
 | 0.5 CI + plancher | M | 0.2, 0.3 | la CI orchestre tous les gates déjà écrits |
 | 1.1 Installation | M | **B0** | première story métier : après la barrière |
 | 1.2 Connexion 2FA | L | 1.1 | l'enrôlement TOTP termine `/install` |
@@ -65,7 +65,7 @@ Les 33 stories du backlog, aucune non classée. Chaque dépendance porte sa rais
 |---|---|---|
 | **V0 — Fondations** | 0.0–0.5 | **B0** : clone neuf → `./go` → tous les gates verts, sensibilité prouvée, paquet installé en hébergement simulé, offre d'hébergement choisie |
 | **V1 — Accès et vitrine** | 1.1–1.4, 2.1–2.7, 3.1 | P3 rejoué (e2e + visuel + vitrine) |
-| **V2 — Moteur de réservation** | 3.2–3.5 | **B1** : 20 réservations simultanées = 1 confirmée sur MariaDB 10.11 |
+| **V2 — Moteur de réservation** | 3.2–3.5 | **B1** : 20 réservations simultanées = 1 confirmée sur MySQL 8 (CI : 8.0 et 8.4) |
 | **V3 — Réservation complète** | 3.11, 3.6, 4.1, 3.7, 3.8, 3.9, 4.2 | P1, P2, P4 rejoués |
 | **V4 — Conformité et exploitation** | 2.8, 3.10, 5.2 | gate review CyFun Essential (couche application) sans écart bloquant |
 | **V5 — Mise en ligne** | 5.1 | promotion arbitrée par le PO, recette puis production |

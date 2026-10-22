@@ -141,12 +141,12 @@ bruxelloise, hébergeable pour quelques euros par mois, sans dépendance à une 
   - déploiement par **SFTP ou FTPS** (FTP en clair exclu), sans SSH ni Composer ni CLI côté serveur `[hypothèse à valider selon l'offre]` → paquet **autonome** (dépendances embarquées, rien à installer sur le serveur) ;
   - **migrations de schéma sans CLI** (déclenchées depuis l'administration ou au premier passage) ;
   - **racine web imposée** (`www/` ou `public_html/`) → le code applicatif hors racine ou protégé par `.htaccess` ;
-  - pile cible **PHP 8.4 + MariaDB** (le plus répandu en mutualisé) — les gates en CI tournent sur ce couple ;
+  - pile cible **PHP 8.4 + MySQL** (le plus répandu en mutualisé) — les gates en CI tournent sur ce couple ;
   - **pas de Node côté serveur** : le JavaScript est compilé avant l'envoi.
 - **Pile** : *erratum v1.1* — le mutualisé **n'exclut pas** Symfony/API Platform (elles y tournent si `vendor/` est livré). PHP sans framework + SQL pur est un **choix proposé et tranché par le PO** pour la légèreté (ADR-004, ADR-005), la destination API Platform restant fixée par le cadre.
 - **Rendu** : pages publiques rendues côté serveur par PHP depuis la base (le contenu est éditable), îlots Svelte limités au formulaire et à l'administration → **ADR** d'écart de rendu (D2).
 - **E-mails** : envoyés par le serveur d'envoi (SMTP) de l'hébergeur ; risque de délivrabilité à traiter (SPF/DKIM du domaine).
-- **Concurrence** : l'anti-double réservation doit tenir sur **MariaDB mutualisée** (transaction + contrainte en base), pas seulement dans le code.
+- **Concurrence** : l'anti-double réservation doit tenir sur **MySQL mutualisée** (transaction + contrainte en base), pas seulement dans le code.
 - **Médias** : upload contrôlé (type, taille, renommage), **aucune exécution PHP** dans le dossier d'upload.
 - **Conformité** : RGPD (nom, téléphone, e-mail et historique de rendez-vous des clients ; durée de conservation, droit d'effacement) · **CyFun® Essential** (défaut : le produit conserve des données d'utilisateurs) → double facteur sur l'administration, moindre privilège, plan de gestion des vulnérabilités.
 - **Langues** : FR, NL, EN dès le MVP (PO, 2026-10-22) — interface, contenus éditables, e-mails, pages légales. Traductions fournies par le gérant `[hypothèse à valider : pas de traduction automatique]`.
@@ -158,7 +158,7 @@ bruxelloise, hébergeable pour quelques euros par mois, sans dépendance à une 
 | L'offre mutualisée choisie est plus restrictive que prévu (PHP ancien, pas de `.htaccess`) | Moyenne | Élevé | Sonder l'offre réelle avant le Sprint 0 ; viser PHP 8.4 ; test de déploiement à blanc |
 | Upload d'image utilisé pour déposer un script | Moyenne | Élevé | Liste blanche de types, ré-encodage, `.htaccess` sans exécution, gate `@security` |
 | Spam ou fausses réservations bloquant l'agenda | Élevée | Élevé | Champ piège, limitation de débit, confirmation par e-mail, annulation admin en un clic |
-| Double réservation sous accès simultané | Moyenne | Élevé | Contrainte en base + transaction ; test `@edge` de concurrence en CI sur MariaDB |
+| Double réservation sous accès simultané | Moyenne | Élevé | Contrainte en base + transaction ; test `@edge` de concurrence en CI sur MySQL |
 | E-mails classés en spam ou non envoyés | Élevée | Élevé | SMTP authentifié du domaine, SPF/DKIM, la réservation reste valide même si l'e-mail échoue (journal + relance) |
 | Erreurs d'heure aux changements d'heure | Moyenne | Moyen | Heures stockées avec fuseau `Europe/Brussels` ; tests `@edge` sur les deux dimanches de bascule |
 | Traductions incomplètes | Élevée | Faible | Repli sur le FR ; indicateur « à traduire » dans l'admin |

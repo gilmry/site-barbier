@@ -234,7 +234,7 @@ Prestation · Catégorie · Carte · Barbier · Horaires · **Disponibilité** �
 - **4×N** :
   - `@happy` — réservation *confirmée* ; récapitulatif (prestation, barbier, date/heure de Bruxelles, prix) ; e-mails FR-030 et FR-031 déclenchés.
   - `@negative` — champ obligatoire vide, e-mail ou téléphone invalide → refus champ par champ ; créneau devenu indisponible → 409 avec proposition de rafraîchir. (Base légale = exécution du service demandé : **information** visible avec lien vers la politique, **pas** de case de consentement.)
-  - `@edge` — **deux clients valident le même créneau au même instant → exactement une réservation confirmée, l'autre reçoit 409** (garanti en base, testé sur MariaDB) ; créneau qui chevauche partiellement une autre réservation → 409 ; prix/durée figés au moment de la réservation ; réservation concurrente d'une dépublication de la prestation ou d'une désactivation du barbier → sérialisée (l'une des deux l'emporte, jamais un état incohérent).
+  - `@edge` — **deux clients valident le même créneau au même instant → exactement une réservation confirmée, l'autre reçoit 409** (garanti en base, testé sur MySQL) ; créneau qui chevauche partiellement une autre réservation → 409 ; prix/durée figés au moment de la réservation ; réservation concurrente d'une dépublication de la prestation ou d'une désactivation du barbier → sérialisée (l'une des deux l'emporte, jamais un état incohérent).
   - `@security` — champ piège + limitation de débit par IP (ex. 5 réservations/heure `[hypothèse]`) ; désérialisation stricte (champ inconnu → 400) ; données personnelles jamais renvoyées par un autre endpoint public ; journal sans données personnelles en clair.
 - **Capacité** : §7.5
 
@@ -368,7 +368,7 @@ Prestation · Catégorie · Carte · Barbier · Horaires · **Disponibilité** �
 | # | Exigence | Mesure |
 |---|---|---|
 | NFR-01 Performance | accueil rendu serveur < 200 ms (TTFB, hébergeur nominal) ; < 500 Ko hors photos ; Lighthouse perf mobile ≥ 90 | test de charge léger + Lighthouse en CI |
-| NFR-02 Compatibilité hébergement | PHP **8.4** + **MariaDB 10.11** ; extensions : `pdo_mysql`, `gd` ou `imagick`, `mbstring`, `intl`, `openssl` ; aucune dépendance installée sur le serveur | gates CI sur cette pile exacte |
+| NFR-02 Compatibilité hébergement | PHP **8.4** + **MySQL 8 (CI : 8.0 et 8.4)** ; extensions : `pdo_mysql`, `gd` ou `imagick`, `mbstring`, `intl`, `openssl` ; aucune dépendance installée sur le serveur | gates CI sur cette pile exacte |
 | NFR-03 Sécurité | CyFun Essential (couche application, `skills/conformite.md` §2bis) ; OWASP ASVS niveau 2 sur l'admin | gates `@security` + rapports de jalon (SAST, SCA) |
 | NFR-04 Accessibilité | WCAG 2.1 AA (contraste sur fond noir vérifié, navigation clavier, libellés de formulaire) | axe en E2E |
 | NFR-05 Disponibilité | celle de l'hébergeur ; aucun point unique ajouté par l'app ; sauvegarde quotidienne de la base par l'hébergeur (**vérifiée** au choix de l'offre, Story 0.0) + export par le gérant (FR-044) | check-list 0.0, FR-044 |
@@ -455,9 +455,9 @@ l'API ; elles appellent **les mêmes cas d'usage** (couche Application).
 
 Le PO désignera, à l'étape d'arbitrage du bootstrap, lesquels sont « critiques » et filmés (défaut proposé : P1 et P3).
 
-## 10. Modèle de données (entités → tables MariaDB)
+## 10. Modèle de données (entités → tables MySQL)
 
-*Le gabarit dit PostgreSQL ; ici **MariaDB 10.11** imposée par l'hébergement (Brief §14).*
+*Le gabarit dit PostgreSQL ; ici **MySQL 8 (CI : 8.0 et 8.4)** imposée par l'hébergement (Brief §14).*
 
 | Entité | Table | Colonnes clés | Contraintes |
 |---|---|---|---|
@@ -481,7 +481,7 @@ Le PO désignera, à l'étape d'arbitrage du bootstrap, lesquels sont « critiqu
 | Statistique anonyme | `booking_stat` | `month`, `count`, `cancelled` | — |
 | Migrations | `schema_migration` | `version`, `applied_at` | — |
 
-Migrations `NNNN_*.up.sql` / `*.down.sql` réversibles, SQL portable MariaDB.
+Migrations `NNNN_*.up.sql` / `*.down.sql` réversibles, SQL portable MySQL.
 
 ## 11. Intégrations externes
 
@@ -492,7 +492,7 @@ Migrations `NNNN_*.up.sql` / `*.down.sql` réversibles, SQL portable MariaDB.
 
 ## 12. Contraintes et hypothèses
 
-- Contraintes : Brief §14 (mutualisé, SFTP/FTPS, PHP 8.4 + MariaDB, pas de Node serveur, CyFun Essential, RGPD, FR/NL/EN).
+- Contraintes : Brief §14 (mutualisé, SFTP/FTPS, PHP 8.4 + MySQL, pas de Node serveur, CyFun Essential, RGPD, FR/NL/EN).
 - Hypothèses acceptées à la validation du Brief : e-mail client obligatoire · conservation 6 mois ·
   délai minimal 2 h, annulation jusqu'à 2 h avant · traductions saisies par le gérant · SFTP/FTPS sans SSH · ≤ 5 €/mois.
 - Hypothèses introduites ici (acceptées à la validation du PRD v1.0) : débuts au quart d'heure · horizon 60 jours ·
@@ -505,7 +505,7 @@ Migrations `NNNN_*.up.sql` / `*.down.sql` réversibles, SQL portable MariaDB.
 
 ## 13. Critères de succès MVP
 
-1. Les 4 parcours de référence (P1–P4) passent en E2E sur PHP 8.4 + MariaDB 10.11.
+1. Les 4 parcours de référence (P1–P4) passent en E2E sur PHP 8.4 + MySQL 8 (CI : 8.0 et 8.4).
 2. Test de concurrence : 20 réservations simultanées sur un même créneau → exactement 1 confirmée.
 3. Un paquet de déploiement unique, envoyé par SFTP/FTPS sur un hébergement de test, s'installe via `/install`.
 4. Objectifs O1, O2, O5 mesurés et atteints avant mise en ligne.
