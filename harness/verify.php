@@ -86,8 +86,34 @@ foreach (rglob($root . '/frontend/src', ['js', 'ts', 'svelte', 'mjs']) as $file)
     }
 }
 
+// J1 — anti-dette de documentation : les trois harnais rejouent LES parcours de journeys/, jamais une
+// copie. Le moteur charge journeys/ ; aucun autre script du harnais ne pilote un navigateur ; chaque
+// parcours a un id, un titre et des étapes décrites en langage métier.
+$engine = (string) @file_get_contents($root . '/harness/browser/run.mjs');
+if (!str_contains($engine, "resolve(ROOT, 'journeys')")) {
+    $failures[] = 'J1: harness/browser/run.mjs ne charge plus les parcours depuis journeys/.';
+}
+foreach (rglob($root . '/harness', ['js', 'mjs', 'ts']) as $file) {
+    $rel = substr($file, strlen($root) + 1);
+    if ($rel !== 'harness/browser/run.mjs' && !str_contains($rel, 'node_modules') && preg_match('/\.goto\(|chromium\.launch/', (string) file_get_contents($file))) {
+        $failures[] = "J1: parcours recopié hors de journeys/ : $rel";
+    }
+}
+$journeys = glob($root . '/journeys/*.journey.mjs') ?: [];
+if ($journeys === []) {
+    $failures[] = 'J1: aucun parcours de référence dans journeys/.';
+}
+foreach ($journeys as $file) {
+    $code = (string) file_get_contents($file);
+    $steps = preg_match_all('/\bid:\s*[\'"]/', $code) - 1;
+    $described = preg_match_all('/\bdescription:\s*[\'"]/', $code);
+    if (!preg_match('/\btitle:\s*[\'"]/', $code) || $steps < 1 || $described < $steps) {
+        $failures[] = 'J1: parcours sans titre ou étape sans description métier : ' . basename($file);
+    }
+}
+
 if ($failures === []) {
-    fwrite(STDOUT, "verify: 🟢 G1 G2 H1 L1 C1 F1 verts.\n");
+    fwrite(STDOUT, "verify: 🟢 G1 G2 H1 L1 C1 F1 J1 verts.\n");
     exit(0);
 }
 fwrite(STDERR, "verify: 🔴\n - " . implode("\n - ", $failures) . "\n");

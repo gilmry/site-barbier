@@ -72,3 +72,42 @@ php_run() {
     -e DB_HOST=127.0.0.1 -e DB_PORT="$BARBIER_DB_PORT" -e DB_USER=root -e DB_PASSWORD="$BARBIER_DB_ROOT_PASSWORD" \
     -e DB_NAME="${DB_NAME:-barbier}" -e TZ=UTC "$@"
 }
+
+BARBIER_BROWSER_IMAGE="${BARBIER_BROWSER_IMAGE:-site-barbier-browser:pw1.49}"
+
+# Image navigateur (Chromium Playwright) — reconstruite si son Dockerfile ou son package.json change.
+ensure_browser_image() {
+  ensure_docker
+  local sum; sum="$(cat "$BARBIER_ROOT/harness/browser/Dockerfile" "$BARBIER_ROOT/harness/browser/package.json" | sha256sum | cut -c1-16)"
+  local have; have="$(docker image inspect -f '{{index .Config.Labels "barbier.browser"}}' "$BARBIER_BROWSER_IMAGE" 2>/dev/null || true)"
+  [ "$have" = "$sum" ] && return 0
+  echo "[harnais] build $BARBIER_BROWSER_IMAGE (node:22-bookworm + Chromium)…" >&2
+  docker build -q --label "barbier.browser=$sum" -t "$BARBIER_BROWSER_IMAGE" "$BARBIER_ROOT/harness/browser" >/dev/null
+}
+
+# Serveur web de test sur une base neuve migrée (et semée si app/bin/seed.php existe).
+# Usage : start_web <port> <base> ; le conteneur s'arrête avec stop_web.
+start_web() {
+  local port="$1" db="$2"
+  BARBIER_WEB_CONTAINER="barbier-web-$port"
+  reset_database "$db"
+  DB_NAME="$db" php_run "$BARBIER_PHP_IMAGE" php app/bin/migrate.php up >/dev/null
+  [ -f "$BARBIER_ROOT/app/bin/seed.php" ] && DB_NAME="$db" php_run "$BARBIER_PHP_IMAGE" php app/bin/seed.php >/dev/null
+  docker rm -f "$BARBIER_WEB_CONTAINER" >/dev/null 2>&1 || true
+  docker run -d --rm --name "$BARBIER_WEB_CONTAINER" --network host -v "$BARBIER_ROOT":/app -w /app \
+    -e DB_HOST=127.0.0.1 -e DB_PORT="$BARBIER_DB_PORT" -e DB_USER=root -e DB_PASSWORD="$BARBIER_DB_ROOT_PASSWORD" \
+    -e DB_NAME="$db" -e BARBIER_ENV=test ${BARBIER_WEB_ENV:-} "$BARBIER_PHP_IMAGE" \
+    php -S "127.0.0.1:$port" -t www harness/dev-router.php >/dev/null
+  local i
+  for i in $(seq 1 60); do curl -s -o /dev/null "http://127.0.0.1:$port/api/v1/health" && return 0; sleep 0.25; done
+  echo "[harnais] le serveur web de test ne répond pas (port $port)." >&2; return 1
+}
+stop_web() { docker rm -f "${BARBIER_WEB_CONTAINER:-none}" >/dev/null 2>&1 || true; }
+
+# Lance le moteur des parcours dans l'image navigateur. Usage : run_journeys <mode> <port> [env…]
+run_journeys() {
+  local mode="$1" port="$2"; shift 2
+  docker run --rm --network host -v "$BARBIER_ROOT":/app -w /app -u "$(id -u):$(id -g)" -e HOME=/tmp \
+    -e MODE="$mode" -e BASE_URL="http://127.0.0.1:$port" -e JOURNEY="${JOURNEY:-}" "$@" \
+    "$BARBIER_BROWSER_IMAGE" node harness/browser/run.mjs
+}

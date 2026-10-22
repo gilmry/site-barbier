@@ -44,14 +44,16 @@ Prérequis : Docker seulement (aucun PHP local). Images : `site-barbier-php:8.4`
 
 | Gate | Commande | Base requise | Depuis |
 |---|---|---|---|
-| `verify` / `plancher` structurel (lint PHP 8.4, G1 G2 H1 L1 C1 F1) | `bash harness/run-verify.sh` | non | 0.1 |
+| `verify` / `plancher` structurel (lint PHP 8.4, G1 G2 H1 L1 C1 F1 J1) | `bash harness/run-verify.sh` | non | 0.1 |
 | `unit` + `bdd` | `bash harness/run-phpunit.sh` (un test : `--filter RouterTest`) — suite `bdd` ajoutée en 1.1 | non | 0.1 |
 | `integration` (MySQL réelle, 8.4 puis 8.0 : migrations up → down → up, suite PHPUnit `Integration` avec réponses validées contre la spec) | `bash harness/run-integration.sh` (`BARBIER_DB_VERSIONS="8.4"` pour une seule) | oui (auto) | 0.1 |
 | `e2e` (smoke HTTP via le contrôleur frontal) | `bash harness/e2e-smoke.sh` | oui (auto) | 0.1 |
 | **tous** | `bash harness/ci.sh` | oui (auto) | 0.1 |
 | preuve de sensibilité (chaque gate bloque une dérive) | `bash harness/prove-sensitivity.sh` | oui (auto) | 0.1 |
 | `contrat` (parité routes ↔ spec, objets fermés, 400 déclaré, client TS à jour) | `bash harness/run-contract.sh` | non | 0.2 |
-| `e2e` navigateur, `visuel`, `doc-vivante` | à venir | | 0.3 |
+| `e2e` navigateur (chaque parcours de `journeys/`, bureau + mobile) | `bash harness/run-e2e.sh` (`JOURNEY=<id>` pour un seul) | oui (auto) | 0.3 |
+| `visuel` (goldens par parcours et taille d'écran, tolérance 0,5 %) | `bash harness/run-visual.sh` — `VISUAL_MODE=capture` pour réécrire **consciemment** les goldens | oui (auto) | 0.3 |
+| `doc-vivante` (cadence 1 action/1 s, captures + vidéo, **non bloquant**) | `bash harness/run-demo.sh` → `harness/demo/vitrine/index.html` | oui (auto) | 0.3 |
 | `hebergement` (paquet en hébergement simulé) | à venir | | 0.4 |
 | `plancher` sécurité (secrets, SBOM, SCA) + CI distante | à venir | | 0.5 |
 
@@ -67,6 +69,15 @@ Les gates s'ajoutent à cette table **dans la même PR** que la story qui les cr
   **jamais édité à la main** ; seul `frontend/src/shared/transport.ts` appelle le réseau (invariant F1).
 - Toute nouvelle opération : spec d'abord (avec `operationId`, réponse 400, objets `additionalProperties:
   false`, paramètres de requête en chaînes), puis route, puis régénération du client.
+
+## Parcours de référence (documentation vivante)
+
+- Un parcours = un fichier `journeys/<id>.journey.mjs` (étapes en langage métier, `action`, `check`,
+  `snapshot` facultatif). **Écrit une fois**, rejoué par les trois harnais (`harness/browser/run.mjs`).
+- Une story à écran va **jusqu'à la preuve de valeur** : e2e vert, goldens capturés puis comparés, vitrine
+  régénérée — sans attendre qu'on le demande.
+- Un golden ne se réécrit que pour un changement de rendu **voulu** (`VISUAL_MODE=capture`), jamais pour
+  faire passer un rouge.
 
 ## Règles de l'agent
 

@@ -30,6 +30,18 @@ p='app/src/Kernel.php'; s=open(p).read()
 open(p,'w').write(s.replace("['status' => 'ok', 'database' => 'ok']", "['status' => 'ok', 'database' => 'ok', 'version' => 'x']", 1))
 PY
 }
+drift_j1()   { echo "await page.goto('/x')" > harness/copie.mjs; }
+drift_journey() { sed -i "s/body.status === 'ok'/body.status === 'parfait'/" journeys/socle.journey.mjs; }
+drift_golden() { python3 - <<'PY'
+import glob, struct, zlib
+# remplace un golden par une image unie de même taille : la comparaison doit échouer
+f=sorted(glob.glob('harness/visual/goldens/*.png'))[0]
+d=open(f,'rb').read(); w,h=struct.unpack('>II',d[16:24])
+raw=b''.join(b'\x00'+b'\xff\x00\x00'*w for _ in range(h))
+chunk=lambda t,c: struct.pack('>I',len(c))+t+c+struct.pack('>I',zlib.crc32(t+c)&0xffffffff)
+open(f,'wb').write(b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',w,h,8,2,0,0,0))+chunk(b'IDAT',zlib.compress(raw))+chunk(b'IEND',b''))
+PY
+}
 drift_e2e()  { sed -i "s#'/api/v1/health'#'/api/v1/sante'#" app/src/Kernel.php; }
 
 # --- Moteur ----------------------------------------------------------------------------------------
@@ -64,5 +76,8 @@ probe "client édité à la main"     drift_client run-contract.sh
 probe "integration : down incomplet" drift_down run-integration.sh
 probe "integration : réponse hors contrat" drift_resp run-integration.sh
 probe "e2e : santé cassée"         drift_e2e    e2e-smoke.sh
+probe "J1 parcours recopié"        drift_j1     run-verify.sh
+probe "e2e navigateur : attente fausse" drift_journey run-e2e.sh
+probe "visuel : rendu différent du golden" drift_golden run-visual.sh
 
 [ "$fail" -eq 0 ] && echo -e "\nsensibilité: 🟢 chaque gate bloque sa dérive" || { echo -e "\nsensibilité: 🔴 $fail sonde(s) en échec"; exit 1; }

@@ -11,3 +11,4 @@ node_modules/
 !/www/uploads/.htaccess
 # Paquets de déploiement (artefacts CI).
 /dist/
+/harness/visual/test-results/
