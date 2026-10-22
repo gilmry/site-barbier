@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
       - run: bash harness/run-plancher.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with: { name: sbom, path: dist/sbom/ }
 
   structure-contrat-unit:
@@ -48,11 +48,11 @@ jobs:
       - run: bash harness/run-e2e.sh
       - run: bash harness/run-visual.sh
       - if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with: { name: visuel-diffs, path: harness/visual/test-results/ }
       - run: bash harness/run-demo.sh
         continue-on-error: true
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with: { name: vitrine, path: harness/demo/vitrine/ }
 
   hebergement:
@@ -61,7 +61,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: bash harness/run-hosting.sh
       - run: PACKAGE_VERSION=${{ github.sha }} bash harness/package.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with: { name: paquet, path: 'dist/site-barbier-*.zip*' }
 
   jalon:
@@ -73,7 +73,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: bash harness/run-jalon.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with: { name: jalon, path: dist/reports/ }
       - uses: github/codeql-action/upload-sarif@v3
         if: always() && hashFiles('dist/reports/sast.sarif') != ''
