@@ -67,7 +67,39 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 
 | Périmètre / story | État | Couches vertes | Bascule | Commit / ADR | Tours | Tokens | Wall-clock |
 |---|---|---|---|---|---|---|---|
-| — (backlog produit en Phase A, étape 4) | | | | | | | |
+| 0.0 Choisir et sonder l'hébergement (S) | 🔵 en cours | — | — | — | | | |
+| 0.1 Socle reproductible (L) | 🔵 en cours | — | — | — | | | |
+| 0.2 Harnais de contrat (M) | ⚪ à faire | — | — | — | | | |
+| 0.3 Parcours partagés et triple harnais (M) | ⚪ à faire | — | — | — | | | |
+| 0.4 Paquet et hébergement simulé (M) | ⚪ à faire | — | — | — | | | |
+| 0.5 CI, hooks, plancher (M) | ⚪ à faire | — | — | — | | | |
+| 1.1 Installation sans CLI (M) | ⚪ à faire | — | — | — | | | |
+| 1.2 Connexion 2FA (L) | ⚪ à faire | — | — | — | | | |
+| 1.3 Session, CSRF, TOTP récent (M) | ⚪ à faire | — | — | — | | | |
+| 1.4 Codes de secours, reprise d'accès (M) | ⚪ à faire | — | — | — | | | |
+| 2.1 Accueil Le Corbeau (L) | ⚪ à faire | — | — | — | | | |
+| 2.2 Trois langues (M) | ⚪ à faire | — | — | — | | | |
+| 2.3 Carte (L) | ⚪ à faire | — | — | — | | | |
+| 2.4 Équipe (M) | ⚪ à faire | — | — | — | | | |
+| 2.5 Horaires et coordonnées (M) | ⚪ à faire | — | — | — | | | |
+| 2.6 Textes des sections (M) | ⚪ à faire | — | — | — | | | |
+| 2.7 Images (P3) (M) | ⚪ à faire | — | — | — | | | |
+| 2.8 Légal + RGPD (M) | ⚪ à faire | — | — | — | | | |
+| 3.1 Calcul des créneaux (M) | ⚪ à faire | — | — | — | | | |
+| 3.2 Disponibilités (M) | ⚪ à faire | — | — | — | | | |
+| 3.3 Absences et fermetures (M) | ⚪ à faire | — | — | — | | | |
+| 3.4 API de lecture (S) | ⚪ à faire | — | — | — | | | |
+| 3.5 Réserver (L) | ⚪ à faire | — | — | — | | | |
+| 3.11 Garde-fous agenda (P4) (M) | ⚪ à faire | — | — | — | | | |
+| 3.6 Sans préférence (S) | ⚪ à faire | — | — | — | | | |
+| 3.7 Îlot de réservation (P1) (L) | ⚪ à faire | — | — | — | | | |
+| 3.8 Annulation client (P2) (M) | ⚪ à faire | — | — | — | | | |
+| 3.9 Planning salon (M) | ⚪ à faire | — | — | — | | | |
+| 3.10 Purge (S) | ⚪ à faire | — | — | — | | | |
+| 4.1 E-mails (M) | ⚪ à faire | — | — | — | | | |
+| 4.2 Journal et relance (S) | ⚪ à faire | — | — | — | | | |
+| 5.1 Recette puis production (M) | ⚪ à faire | — | — | — | | | |
+| 5.2 Santé et sauvegarde (M) | ⚪ à faire | — | — | — | | | |
 
 ## Promotions
 
