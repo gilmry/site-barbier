@@ -337,7 +337,7 @@ plusieurs milliers à envoyer en SFTP ; (b) pas de cache Symfony inscriptible à
 **Réversibilité** : le kit prouve qu'API Platform s'enfiche sur **les mêmes cas d'usage** (`src/Http/ApiPlatform/`)
 sans toucher Domaine ni Application ; la bascule reste possible tant que le contrat v1 est respecté.
 **Destination et modalité** : la destination (API Platform, `bootstrap-nouveau-projet.md`) n'est pas remise en cause.
-Le PO a tranché « léger » (bascule **différée**). Précisions de modalité **proposées, à confirmer par le PO** :
+Le PO a tranché « léger » (bascule **différée**) et, le 2026-10-22, les précisions de modalité suivantes :
 réexamen à chaque gate review ; bascule déclenchée par le premier de ces événements — un incident de dérive du
 contrat, plus de 60 routes, ou une offre d'hébergement qui rend le poids indifférent ; premier réexamen à la gate
 review de fin de release.

@@ -10,7 +10,7 @@ signature_humaine:
   nom: gilmry
   role: PO
   date: 2026-10-22
-  verdict: à revalider (v1.1, corrections du Validateur) — v1.0 validé le 2026-10-22 (une seule release, ≈ 28 j ; ≈ 30 j en v1.1 à confirmer)
+  verdict: à revalider (v1.1, corrections du Validateur) — v1.0 validé le 2026-10-22 (une seule release, ≈ 28 j ; ≈ 30 j en v1.1, accepté par le PO le 2026-10-22)
 ---
 
 # Epics & User Stories — site-barbier
@@ -265,4 +265,4 @@ vitrine sont regroupés en 3.11 (après 3.5), et les e-mails (4.1) précèdent l
   le découpage en compte 33, car la réservation fiable (verrous, concurrence, changements d'heure), le double facteur
   et l'installation sans ligne de commande pèsent plus que prévu.
 
-**Décision du PO (2026-10-22) : une seule release, ≈ 28 j.** Recalée à ≈ 30 j en v1.1, à confirmer par le PO.
+**Décision du PO (2026-10-22) : une seule release, ≈ 28 j**, puis enveloppe de **≈ 30 j acceptée** après les corrections du Validateur.

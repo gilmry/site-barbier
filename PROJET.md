@@ -78,13 +78,7 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 
 ### 🔴 En attente (l'humain doit trancher une MODALITÉ)
 
-- **Point** : ADR-004 — précisions de la bascule différée vers l'outillage lourd
-  - **Preuve jointe** : `docs/conception/03-architecture.md` ADR-004, ADR-002 (résidu mesuré)
-  - **Question (clair)** : on revoit ce choix à chaque bilan, et on bascule au premier incident de cohérence, au-delà de 60 routes, ou si l'hébergeur rend le poids indifférent ?
-  - **Options** : A. ces trois déclencheurs, revus à chaque bilan (recommandé) · B. on ne revoit qu'en fin de release
-- **Point** : nouvelle enveloppe ≈ 30 j (au lieu de 28 j acceptés)
-  - **Preuve jointe** : `docs/conception/04-epics-stories.md` §Estimation (33 stories, 24,75 j + 20 %)
-  - **Options** : A. accepter ≈ 30 j · B. retirer une capacité pour rester à 28 j
+- *(aucun — passage 3 du Validateur en cours)*
 
 ### ✅ Tranchés
 
@@ -100,6 +94,8 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 | Stockage | SQL sur mesure (CQRS), pas d'ORM | gilmry | 2026-10-22 | ADR-005 |
 | Environnements | Recette `test.<domaine>` puis production, envoi SFTP/FTPS par le PO | gilmry | 2026-10-22 | ADR-008 |
 | Découpage de release | Une seule release (≈ 28 j) ; target recalée 15 → 28 j | gilmry | 2026-10-22 | — |
+| Enveloppe après validation | ≈ 30 j acceptés (33 stories) | gilmry | 2026-10-22 | — |
+| Modalité de la bascule différée | Revue à chaque gate review ; déclencheurs : incident de dérive, > 60 routes, hébergeur rendant le poids indifférent | gilmry | 2026-10-22 | ADR-004 |
 | Architecture v1.0 + plan de vulnérabilités | Validés ; responsable sécurité Gilles seul (sans suppléant, mesure compensatoire), signalement gilmry+abuse@gmail.com | gilmry | 2026-10-22 | — |
 
 ### Défauts annoncés (réversibles, non votés)
@@ -121,3 +117,4 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 - 2026-10-22 — backlog validé, une seule release (≈ 28 j)
 - 2026-10-22 — Validateur passage 1 : CONCERNS 98/100 ; reboucle PM/Architecte/Scrum Master → Brief/PRD/Archi/Stories v1.1 (28 FR, ADR-010, stories 0.0 et 3.11, ≈ 30 j)
 - 2026-10-22 — Validateur passage 2 : CONCERNS 100/100 ; 3 points + 9 mineures corrigés (v1.1 revue) ; arbitrages ADR-004 et enveloppe 30 j posés
+- 2026-10-22 — PO : modalité ADR-004 et enveloppe ≈ 30 j acceptées ; passage 3 du Validateur
