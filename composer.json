@@ -6,7 +6,7 @@
     "require": {
         "php": ">=8.4",
         "opis/json-schema": "^2.4",
-        "phpmailer/phpmailer": "^6.9"
+        "phpmailer/phpmailer": "^7.1"
     },
     "config": {
         "vendor-dir": "app/vendor",
