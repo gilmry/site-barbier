@@ -79,13 +79,13 @@ registre `PROJET.md` à jour (tours, tokens, wall-clock) · un commit par étape
 
 ### Story 1.3 — Session sûre, CSRF, en-têtes (FR-041)
 - **Gherkin** : `Étant donné une session inactive depuis 30 min, Quand j'agis dans l'admin, Alors on me redemande de me connecter.`
-- **4×N** : `@happy` sessions en base, cookie `__Host-`, déconnexion · `@negative` cookie altéré → refus · `@edge` expirations 30 min / 12 h · `@security` CSRF sur toute écriture, CSP stricte, HSTS, `noindex` sur l'admin, identifiant régénéré à la connexion.
+- **4×N** : `@happy` sessions en base, cookie `__Host-`, déconnexion ; **TOTP récent** (heure du dernier code vérifié, re-demande au-delà de 10 min pour les actions sensibles) · `@negative` cookie altéré → refus · `@edge` expirations 30 min / 12 h ; action sensible à 10 min 01 s du dernier code → code redemandé ; `@security` CSRF sur toute écriture, CSP stricte, HSTS, `noindex` sur l'admin, identifiant régénéré à la connexion.
 - **Couches** : Infra · Http · **Taille** : M · **Tours** : 8
 
 ### Story 1.4 — Codes de secours (FR-043)
-- **Gherkin** : `Quand j'utilise un de mes 10 codes de secours au lieu du TOTP, Alors je suis connecté et ce code n'est plus valable.`
-- **4×N** : `@happy` génération, affichage unique, stockage haché · `@negative` code utilisé → refus · `@edge` dernier code → régénération exigée · `@security` mêmes limites de tentatives que 1.2.
-- **Couches** : Domain · Application · Frontend · **Taille** : S · **Tours** : 6
+- **Gherkin** : `Étant donné que j'ai perdu mon téléphone, Quand je me connecte avec un de mes codes de secours puis réinitialise mon double facteur sur un nouveau téléphone, Alors j'ai de nouveau un accès complet, l'ancien secret et les anciens codes ne valent plus rien.`
+- **4×N** : `@happy` génération, affichage unique, stockage haché ; session « secours » → réinitialisation du TOTP · `@negative` code utilisé → refus ; session « secours » → toute autre écriture refusée · `@edge` dernier code → régénération exigée ; plus aucun code → réinitialisation d'urgence par fichier jeton déposé en SFTP/FTPS · `@security` mêmes limites de tentatives que 1.2 ; jeton d'urgence à usage unique, supprimé après usage, événement notifié par e-mail.
+- **Couches** : Domain · Application · Infra · Frontend · **Taille** : M · **Tours** : 8
 
 ---
 
@@ -160,10 +160,10 @@ registre `PROJET.md` à jour (tours, tokens, wall-clock) · un commit par étape
 - **4×N** : `@happy` `BookSlot` en transaction (`AgendaLock` + cellules de 5 min `booking_slot`), prix/durée figés, jeton d'annulation haché · `@negative` champs invalides → 400 champ par champ (pas de case de consentement : information RGPD seulement) ; créneau pris → 409 · `@edge` **20 réservations simultanées = 1 confirmée** ; chevauchement partiel → 409 ; réservation ↔ annulation simultanées · `@security` champ piège, 5 réservations/h/IP, désérialisation stricte, aucune donnée personnelle dans les journaux.
 - **Couches** : Domain · Application · Infra · Http · **Taille** : L · **Tours** : 10
 
-### Story 3.11 — Garde-fous de l'agenda sur le contenu (FR-008, FR-009, FR-010, FR-020 ; parcours P4) *(après 3.5)*
+### Story 3.11 — Garde-fous de l'agenda sur le contenu (FR-008, FR-009, FR-010, FR-020, FR-021 ; parcours P4) *(après 3.5)*
 - **En tant que** gérant **je veux** que mes modifications de carte, d'équipe et d'horaires ne cassent jamais une réservation existante **afin de** ne pas laisser un client sans rendez-vous.
-- **Gherkin** : `Étant donné une réservation future de Léa, Quand je supprime sa prestation, la désactive, réduis les horaires qui la couvrent ou pose une absence ce jour, Alors chaque action est refusée (ou avertie pour la désactivation) avec la liste des réservations concernées.`
-- **4×N** : `@happy` suppression → refus et proposition de dépublier ; dépublication et désactivation → acceptées, réservations conservées, liste affichée ; réduction d'horaires → refus avec la liste ; disponibilité qui déborde → signalée « hors horaires » · `@negative` aucune réservation concernée → action acceptée · `@edge` chaque action **en concurrence avec une réservation** sur MariaDB → l'une des deux l'emporte, jamais d'état incohérent (verrous ADR-006 dans l'ordre des identifiants) · `@security` admin + CSRF. **P4 rejoué** : absence posée → créneaux disparus → absence refusée sur un jour réservé.
+- **Gherkin** : `Étant donné une réservation future de Léa, Quand je supprime sa prestation, la désactive, réduis les horaires qui la couvrent, modifie sa disponibilité de sorte à l'exclure ou pose une absence ce jour, Alors chaque action est refusée (ou avertie pour la désactivation) avec la liste des réservations concernées.`
+- **4×N** : `@happy` suppression → refus et proposition de dépublier ; dépublication et désactivation → acceptées, réservations conservées, liste affichée ; réduction d'horaires ou modification de disponibilité qui exclut la réservation → refus avec la liste ; disponibilité qui déborde → signalée « hors horaires » · `@negative` aucune réservation concernée → action acceptée · `@edge` chaque action **en concurrence avec une réservation** sur MariaDB → l'une des deux l'emporte, jamais d'état incohérent (verrous ADR-006 dans l'ordre des identifiants) · `@security` admin + CSRF. **P4 rejoué** : absence posée → créneaux disparus → absence refusée sur un jour réservé.
 - **Couches** : Application · Infra · Frontend · **Taille** : M · **Tours** : 8
 
 ### Story 3.6 — Réserver « sans préférence » (FR-024)
@@ -249,17 +249,17 @@ vitrine sont regroupés en 3.11 (après 3.5), et les e-mails (4.1) précèdent l
 | Couche dominante | Stories | Σ jours | Σ tours |
 |---|---|---|---|
 | Fondations (IaC / CI / harnais) | 0.0–0.5 | 4,50 | 48 |
-| Accès | 1.1–1.4 | 3,00 | 32 |
+| Accès | 1.1–1.4 | 3,25 | 34 |
 | Vitrine | 2.1–2.8 | 6,50 | 68 |
 | Agenda & réservation | 3.1–3.11 | 8,00 | 86 |
 | Notification | 4.1–4.2 | 1,25 | 14 |
 | Mise en ligne / monitoring | 5.1–5.2 | 1,50 | 16 |
-| **Sous-total (33 stories)** | | **24,75** | **264** |
-| Émergence (20 %) | | 4,95 | 53 |
-| **Total** | | **≈ 30 j** | **≈ 317 tours** |
+| **Sous-total (33 stories)** | | **25,00** | **266** |
+| Émergence (20 %) | | 5,00 | 53 |
+| **Total** | | **≈ 30 j** | **≈ 319 tours** |
 
-- **Coût superviseur** : ≈ 30 j de supervision (v1.1 : +1,5 j pour les stories 0.0, 3.11 et l'export de sauvegarde).
-- **Coût modèle** : 317 tours × (0,4 Mtok × 0,85 € + 0,04 Mtok × 2,55 €) ≈ 317 × 0,44 € ≈ **140 €**.
+- **Coût superviseur** : ≈ 30 j de supervision (v1.1 : +1,75 j pour les stories 0.0, 3.11, l'export de sauvegarde et la reprise d'accès après perte du téléphone).
+- **Coût modèle** : 319 tours × (0,4 Mtok × 0,85 € + 0,04 Mtok × 2,55 €) ≈ 319 × 0,44 € ≈ **140 €**.
 - **Comparaison à la target** : la target du Brief (≤ 15 j) a été recalée par le PO à **28 j** (une seule release,
   proposition R1/R2 écartée) ; les corrections du Validateur la portent à **≈ 30 j** (+7 %). Le Brief comptait ~20 stories ;
   le découpage en compte 33, car la réservation fiable (verrous, concurrence, changements d'heure), le double facteur

@@ -91,7 +91,7 @@ Un cas d'usage par FR (ou groupe cohérent), orchestration sans règle métier :
 - Vitrine : `RenderHomePage`, `UpdateSection`, `UploadMedia`, `ManageCatalog`, `ManageBarbers`, `UpdateOpeningHours`, `UpdateSalonInfo`, `RenderLegalPage`, `UpdateLegalPage`.
 - Agenda : `ListBookableServices`, `ListBookableBarbers`, `ListBookableDays`, `ListFreeSlots`, `BookSlot`, `CancelBookingByClient`, `CancelBookingBySalon`, `SetAvailability`, `AddAbsence`, `AddClosure`, `ListBookings`, `PurgeExpiredBookings`, `FindClientBookings`, `ExportClientData`, `EraseClientData` (FR-012 : agissent sur `Booking`).
 - Notification : `NotifySalon`, `NotifyClient`, `RetryFailedMails`.
-- Acces : `Login`, `VerifyTotp`, `EnrollTotp`, `ConfirmTotpEnrollment` (émet les codes de secours), `UseRecoveryCode`, `RegenerateRecoveryCodes`, `Logout`, `InstallApplication`, `ApplyPendingMigrations`, `ExportBackup` (FR-044), `ReadHealth`.
+- Acces : `Login`, `VerifyTotp`, `EnrollTotp`, `ConfirmTotpEnrollment` (émet les codes de secours), `UseRecoveryCode` (ouvre une session « secours »), `RegenerateRecoveryCodes`, `ResetTotp`, `EmergencyResetTotp` (jeton fichier déposé par SFTP/FTPS), `Logout`, `InstallApplication`, `ApplyPendingMigrations`, `ExportBackup` (FR-044), `ReadHealth`.
 
 DTO d'entrée/sortie typés ; les pages publiques et l'API appellent **les mêmes** cas d'usage.
 

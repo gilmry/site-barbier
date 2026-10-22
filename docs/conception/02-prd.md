@@ -347,9 +347,9 @@ Prestation · Catégorie · Carte · Barbier · Horaires · **Disponibilité** �
 - **En tant que** gérant **je veux** des codes de secours **afin de** ne pas perdre l'accès si je perds mon téléphone.
 - **Gherkin** : `Étant donné mes 10 codes de secours, Quand j'en utilise un à la place du code TOTP, Alors je suis connecté et ce code n'est plus valable.`
 - **4×N** :
-  - `@happy` — 10 codes générés à l'enrôlement TOTP (`POST /api/v1/admin/account/totp/confirm`), affichés une seule fois, stockés hachés ; régénération depuis l'admin (`POST /api/v1/admin/account/recovery-codes`) après saisie d'un code TOTP valide ; connexion par code de secours (`POST /api/v1/admin/session/recovery`).
+  - `@happy` — 10 codes générés à l'enrôlement TOTP (`POST /api/v1/admin/account/totp/confirm`), affichés une seule fois, stockés hachés ; régénération depuis l'admin (`POST /api/v1/admin/account/recovery-codes`) avec un TOTP récent ; connexion par code de secours (`POST /api/v1/admin/session/recovery`). Une session ouverte par code de secours est marquée **« secours »** : elle n'est **pas** un TOTP récent et n'ouvre que la consultation et la **réinitialisation du double facteur** (`POST /api/v1/admin/account/totp/reset` → nouveau secret, confirmé par un premier code ; l'ancien secret et tous les anciens codes sont invalidés, 10 nouveaux codes émis).
   - `@negative` — code de secours déjà utilisé → refus.
-  - `@edge` — dernier code utilisé → l'admin exige d'en régénérer.
+  - `@edge` — dernier code utilisé → l'admin exige d'en régénérer ; **téléphone perdu** : connexion par code de secours → réinitialisation du TOTP sur le nouveau téléphone → accès complet rétabli ; **téléphone perdu et plus aucun code** : réinitialisation d'urgence par le propriétaire du serveur — il dépose par SFTP/FTPS un fichier `app/var/reset-2fa.token` contenant un code qu'il choisit, puis ouvre `/install/reset-2fa` avec ce code et le mot de passe : le TOTP est réinitialisé, le fichier supprimé, l'événement journalisé et notifié par e-mail au salon.
   - `@security` — mêmes limites de tentatives que FR-040.
 - **Capacité** : §7.7
 
@@ -357,7 +357,7 @@ Prestation · Catégorie · Carte · Barbier · Horaires · **Disponibilité** �
 - **En tant que** gérant **je veux** télécharger une sauvegarde complète de la base depuis l'admin **afin de** ne pas dépendre uniquement des sauvegardes de l'hébergeur.
 - **Gherkin** : `Quand je clique « Télécharger une sauvegarde », Alors je reçois un fichier SQL horodaté qui, réimporté dans une base vide, restaure le site à l'identique.`
 - **4×N** :
-  - `@happy` — export SQL (schéma + données) en flux, sans fichier intermédiaire sur le serveur ; rappel mensuel dans le tableau de bord si aucun export depuis 30 j. La restauration exige aussi le `config.php` d'origine (clé de chiffrement des secrets TOTP) : l'écran d'export le rappelle ; sans cette clé, l'éditeur ré-enrôle son double facteur via ses codes de secours.
+  - `@happy` — export SQL (schéma + données) en flux, sans fichier intermédiaire sur le serveur ; rappel mensuel dans le tableau de bord si aucun export depuis 30 j. La restauration exige aussi le `config.php` d'origine (clé de chiffrement des secrets TOTP) : l'écran d'export le rappelle ; sans cette clé, l'éditeur réinitialise son double facteur par la réinitialisation d'urgence (FR-043).
   - `@negative` — export interrompu → aucun fichier partiel laissé sur le serveur.
   - `@edge` — base de plusieurs Mo → export en flux sans dépasser la mémoire du mutualisé ; restauration testée en CI (aller-retour export → import → P1 vert).
   - `@security` — admin + **TOTP récent** (FR-041) ; le fichier contient des données personnelles : avertissement explicite à l'écran, et la politique de confidentialité (FR-011) indique que le gérant conserve ses sauvegardes au plus 6 mois puis les supprime.
@@ -419,7 +419,9 @@ Version `v1` dans le chemin.
 | POST | `/api/v1/bookings/cancel` | public (jeton) | annuler par le client (200 / 404 / 422) |
 | POST | `/api/v1/admin/session` · `/session/totp` · `/session/recovery` · DELETE `/session` | — | connexion en deux temps (ou code de secours), déconnexion |
 | GET/POST | `/api/v1/admin/account/totp` · `/account/totp/confirm` | session **pré-enrôlement** (créée par `/install`, n'ouvre que ces deux routes) | enrôlement TOTP (secret + URI otpauth, confirmation par un premier code → codes de secours) |
-| POST | `/api/v1/admin/account/recovery-codes` | admin | régénérer les codes de secours |
+| POST | `/api/v1/admin/account/recovery-codes` | admin + TOTP récent | régénérer les codes de secours |
+| POST | `/api/v1/admin/account/totp/reset` · `/account/totp/reset/confirm` | session « secours » ou admin + TOTP récent | réinitialiser le double facteur (FR-043) |
+| GET/POST | `/install/reset-2fa` (rendu serveur) | fichier jeton déposé par SFTP/FTPS + mot de passe | réinitialisation d'urgence (FR-043) |
 | GET/PUT | `/api/v1/admin/sections/{key}` | admin | textes traduits d'une section (version pour verrou optimiste) |
 | POST/DELETE | `/api/v1/admin/media` · `/media/{id}` | admin | images |
 | GET/POST/PUT/DELETE | `/api/v1/admin/categories[/{id}]` · `/services[/{id}]` | admin | carte |
