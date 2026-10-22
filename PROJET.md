@@ -26,13 +26,13 @@
 ## Gantt / vagues
 
 - **Gantt** : `docs/pilotage/gantt.md` v1.0 (signé le 2026-10-22 par gilmry) — scénario B, ratio 2
-- **Vague courante** : V5 — Mise en ligne (en attente du PO) · **barrière** : B0 (Sprint 0 vert, offre d'hébergement choisie)
+- **Vague courante** : V5 — Mise en ligne, transmise au PO (paquet prêt) · **barrière** : B0 (Sprint 0 vert, offre d'hébergement choisie)
 - **Branches ouvertes** : —
 - **Barreau** : Scrum (ADR-011)
 
 ## Position courante
 
-- **Phase / étape** : Vagues V0 à V4 terminées (32 stories sur 33) · V5 (Story 5.1) en attente du PO
+- **Phase / étape** : release 1 terminée et promue ; mise en ligne transmise au PO (porte `exploitation` à ouvrir une fois en production)
 - **Prochaine action attendue** : le PO fait confirmer les 6 points par OVH, commande, crée le dépôt distant (protection de `main`) et déroule `docs/deploiement.md` (recette → production)
 - **Rôle à jouer** : `pilote/roles/harnais.md` + `pilote/roles/gate-runner.md`
 
@@ -98,7 +98,7 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 | 3.10 Purge (S) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
 | 4.1 E-mails (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
 | 4.2 Journal et relance (S) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 5.1 Recette puis production (M) | 🔴 en attente du PO (points irréversibles : commande OVH, SFTP, config, recette, production) | — | n°prod | — | | | |
+| 5.1 Recette puis production (M) | ✅ part de l'agent faite — paquet `dist/site-barbier-release-1-4fedf7c.zip` (sha256 f3649fc0…) validé en hébergement simulé ; **déploiement réalisé par le PO** (décision du 2026-10-22) selon `docs/deploiement.md` | — | prod : PO | — | | | |
 | 5.2 Santé et sauvegarde (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
 
 ## Promotions
@@ -134,6 +134,7 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 | Gantt | Signé (`docs/pilotage/gantt.md` v1.0) | gilmry | 2026-10-22 | — |
 | Versions de la pile | **PHP 8.4** (support de sécurité jusqu'au 31/12/2028 ; 8.2 finit le 31/12/2026) et **MariaDB 10.11 LTS** (10.6 sans support depuis 07/2026) — PHP n'a pas de LTS officielle | gilmry | 2026-10-22 | NFR-02 amendé |
 | Hébergeur | **OVH Perso, 48 mois, datacenter GRA** — commande par le PO après confirmation des 6 points de `docs/hebergement.md` ; base **MySQL 8** (remplace MariaDB 10.11), CI sur MySQL 8.0 et 8.4 jusqu'à confirmation | gilmry | 2026-10-22 | ADR-010 (résidu accepté) |
+| Mise en ligne (Story 5.1) | Le PO déploie lui-même (commande OVH, SFTP, config, recette puis production) avec le paquet de la release | gilmry | 2026-10-22 | ADR-008 |
 | Promotion release 1 | Promue sur main ; triage des rapports de jalon accepté (gate review signée) | gilmry | 2026-10-22 | — |
 | Sortie de BMAD | Conception validée (PASS 100/100), livrables v1.1 signés | gilmry | 2026-10-22 | — |
 | Modalité de la bascule différée | Revue à chaque gate review ; déclencheurs : incident de dérive, > 60 routes, hébergeur rendant le poids indifférent | gilmry | 2026-10-22 | ADR-004 |
@@ -170,3 +171,4 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 - 2026-10-22 — socle passé sur MySQL 8 : CI verte sur 8.4 et 8.0, sensibilité reprouvée (commit `7419690` sur `story/0.1-socle`)
 - 2026-10-22 — /goal « terminer le site » : stories 0.2 à 5.2 fabriquées (sauf 5.1), CI complète verte, gate review de fin de release rédigée
 - 2026-10-22 — release 1 promue sur main par le PO (merge `2bd9d58`) ; reste la Story 5.1, actions du PO
+- 2026-10-22 — paquet de release `site-barbier-release-1-4fedf7c.zip` construit et validé ; le PO déploie lui-même (Story 5.1 transmise)
