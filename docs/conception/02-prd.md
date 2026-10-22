@@ -2,15 +2,15 @@
 livrable: PRD
 persona: 02-product-manager (BMAD, TOGAF Phases B-C)
 projet: site-barbier
-version: 0.1 (à valider)
+version: 1.0 (validé)
 source: 01-product-brief.md v1.0 (validé 2026-10-22)
 redige_le: 2026-10-22
 redige_par: agent (Claude Code, pilote Foyer)
 signature_humaine:
-  nom: <à signer>
+  nom: gilmry
   role: PO
-  date: <AAAA-MM-JJ>
-  verdict: <validé | à reprendre>
+  date: 2026-10-22
+  verdict: validé (hypothèses introduites acceptées telles quelles)
 ---
 
 # PRD — site-barbier
