@@ -44,7 +44,7 @@
 | 2 | PRD | `docs/conception/02-prd.md` | ✅ v1.0 validé (gilmry, 2026-10-22) |
 | 3 | Architecture + ADR + plan vulnérabilités | `docs/conception/03-architecture.md` + `03b-plan-vulnerabilites.md` | ✅ v1.0 validé (gilmry, 2026-10-22) |
 | 4 | Epics & stories | `docs/conception/04-epics-stories.md` | ✅ v1.0 validé (gilmry, 2026-10-22) |
-| 5 | Validation | `docs/conception/05-validation.md` | ⚪ |
+| 5 | Validation | `docs/conception/05-validation.md` | 🟡 passage 1 : CONCERNS (98/100, 12 à corriger + 9 mineures) → corrections v1.1 faites, passage 2 en cours |
 
 Référence visuelle : `docs/design/reference-le-corbeau.md`.
 
@@ -113,3 +113,4 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 - 2026-10-22 — architecture v1.0 et plan de vulnérabilités validés
 - 2026-10-22 — backlog v0.1 : 31 stories, ≈ 28 j (recalage ×1,9 vs prior du Brief), proposition R1/R2
 - 2026-10-22 — backlog validé, une seule release (≈ 28 j)
+- 2026-10-22 — Validateur passage 1 : CONCERNS 98/100 ; reboucle PM/Architecte/Scrum Master → Brief/PRD/Archi/Stories v1.1 (28 FR, ADR-010, stories 0.0 et 3.11, ≈ 30 j)

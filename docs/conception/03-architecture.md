@@ -2,8 +2,8 @@
 livrable: Architecture technique
 persona: 03-architecte (BMAD, TOGAF Phases C-D)
 projet: site-barbier
-version: 1.0 (validé)
-source: 02-prd.md v1.0 (validé 2026-10-22)
+version: 1.1 (corrections du Validateur, à revalider)
+source: 02-prd.md v1.1
 redige_le: 2026-10-22
 redige_par: agent (Claude Code, pilote Foyer)
 annexe: 03b-plan-vulnerabilites.md
@@ -72,8 +72,8 @@ Aucune dépendance (ni PDO, ni SQL, ni HTTP, ni `$_SESSION`) — vérifié par l
 
 | BC | Agrégats / value objects | Invariants codés dans les constructeurs |
 |---|---|---|
-| **Vitrine** | `Section`, `TranslatedText` (fr obligatoire, nl/en optionnels), `Service`, `Category`, `Barber`, `OpeningHours` (7 `DaySchedule`), `SalonInfo`, `MediaRef`, `Money` (centimes, ≥ 0), `Duration` (> 0, multiple de 15, ≤ 240) | FR obligatoire ; prix ≥ 0 ; durée valide ; fin > début |
-| **Agenda** | `Booking` (états `confirmed` → `cancelled`), `TimeRange` (UTC, fin > début), `Slot`, `WeeklyAvailability`, `Absence` (barbier ou salon), `SlotPolicy` (pas 15 min, délai 2 h, horizon 60 j), `SlotCalculator` (fonction pure), `NoPreferenceAssigner` (pure), `CancelToken` (haché), `RetentionPolicy` (6 mois) | réservation dans une disponibilité, hors absence, dans le futur ; annulation client ≥ 2 h avant ; pas de transition depuis `cancelled` ; prix/durée figés |
+| **Vitrine** | `Page` (accueil, pages légales), `Section`, `TranslatedText` (fr obligatoire, nl/en optionnels), `Lang` (fr/nl/en, liste blanche), `Catalog` (catégories ordonnées), `Service` (indicateur `published`), `Category`, `Barber`, `OpeningHours` (7 `DaySchedule`), `SalonInfo`, `MediaRef`, `Money` (centimes, ≥ 0), `Duration` (> 0, multiple de 5, ≤ 240) | FR obligatoire ; prix ≥ 0 ; durée valide ; fin > début |
+| **Agenda** | `Booking` (états `confirmed` → `cancelled`), `TimeRange` (UTC, fin > début), `Slot`, `WeeklyAvailability`, `Absence` (barbier ou salon), `SlotPolicy` (débuts au quart d'heure, cellules de 5 min, délai 2 h, horizon 60 j), `SlotCalculator` (fonction pure), `NoPreferenceAssigner` (pure), `CancelToken` (haché), `RetentionPolicy` (6 mois) | réservation dans une disponibilité, hors absence, dans le futur ; annulation client ≥ 2 h avant ; pas de transition depuis `cancelled` ; prix/durée figés |
 | **Notification** | `MailMessage`, `MailKind`, `MailAttempt` | destinataire valide ; aucun retour à la ligne dans les en-têtes |
 | **Acces** | `Editor`, `PasswordPolicy` (≥ 12, liste noire), `TotpCode`, `RecoveryCode`, `LoginThrottle` | verrou progressif après 5 échecs ; code TOTP à usage unique |
 
@@ -81,17 +81,17 @@ Ports déclarés côté domaine : `BookingRepository`, `AgendaLock`, `ServiceRep
 `ContentRepository`, `MediaStorage`, `Mailer`, `Clock`, `IdGenerator`, `TokenGenerator`, `PasswordHasher`,
 `SecretBox`, `EditorRepository`.
 
-`SlotCalculator` est **pur** : (disponibilités, absences, réservations, prestation, maintenant, fuseau) → créneaux.
+`SlotCalculator` est **pur** : (horaires du salon, disponibilités, absences, réservations, prestation, maintenant, fuseau) → créneaux. Il **rogne** les disponibilités aux horaires du salon (une disponibilité qui déborde après une réduction d'horaires reste stockée mais n'ouvre aucun créneau ; l'admin la signale).
 Toute la logique d'heure (Europe/Brussels, changements d'heure) y vit et se teste sans base.
 
 ## Couche 2 — Application *(ISP, OCP, DRY)*
 
 Un cas d'usage par FR (ou groupe cohérent), orchestration sans règle métier :
 
-- Vitrine : `RenderHomePage`, `UpdateSection`, `UploadMedia`, `ManageCatalog`, `ManageBarbers`, `UpdateOpeningHours`, `UpdateSalonInfo`, `RenderLegalPage`.
-- Agenda : `ListBookableDays`, `ListFreeSlots`, `BookSlot`, `CancelBookingByClient`, `CancelBookingBySalon`, `SetAvailability`, `AddAbsence`, `AddClosure`, `ListBookings`, `PurgeExpiredBookings`.
+- Vitrine : `RenderHomePage`, `UpdateSection`, `UploadMedia`, `ManageCatalog`, `ManageBarbers`, `UpdateOpeningHours`, `UpdateSalonInfo`, `RenderLegalPage`, `UpdateLegalPage`, `FindClientBookings`, `ExportClientData`, `EraseClientData` (FR-012).
+- Agenda : `ListBookableServices`, `ListBookableBarbers`, `ListBookableDays`, `ListFreeSlots`, `BookSlot`, `CancelBookingByClient`, `CancelBookingBySalon`, `SetAvailability`, `AddAbsence`, `AddClosure`, `ListBookings`, `PurgeExpiredBookings`.
 - Notification : `NotifySalon`, `NotifyClient`, `RetryFailedMails`.
-- Acces : `Login`, `VerifyTotp`, `UseRecoveryCode`, `Logout`, `InstallApplication`, `ApplyPendingMigrations`.
+- Acces : `Login`, `VerifyTotp`, `EnrollTotp`, `ConfirmTotpEnrollment` (émet les codes de secours), `UseRecoveryCode`, `RegenerateRecoveryCodes`, `Logout`, `InstallApplication`, `ApplyPendingMigrations`, `ExportBackup` (FR-044), `ReadHealth`.
 
 DTO d'entrée/sortie typés ; les pages publiques et l'API appellent **les mêmes** cas d'usage.
 
@@ -101,19 +101,25 @@ DTO d'entrée/sortie typés ; les pages publiques et l'API appellent **les même
   mapping ligne↔entité isolé — **ADR-005**. Heures stockées en UTC (`DATETIME`), converties au bord.
 - **Sérialisation de l'agenda** — **ADR-006** : toute écriture qui touche l'agenda d'un barbier passe par
   `AgendaLock` (`SELECT … FOR UPDATE` sur la ligne `barber`, en transaction), et les réservations occupent
-  des cellules de 15 min dans `booking_slot` avec `UNIQUE(barber_id, slot_start)` (filet en base).
+  des cellules de 5 min dans `booking_slot` avec `UNIQUE(barber_id, slot_start)` (filet en base).
 - **HTTP** : front controller unique `www/index.php` → routeur maison du kit (`vanilla`) — **ADR-004**.
-  `StrictJson` valide chaque corps et chaque requête **contre la spec OpenAPI elle-même** (champ inconnu → 400).
+  `StrictJson` valide chaque corps et chaque requête **contre la spec OpenAPI elle-même** (champ inconnu → 400),
+  via **`opis/json-schema`** (Apache-2.0, JSON Schema 2020-12 — le dialecte d'OpenAPI 3.1), embarqué dans `vendor/`.
+  `StrictJson` et la parité routes ↔ spec **n'existent pas dans le kit** : ils sont créés par la Story 0.2.
   Exceptions du domaine traduites en `problem+json` (400/401/403/404/409/422/429) dans cette seule couche.
 - **Middleware** : en-têtes de sécurité (CSP stricte, HSTS, `nosniff`, `Referrer-Policy`, `frame-ancestors 'none'`),
   session, CSRF (jeton synchronisé), limitation de débit (compteurs en base, par IP hachée), langue.
 - **Session** — FR-041 : sessions **en base** (gestionnaire `SessionHandlerInterface` sur PDO), jamais dans le
   `/tmp` partagé du mutualisé ; cookie `__Host-` `Secure; HttpOnly; SameSite=Strict`.
-- **E-mail** : port `Mailer` → adaptateur SMTP authentifié (PHPMailer, embarqué) ; journal `mail_log`.
+- **E-mail** : port `Mailer` → adaptateur SMTP authentifié (PHPMailer, embarqué) ; journal `mail_log` (type, état, erreur, tentatives — **jamais le corps**). Le corps est recomposé depuis la réservation à chaque envoi ; une (re)confirmation **renouvelle** le jeton d'annulation dans la même transaction que l'envoi journalisé.
 - **Médias** : GD — vérification par contenu (`getimagesize` + signature), ré-encodage JPEG/WebP, max 1600 px,
   EXIF retiré, nom aléatoire ; `www/uploads/.htaccess` interdit toute exécution.
 - **Sécurité** : `password_hash` (Argon2id si disponible, sinon bcrypt) ; TOTP RFC 6238 (implémentation
   locale testée sur les vecteurs de la RFC) ; secret TOTP chiffré par `sodium_crypto_secretbox` (clé dans `config.php`).
+- **Comptes MariaDB** — ADR-010 : si l'hébergeur le permet, deux comptes (applicatif : `SELECT/INSERT/UPDATE/DELETE` ;
+  migrations : DDL, identifiants séparés dans `config.php`, utilisé seulement par `/install` et l'action « appliquer les
+  migrations ») ; sinon un compte unique, résidu accepté.
+- **Sauvegarde** — FR-044 : `ExportBackup` écrit un dump SQL en flux (`php://output`), sans fichier intermédiaire.
 - **Purge** — FR-027 : `PurgeExpiredBookings` appelé par la tâche planifiée de l'hébergeur si elle existe,
   sinon au premier passage du jour (verrou `GET_LOCK` pour éviter les doubles exécutions).
 
@@ -123,10 +129,10 @@ DTO d'entrée/sortie typés ; les pages publiques et l'API appellent **les même
   `verify` : aucun `echo $` brut dans `templates/`). Design : `docs/design/reference-le-corbeau.md` (jetons CSS
   repris tels quels). **Polices auto-hébergées** (licence OFL) : aucune requête vers Google Fonts — **ADR-007**.
 - **Îlots Svelte 5 (runes)**, compilés par Vite en CI et livrés en JS statique dans `www/islands/` :
-  - `booking` : parcours ① prestation → ② barbier → ③ jour → ④ heure → ⑤ coordonnées → ⑥ récapitulatif ;
+  - `booking` : parcours ① prestation → ② barbier → ③ jour → ④ heure → ⑤ coordonnées (+ information RGPD) → ⑥ récapitulatif ;
   - `admin` : contenu, carte, équipe, horaires, agenda, réservations, journal des e-mails (FR seul).
-- **Client généré** : `frontend/shared/generated/api.ts` produit par `gen-api.mjs` (repris du kit) depuis la
-  spec ; un invariant interdit tout `fetch(`/URL d'endpoint hors `generated/` (gate `verify`).
+- **Client généré** : `frontend/shared/generated/api.ts` produit par `gen-api.mjs` depuis la spec. Le script du kit
+  cible OpenAPI 3.0.3 : la Story 0.2 l'adapte à 3.1 (types `["string","null"]` au lieu de `nullable`) ; un invariant interdit tout `fetch(`/URL d'endpoint hors `generated/` (gate `verify`).
 - **i18n** : libellés serveur dans `app/i18n/*.php` ; l'îlot `booking` reçoit le dictionnaire de la langue de
   la page en JSON embarqué ; aucune chaîne en dur (gate `verify`).
 - **Écart au moule (D2)** : le moule rend les pages en Astro statique ; ici les pages publiques sont rendues par
@@ -150,11 +156,11 @@ Pas de serveur à piloter : l'hébergeur porte la plateforme. Ce que le projet p
 | Contrôle | Mise en œuvre |
 |---|---|
 | A.5.9 / A.8 Inventaire des actifs | SBOM CycloneDX (PHP + npm) attachés à chaque paquet ; section *Données et flux* |
-| A.5.15 / A.8.2 Contrôle d'accès | éditeur unique, TOTP, verrou progressif, moindre privilège de l'utilisateur MariaDB (pas de `DROP`/`GRANT` hors migrations) |
+| A.5.15 / A.8.2 Contrôle d'accès | éditeur unique, TOTP, verrou progressif, deux comptes MariaDB (DML / DDL) si l'hébergeur le permet — ADR-010 |
 | A.8.24 Cryptographie | HTTPS/HSTS, secret TOTP chiffré (sodium), jetons hachés, mots de passe Argon2id/bcrypt |
 | A.8.9 Configuration | `.htaccess` et `.user.ini` versionnés, vérifiés par le gate `hebergement` |
 | A.8.15 Journalisation | journal applicatif hors racine web, sans donnée personnelle en clair, rotation |
-| A.8.13 Sauvegarde | sauvegarde quotidienne de la base par l'hébergeur `[hypothèse]` + export manuel depuis l'admin |
+| A.8.13 Sauvegarde | sauvegarde quotidienne de l'hébergeur **vérifiée au choix de l'offre** (Story 0.0, critère éliminatoire) + export SQL par le gérant (FR-044, rappel mensuel) ; restauration testée en CI |
 | A.8.25-29 Développement sécurisé | cycle rouge/vert/bleu, 4 classes de tests, gates plancher, plan de vulnérabilités |
 
 ## Couche 6 — CI/CD
@@ -188,7 +194,8 @@ Pas de serveur à piloter : l'hébergeur porte la plateforme. Ce que le projet p
   version déployée, espace disque des uploads.
 - **Journal applicatif** (`app/var/log/`, hors racine) : erreurs, connexions admin (réussies/échouées), annulations,
   purges — identifiants hachés, aucune coordonnée client en clair ; rotation 30 jours.
-- **Alerte** : e-mail au salon sur 5 échecs de connexion consécutifs et sur erreur d'envoi répétée.
+- **Alerte** : e-mail au salon sur 5 échecs de connexion consécutifs. Une **panne d'envoi** ne peut pas s'annoncer par
+  le SMTP en panne : elle s'affiche en bandeau rouge sur le tableau de bord et en tête de chaque page admin.
 - **Hors MVP** : sonde de disponibilité externe (ajouterait un flux externe → mise à jour de *Données et flux*).
 - **Plan de gestion des vulnérabilités** : `03b-plan-vulnerabilites.md`.
 
@@ -198,9 +205,9 @@ Les quatre éléments de `skills/contrat-api.md`, nommés :
 
 | Élément | Mécanisme concret |
 |---|---|
-| 1. Source de vérité | `openapi/site-barbier.openapi.json` (OpenAPI 3.1) **écrite à la main avant le code** (pas d'annotation PHP — résidu, voir ADR-002) |
+| 1. Source de vérité | `openapi/site-barbier.openapi.json` (OpenAPI 3.1) **écrite à la main avant le code** (pas d'annotation PHP — élément **remplacé**, résidu mesuré : ADR-002) |
 | 2. Client généré | `frontend/shared/scripts/gen-api.mjs` → `frontend/shared/generated/api.ts`, régénéré au `prebuild` ; jamais édité |
-| 3. Désérialisation stricte | `StrictJson` valide requêtes et corps **contre la spec au moment de l'exécution** (validateur JSON Schema embarqué) ; `additionalProperties: false` partout |
+| 3. Désérialisation stricte | `StrictJson` valide requêtes et corps **contre la spec au moment de l'exécution** avec `opis/json-schema` ; `additionalProperties: false` partout (vérifié par un test sur la spec) |
 | 4. Contract tests CI | gate `contrat` : client régénéré ≡ commité, **parité table de routes ↔ chemins de la spec** (dans les deux sens) ; gate `integration` : chaque réponse validée contre son schéma |
 
 Version `v1` dans le chemin ; toute rupture = point irréversible (validation humaine).
@@ -210,6 +217,7 @@ Version `v1` dans le chemin ; toute rupture = point irréversible (validation hu
 | Métier (FR) | Code | Table |
 |---|---|---|
 | Prestation / Catégorie / Carte | `Service` / `Category` / `Catalog` | `service` / `category` |
+| Publication | `Service::published` ; enregistrement = publication immédiate | `service.published` |
 | Barbier | `Barber` | `barber`, `barber_service` |
 | Horaires | `OpeningHours`, `DaySchedule` | `opening_hours` |
 | Disponibilité | `WeeklyAvailability` | `availability` |
@@ -218,8 +226,10 @@ Version `v1` dans le chemin ; toute rupture = point irréversible (validation hu
 | Réservation | `Booking` | `booking`, `booking_slot` |
 | Jeton d'annulation | `CancelToken` | `booking.cancel_token_hash` |
 | Texte traduit / Langue | `TranslatedText` / `Lang` | `translation` |
-| Section / Page / Média | `Section` / `Page` / `MediaRef` | `section` / — / `media` |
+| Section / Page / Média | `Section` / `Page` / `MediaRef` | `section` / `section.page` / `media` |
+| Unité de durée | `Duration` (multiple de 5 min) | `service.duration_min` |
 | Éditeur | `Editor` | `editor`, `recovery_code`, `session` |
+| Limitation de débit | `RateLimiter` (port) | `rate_limit` |
 
 ## Stratégie de tests
 
@@ -246,10 +256,12 @@ importés par les trois harnais — invariant anti-dette). Couverture cible : do
 | Contenu du site (textes, carte, équipe, horaires) | public | non (prénoms des barbiers publiés de leur plein gré) | MariaDB | non (public) |
 | Photos | public | oui si visages (barbiers consentants) | `www/uploads/` | non (public) |
 | Réservations (nom, téléphone, e-mail, rendez-vous, langue) | **confidentiel** | **oui** | MariaDB, 6 mois max | non applicatif — base de l'hébergeur ; accès restreint, purge ; à réexaminer en gate review |
+| Compteurs de limitation de débit | interne | pseudonymisé (IP **hachée** avec sel secret) | MariaDB, purgés chaque jour | haché |
+| Sauvegardes exportées par le gérant | **confidentiel** | **oui** | poste du gérant (hors produit) | à la charge du gérant — avertissement à l'export |
 | Jetons d'annulation | confidentiel | lié | MariaDB | **haché** (SHA-256) |
 | Compte éditeur (e-mail, hash, secret TOTP, codes de secours) | **confidentiel** | oui | MariaDB | hash / **chiffré** (sodium) / hachés |
 | Sessions admin | confidentiel | lié | MariaDB | identifiant seul, données minimales |
-| Journal des e-mails | confidentiel | oui (destinataire) | MariaDB, purgé avec la réservation | non — destinataire masqué à l'affichage |
+| Journal des e-mails | confidentiel | oui (destinataire) | MariaDB, purgé avec la réservation ; **aucun corps d'e-mail stocké** | non — destinataire masqué à l'affichage |
 | Journal applicatif | interne | pseudonymisé | `app/var/log/` | non — aucune coordonnée en clair |
 | Secrets (DB, SMTP, clé sodium, code d'installation) | **confidentiel** | non | `app/config.php` hors racine, jamais commité | fichier protégé (droits 600 si l'hébergeur le permet) |
 
@@ -270,6 +282,8 @@ importés par les trois harnais — invariant anti-dette). Couverture cible : do
 | Sauvegardes de l'hébergeur | sortant (plateforme) | — | base complète | selon l'hébergeur | couche plateforme — à vérifier au choix de l'offre |
 | Poste du PO → hébergeur (déploiement) | sortant | **SFTP ou FTPS** | paquet + `config.php` | oui | ADR-008 |
 | Forge (GitHub) | sortant | HTTPS/SSH | code source, aucune donnée client | oui | ADR-008 |
+| Registres de build (Packagist, npm, Docker Hub, GitHub Actions) | entrant (build uniquement) | HTTPS | dépendances et images ; aucune donnée produit | oui | gates plancher (SBOM, SCA) |
+| Calendrier de support PHP (php.net, données embarquées dans le paquet) | aucun appel à l'exécution | — | — | — | Story 5.2 : table de fin de support livrée avec chaque version |
 
 Aucun autre tiers : pas d'analytics, pas de CDN, pas de polices distantes, pas de captcha tiers (ADR-007).
 
@@ -293,11 +307,14 @@ de fichiers ; la règle de non-chevauchement est testable en isolation.
 
 ### ADR-002 — Contrat API matérialisé, spec écrite à la main — **retenu, résidu déclaré**
 Décision : les 4 éléments du tableau *Contrat API* ci-dessus. Contexte : sans framework d'annotation, la spec ne
-se génère pas depuis le code (`contrat-api.md` § « stack sans écosystème d'annotation »).
+se génère pas depuis le code (`contrat-api.md` § « stack sans écosystème d'annotation ») : l'élément 1 est
+**remplacé** (spec écrite à la main), les éléments 2 à 4 sont mécanisés.
 **Résidu de risque** : la spec est un artefact maintenu à la main ; une route ou un champ de **réponse** peut
 diverger. Mitigation : validation des requêtes **à l'exécution contre la spec** (la dérive d'entrée devient une
-erreur 400 immédiate), parité routes↔spec en CI, validation des réponses en intégration. Ce résidu est suivi au
-diagnostic jusqu'à une éventuelle bascule vers API Platform (ADR-004). Alternatives écartées : client écrit à la
+erreur 400 immédiate), parité routes↔spec en CI, validation des réponses en intégration.
+**Mesure du résidu** (relevée à chaque gate review, ligne `jalon` du registre) : part des réponses d'intégration
+validées contre leur schéma (cible 100 %) et nombre d'incidents de dérive constatés. **Destination** : la pile du
+kit (API Platform), fixée par le cadre ; la **modalité** (quand basculer) est tranchée par le PO en ADR-004. Alternatives écartées : client écrit à la
 main (double maintenance) ; pas de spec (aucun anti-drift).
 
 ### ADR-003 — Pages publiques rendues côté serveur (écart D2 au moule îlots-first) — **retenu**
@@ -318,9 +335,13 @@ plusieurs milliers à envoyer en SFTP ; (b) pas de cache Symfony inscriptible à
 (c) une empreinte mémoire et un temps de réponse meilleurs sur un hébergement d'entrée de gamme.
 **Réversibilité** : le kit prouve qu'API Platform s'enfiche sur **les mêmes cas d'usage** (`src/Http/ApiPlatform/`)
 sans toucher Domaine ni Application ; la bascule reste possible tant que le contrat v1 est respecté.
+**Destination et modalité** : la destination (API Platform, `bootstrap-nouveau-projet.md`) n'est pas remise en cause ;
+le PO a tranché la **modalité** : bascule **différée**, réexaminée à chaque gate review, déclenchée par le premier
+de ces événements — un incident de dérive du contrat, plus de 60 routes, ou une offre d'hébergement qui rend le poids
+indifférent. Date de premier réexamen : la gate review de fin de release.
 Prix : contrat plus faible (résidu ADR-002). Alternative : API Platform dès le MVP — contrat mécanisé, paquet
-lourd. **Question au PO (langage clair)** : « On garde un site léger et simple à envoyer (recommandé), quitte à
-passer plus tard sur l'outillage plus lourd si le projet grandit ? »
+lourd. Question posée au PO (modalité, langage clair) : « On garde un site léger et simple à envoyer, quitte à passer plus
+tard sur l'outillage plus lourd si le projet grandit ? » → « Léger ».
 
 ### ADR-005 — Persistance CQRS SQL pur sur MariaDB — **retenu** (PO gilmry, 2026-10-22 : « Sur mesure »)
 Décision proposée : `*Queries`/`*Commands` en PDO, migrations `up`/`down` SQL, pas d'ORM.
@@ -332,10 +353,11 @@ verrous. Irréversible en pratique une fois des données en production (migratio
 
 ### ADR-006 — Une seule sérialisation de l'agenda — **retenu**
 Décision : toute écriture qui modifie l'agenda d'un barbier (réserver, annuler, purger, poser une absence,
-changer ses disponibilités) s'exécute en transaction après `SELECT … FOR UPDATE` sur sa ligne `barber` ; les
-écritures à l'échelle du salon (fermeture exceptionnelle, horaires du salon) verrouillent **toutes** les lignes
-`barber` dans l'ordre des identifiants (pas d'interblocage). Les réservations confirmées occupent leurs cellules
-de 15 min dans `booking_slot` avec `UNIQUE(barber_id, slot_start)` : filet en base si un chemin de code oubliait
+changer ses disponibilités, **le désactiver**, effacer une réservation au titre du RGPD) s'exécute en transaction
+après `SELECT … FOR UPDATE` sur sa ligne `barber` ; les écritures à l'échelle du salon (fermeture exceptionnelle,
+horaires du salon, **dépublication ou suppression d'une prestation**) verrouillent **toutes** les lignes `barber`
+dans l'ordre des identifiants (pas d'interblocage). `BookSlot` relit l'état publié de la prestation et l'état actif
+du barbier **sous le verrou**. Les réservations confirmées occupent leurs cellules de **5 min** dans `booking_slot` avec `UNIQUE(barber_id, slot_start)` : filet en base si un chemin de code oubliait
 le verrou. Annulation et purge libèrent les cellules **dans la même transaction**. Contexte : MariaDB n'a pas de
 contrainte d'exclusion d'intervalles ; les conflits réservation↔absence↔horaires (FR-010/020/021) doivent être
 sérialisés avec les réservations, pas seulement les réservations entre elles. Alternatives écartées : verrou
@@ -356,3 +378,11 @@ production. **Décision** : la recette est retenue — tout paquet passe par `te
 PHPMailer (LGPL-2.1, embarqué) en SMTP + STARTTLS avec le compte e-mail du domaine du salon ; SPF/DKIM à
 configurer chez l'hébergeur (story de mise en ligne). La réservation ne dépend jamais du succès de l'envoi
 (journal + relance, FR-032). Alternative écartée : service d'envoi tiers (nouveau flux externe, compte, coût).
+
+### ADR-010 — Comptes MariaDB séparés quand l'hébergeur le permet — **retenu**
+Décision : un compte applicatif limité au DML et un compte de migration (DDL), tous deux dans `config.php` ; le
+second n'est chargé que par `/install` et l'action « appliquer les migrations » (session admin + TOTP récent).
+Contexte : beaucoup d'offres mutualisées n'attribuent **qu'un** utilisateur par base ; le moindre privilège n'est
+alors pas mécanisable. Dans ce cas : compte unique, **résidu accepté** (une injection SQL aurait des droits DDL),
+compensé par les requêtes préparées partout (gate `verify` : aucune concaténation SQL) et les tests `@security`.
+Vérifié au choix de l'offre (Story 0.0).

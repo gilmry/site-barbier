@@ -2,7 +2,7 @@
 livrable: Product Brief
 persona: 01-analyste (BMAD, TOGAF Phase A)
 projet: site-barbier
-version: 1.0 (validé)
+version: 1.1 (erratum du Validateur, à revalider)
 redige_le: 2026-10-22
 redige_par: agent (Claude Code, pilote Foyer)
 signature_humaine:
@@ -138,12 +138,12 @@ bruxelloise, hébergeable pour quelques euros par mois, sans dépendance à une 
 
 ## 14. Contraintes
 - **Hébergement mutualisé LAMP bon marché** (exigence du PO, mot pour mot : « hébergement mutualisé pas cher LAMP ») :
-  - déploiement par **FTP/SFTP**, sans SSH ni Composer ni CLI côté serveur `[hypothèse à valider selon l'offre]` → paquet **autonome** (aucune dépendance à installer sur le serveur) ;
+  - déploiement par **SFTP ou FTPS** (FTP en clair exclu), sans SSH ni Composer ni CLI côté serveur `[hypothèse à valider selon l'offre]` → paquet **autonome** (dépendances embarquées, rien à installer sur le serveur) ;
   - **migrations de schéma sans CLI** (déclenchées depuis l'administration ou au premier passage) ;
   - **racine web imposée** (`www/` ou `public_html/`) → le code applicatif hors racine ou protégé par `.htaccess` ;
   - pile cible **PHP 8.2 + MariaDB** (le plus répandu en mutualisé) — les gates en CI tournent sur ce couple ;
   - **pas de Node côté serveur** : le JavaScript est compilé avant l'envoi.
-- **Pile** : PHP sans framework + SQL pur (pas de Symfony/API Platform/Doctrine), imposé par l'hébergement → **ADR** d'exclusion de la pile cible du kit (`skills/bootstrap-nouveau-projet.md` §Conditionnement).
+- **Pile** : *erratum v1.1* — le mutualisé **n'exclut pas** Symfony/API Platform (elles y tournent si `vendor/` est livré). PHP sans framework + SQL pur est un **choix proposé et tranché par le PO** pour la légèreté (ADR-004, ADR-005), la destination API Platform restant fixée par le cadre.
 - **Rendu** : pages publiques rendues côté serveur par PHP depuis la base (le contenu est éditable), îlots Svelte limités au formulaire et à l'administration → **ADR** d'écart de rendu (D2).
 - **E-mails** : envoyés par le serveur d'envoi (SMTP) de l'hébergeur ; risque de délivrabilité à traiter (SPF/DKIM du domaine).
 - **Concurrence** : l'anti-double réservation doit tenir sur **MariaDB mutualisée** (transaction + contrainte en base), pas seulement dans le code.
