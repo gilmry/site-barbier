@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Gate `e2e` (smoke HTTP du socle) — serveur PHP réel + MariaDB, à travers le contrôleur frontal.
+# Gate `e2e` (smoke HTTP du socle) — serveur PHP réel + MySQL, à travers le contrôleur frontal.
 # Le parcours navigateur (Playwright) arrive avec la Story 0.3. Exit 0 = 🟢.
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 ensure_php_image
-ensure_mariadb
+ensure_db
 reset_database barbier_e2e
 PORT="${E2E_PORT:-18080}"
 NAME="barbier-e2e-$$"

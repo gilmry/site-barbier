@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Gate `integration` — migrations sur MariaDB réelle : base vide → tout up → tout down (base vide
+ * Gate `integration` — migrations sur MySQL réelle : base vide → tout up → tout down (base vide
  * à nouveau) → tout up. Prouve G2 sur le vrai moteur, pas seulement par convention de nommage.
  */
 use Barbier\Adapter\Persistence\Database;

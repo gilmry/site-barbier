@@ -6,7 +6,7 @@ namespace Barbier\Adapter\Persistence;
 
 use PDO;
 
-/** Fabrique de connexion PDO/MariaDB : exceptions, requêtes préparées natives, UTC. */
+/** Fabrique de connexion PDO/MySQL : exceptions, requêtes préparées natives, UTC. */
 final class Database
 {
     /** @param array{host?:string, port?:int, database?:string, username?:string, password?:string} $db */

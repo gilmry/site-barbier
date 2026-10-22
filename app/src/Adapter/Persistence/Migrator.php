@@ -10,7 +10,7 @@ use RuntimeException;
 /**
  * Applique / révertit les migrations app/migrations/NNNN_nom.{up,down}.sql dans l'ordre.
  * La migration 0001 crée la table de suivi elle-même ; sa réversion la supprime en dernier.
- * MariaDB valide implicitement le DDL : une migration en échec s'arrête net et n'est pas inscrite.
+ * MySQL valide implicitement le DDL : une migration en échec s'arrête net et n'est pas inscrite.
  */
 final class Migrator
 {

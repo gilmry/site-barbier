@@ -10,7 +10,7 @@ plan de vulnérabilités, 33 stories. Plan : `docs/pilotage/gantt.md`.
 
 ## Pile
 
-- **PHP 8.4** sans framework (ADR-004) · **MariaDB 10.11 LTS**, SQL pur CQRS (ADR-005).
+- **PHP 8.4** sans framework (ADR-004) · **MySQL 8** (hébergement OVH Perso), SQL pur CQRS (ADR-005). CI sur MySQL 8.0 et 8.4 jusqu'à confirmation de la version d'OVH (`docs/hebergement.md`).
 - Pages publiques rendues côté serveur (ADR-003) ; îlots Svelte 5 pour la réservation et l'admin (à venir).
 - Rien n'est installé sur le serveur : les dépendances sont embarquées dans le paquet (Story 0.4).
 
@@ -31,7 +31,7 @@ app/src/Domain (pur) → app/src/Application (cas d'usage, ports) → app/src/Ad
 ## Commandes
 
 Prérequis : Docker seulement (aucun PHP local). Images : `site-barbier-php:8.4` (construite depuis
-`php:8.4-cli`), `mariadb:10.11` (conteneur `barbier-mariadb`, port 13307).
+`php:8.4-cli`), `mysql:8.4` (conteneur `barbier-mysql-8.4`, port 13308) et `mysql:8.0` (`barbier-mysql-8.0`, port 13309). Version de dev : `BARBIER_DB_VERSION=8.0 ./go`.
 
 | Usage | Commande |
 |---|---|
@@ -46,7 +46,7 @@ Prérequis : Docker seulement (aucun PHP local). Images : `site-barbier-php:8.4`
 |---|---|---|---|
 | `verify` / `plancher` structurel (lint PHP 8.4, G1 G2 H1 L1) | `bash harness/run-verify.sh` | non | 0.1 |
 | `unit` + `bdd` | `bash harness/run-phpunit.sh` (un test : `--filter RouterTest`) — suite `bdd` ajoutée en 1.1 | non | 0.1 |
-| `integration` (MariaDB réelle : up → down → up) | `bash harness/run-integration.sh` | oui (auto) | 0.1 |
+| `integration` (MySQL réelle, 8.4 puis 8.0 : up → down → up) | `bash harness/run-integration.sh` (`BARBIER_DB_VERSIONS="8.4"` pour une seule) | oui (auto) | 0.1 |
 | `e2e` (smoke HTTP via le contrôleur frontal) | `bash harness/e2e-smoke.sh` | oui (auto) | 0.1 |
 | **tous** | `bash harness/ci.sh` | oui (auto) | 0.1 |
 | preuve de sensibilité (chaque gate bloque une dérive) | `bash harness/prove-sensitivity.sh` | oui (auto) | 0.1 |

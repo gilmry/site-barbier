@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Commande unique de développement : image PHP 8.4, MariaDB 10.11, migrations, serveur local.
+# Commande unique de développement : image PHP 8.4, MySQL 8, migrations, serveur local.
 # Idempotent : relancer ne change rien au dépôt. Port : FOYER_PORT (défaut 8080).
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/harness/lib.sh"
 PORT="${FOYER_PORT:-8080}"
 ensure_php_image
-ensure_mariadb
+ensure_db
 php_run "$BARBIER_PHP_IMAGE" php app/bin/migrate.php up
 if [ "${1:-}" = "--no-serve" ]; then echo "✓ prêt (sans serveur)"; exit 0; fi
 if (exec 3<>"/dev/tcp/127.0.0.1/$PORT") 2>/dev/null; then
