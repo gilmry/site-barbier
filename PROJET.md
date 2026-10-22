@@ -172,3 +172,4 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 - 2026-10-22 — /goal « terminer le site » : stories 0.2 à 5.2 fabriquées (sauf 5.1), CI complète verte, gate review de fin de release rédigée
 - 2026-10-22 — release 1 promue sur main par le PO (merge `2bd9d58`) ; reste la Story 5.1, actions du PO
 - 2026-10-22 — paquet de release `site-barbier-release-1-4fedf7c.zip` construit et validé ; le PO déploie lui-même (Story 5.1 transmise)
+- 2026-10-22 — compte rendu CSI de la release 1 (`docs/csi/compte-rendu-release-1.md`) : ≈ 5 h réelles pour ≈ 30 j estimés ; recalage des fourchettes proposé, à valider
