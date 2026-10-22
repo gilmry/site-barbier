@@ -140,3 +140,6 @@ footer .legal { flex-basis: 100%; gap: var(--space-3); }
   .top-actions { gap: var(--space-2); }
 }
 @media (prefers-reduced-motion: reduce) { .pole { animation: none; } html { scroll-behavior: auto; } }
+
+.recap, .notice { border-left: 2px solid var(--argent); padding-left: 12px; color: var(--argent-clair); }
+.booking-page .page-title { margin-bottom: 8px; }

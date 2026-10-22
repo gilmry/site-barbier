@@ -15,6 +15,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         admin: resolve(import.meta.dirname, 'src/admin/main.js'),
+        booking: resolve(import.meta.dirname, 'src/booking/main.js'),
       },
       output: {
         entryFileNames: '[name].js',

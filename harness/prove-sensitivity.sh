@@ -61,6 +61,17 @@ open(p,'w').write(s.replace("$st = $this->pdo->prepare('SELECT * FROM editor WHE
 PY
 }
 drift_front() { echo '/* retouche */' >> www/islands/admin.js; }
+drift_guard() { python3 - <<'PY'
+p='app/src/Application/Agenda/StoreAgendaGuard.php'; s=open(p).read()
+open(p,'w').write(s.replace("AgendaAdmin::refuseIf($outside, 'Ces horaires", "// AgendaAdmin::refuseIf($outside, 'Ces horaires", 1))
+PY
+}
+drift_cancel_get() { sed -i 's/return $this->cancel($in, false);/return $this->cancel($in, true);/' app/src/Http/Site/PublicController.php; }
+drift_slots() { python3 - <<'PY'
+p='app/src/Domain/Agenda/SlotCalculator.php'; s=open(p).read()
+open(p,'w').write(s.replace("if ($range->overlaps($b)) {", "if (false && $range->overlaps($b)) {", 1))
+PY
+}
 drift_e2e()  { sed -i "s#'/api/v1/health'#'/api/v1/sante'#" app/src/Kernel.php; }
 
 # --- Moteur ----------------------------------------------------------------------------------------
@@ -101,6 +112,9 @@ probe "plancher : secret commité"   drift_secret run-plancher.sh
 probe "V1 sortie non échappée"     drift_v1     run-verify.sh
 probe "S1 SQL concaténé"           drift_s1     run-verify.sh
 probe "front : îlot retouché"      drift_front  run-front.sh
+probe "3.11 garde-fou d'horaires retiré" drift_guard run-integration.sh
+probe "FR-025 lien qui annule au GET" drift_cancel_get run-integration.sh
+probe "FR-022 chevauchement ignoré" drift_slots run-phpunit.sh
 probe "J1 parcours recopié"        drift_j1     run-verify.sh
 probe "e2e navigateur : attente fausse" drift_journey run-e2e.sh
 probe "visuel : rendu différent du golden" drift_golden run-visual.sh

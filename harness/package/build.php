@@ -40,6 +40,7 @@ foreach (['src', 'templates', 'i18n', 'migrations', 'data'] as $d) {
     $addTree("$root/app/$d", "app/$d", $always);
 }
 $add("$root/app/config.example.php", 'app/config.example.php');
+$add("$root/app/bin/cron.php", 'app/bin/cron.php');
 $add("$root/deploy/app.htaccess", 'app/.htaccess');
 $addTree("$staging/app/vendor", 'app/vendor', static fn (string $rel): bool => !preg_match('#(^|/)(tests?|docs?|\.github)/#i', $rel));
 $addTree("$root/www", 'www', static fn (string $rel): bool => !str_starts_with($rel, 'uploads/') || $rel === 'uploads/.htaccess');

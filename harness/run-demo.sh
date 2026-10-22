@@ -7,6 +7,7 @@ ensure_php_image
 ensure_vendor
 ensure_browser_image
 ensure_db
+ensure_mailpit
 start_web 18083 barbier_demo
 trap stop_web EXIT
 set +e

@@ -123,9 +123,10 @@ foreach (rglob($root . '/app/templates') as $file) {
 }
 
 // S1 — SQL : jamais de valeur concaténée dans une requête (requêtes préparées seulement, ADR-010).
-// Exception documentée : le Migrator exécute le contenu des fichiers de migration versionnés.
+// Exceptions documentées : le Migrator exécute les fichiers de migration versionnés ; l'export de sauvegarde
+// concatène des noms de tables lus dans information_schema et filtrés par /^[a-z_]+$/ (jamais une saisie).
 foreach (rglob($root . '/app/src') as $file) {
-    if (str_ends_with($file, '/Adapter/Persistence/Migrator.php')) {
+    if (str_ends_with($file, '/Adapter/Persistence/Migrator.php') || str_ends_with($file, '/Adapter/Persistence/PdoBackupExporter.php')) {
         continue;
     }
     $code = strip_php_comments((string) file_get_contents($file));

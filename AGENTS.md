@@ -114,6 +114,20 @@ Les gates s'ajoutent à cette table **dans la même PR** que la story qui les cr
 - Polices auto-hébergées (`frontend/scripts/copy-fonts.mjs` → `www/assets/fonts/`), aucun tiers (ADR-007).
 - Garde-fous agenda sur le contenu : port `Application/Vitrine/AgendaGuard` (implémenté en 3.11).
 
+## Agenda, réservation et notification (Epic 3, 4, Story 5.2)
+
+- Créneaux : `Domain/Agenda/SlotCalculator` (pur) — débuts au quart d'heure, cellules de 5 min, délai 2 h,
+  horizon 60 j, heure de Bruxelles (changements d'heure testés). « Sans préférence » : `NoPreferenceAssigner`.
+- **Une seule sérialisation (ADR-006)** : toute écriture qui touche l'agenda passe par `AgendaStore::transactional()`
+  + `lockBarbers()` / `lockAllBarbers()` (ordre des id) ; filet `booking_slot` UNIQUE(barber_id, slot_start) ;
+  connexions en **READ COMMITTED** (sinon l'instantané d'avant le verrou masque les réservations concurrentes).
+- Garde-fous sur le contenu : `Application/Agenda/StoreAgendaGuard` (port `AgendaGuard` de la vitrine).
+- E-mails : `NotificationService` (corps jamais stocké, recomposé ; relance = nouveau jeton d'annulation) ;
+  SMTP via `config.php` (`smtp`) ; tests : Mailpit (`ensure_mailpit`, API 127.0.0.1:18025).
+- Purge 6 mois : `MaintenanceService` (tâche planifiée `php app/bin/cron.php`, sinon premier passage du jour).
+- Exploitation : `/api/v1/admin/health|backup|migrations` ; sauvegarde et migrations exigent un TOTP récent.
+- Tests de concurrence : vrais processus (`tests/Integration/concurrent/worker.php`), départ synchronisé.
+
 ## Règles de l'agent
 
 - **Un gate rouge = stop.** On corrige la cause ; on ne force pas, on ne « défère » pas un gate.

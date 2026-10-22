@@ -58,3 +58,10 @@ button.danger { border-color: var(--ko); color: var(--ko); }
 .services legend { color: var(--argent); }
 .upload input { margin-top: 8px; }
 @media (max-width: 760px) { .split, .grid2 { grid-template-columns: minmax(0, 1fr); } }
+
+.planning { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 16px; }
+.planning .col h2 { font-size: 17px; border-bottom: 1px solid var(--fer); padding-bottom: 6px; }
+.planning .slot { background: var(--charbon); border: 1px solid var(--graphite); padding: 10px 12px; margin: 8px 0; display: grid; gap: 4px; }
+.planning .slot.cancelled { opacity: .55; text-decoration: line-through; }
+textarea { font: inherit; }
+.big { font-size: 44px; font-weight: 700; margin: 4px 0; }

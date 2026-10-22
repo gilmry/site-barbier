@@ -12,11 +12,25 @@ declare(strict_types=1);
  *                La perdre oblige à réactiver le double facteur (FR-044).
  *  install_code  code à usage unique (12 caractères au moins) demandé par /install.
  *  env           prod (défaut : cookies Secure, HTTPS exigé) | test | dev.
+ *  base_url      adresse publique (https://www.lecorbeau.be) pour les liens des e-mails ; sinon l'hôte de la requête.
+ *  smtp          compte e-mail du domaine chez l'hébergeur (OVH : ssl0.ovh.net, port 587, tls) — ADR-009.
+ *  retention_months  durée de conservation des réservations (défaut 6, affichée dans la politique).
  */
 return [
     'env' => getenv('BARBIER_ENV') ?: 'prod',
     'app_key' => getenv('APP_KEY') ?: '',
     'install_code' => getenv('INSTALL_CODE') ?: '',
+    'base_url' => getenv('BASE_URL') ?: '',
+    'retention_months' => 6,
+    'smtp' => [
+        'host' => getenv('SMTP_HOST') ?: '',
+        'port' => (int) (getenv('SMTP_PORT') ?: 587),
+        'secure' => getenv('SMTP_SECURE') ?: 'tls',
+        'username' => getenv('SMTP_USER') ?: '',
+        'password' => getenv('SMTP_PASSWORD') ?: '',
+        'from' => getenv('SMTP_FROM') ?: '',
+        'from_name' => 'Le Corbeau',
+    ],
     'db' => [
         'host' => getenv('DB_HOST') ?: 'localhost',
         'port' => (int) (getenv('DB_PORT') ?: 3306),

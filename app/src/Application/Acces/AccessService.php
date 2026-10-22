@@ -12,6 +12,7 @@ use Barbier\Domain\Acces\PasswordPolicy;
 use Barbier\Domain\Acces\RecoveryCodes;
 use Barbier\Domain\Acces\RecoveryCodeStore;
 use Barbier\Domain\Acces\Totp;
+use Barbier\Domain\Notification\SecurityNotifier;
 use Barbier\Domain\Shared\Clock;
 use Barbier\Domain\Shared\DomainException;
 use Barbier\Domain\Shared\Random;
@@ -34,6 +35,7 @@ final class AccessService
         private readonly PasswordPolicy $policy,
         private readonly Clock $clock,
         private readonly Random $random,
+        private readonly ?SecurityNotifier $notifier = null,
     ) {
     }
 
@@ -196,6 +198,9 @@ final class AccessService
     {
         $failed = $editor->withFailure($now);
         $this->editors->save($failed);
+        if ($failed->isLocked($now) && !$editor->isLocked($now) && $failed->failedAttempts === \Barbier\Domain\Acces\LoginThrottle::FREE_ATTEMPTS) {
+            $this->notifier?->notify('account_locked', 'compte ' . $editor->email . ' verrouillé après ' . $failed->failedAttempts . ' échecs');
+        }
         throw new AccessDenied($failed->isLocked($now) ? 'locked' : 'invalid_credentials', $failed->isLocked($now) ? $failed->lockedUntil->getTimestamp() - $now->getTimestamp() : 0);
     }
 }

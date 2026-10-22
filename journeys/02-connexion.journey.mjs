@@ -47,6 +47,7 @@ export default {
       },
       check: async (page) => { await page.getByRole('heading', { name: 'Tableau de bord' }).waitFor(); },
       snapshot: 'connexion-tableau-de-bord',
+      mask: ['.cards'],
     },
     {
       id: 'deconnexion',

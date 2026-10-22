@@ -7,6 +7,7 @@ ensure_php_image
 ensure_vendor
 ensure_browser_image
 ensure_db
+ensure_mailpit
 start_web 18082 barbier_visual
 trap stop_web EXIT
 run_journeys visual 18082 -e VISUAL_MODE="${VISUAL_MODE:-compare}"

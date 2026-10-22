@@ -1,0 +1,36 @@
+/* Îlot de réservation : reprend les jetons du site (site.css est chargé sur la page). */
+.booking { margin-top: 24px; }
+.booking h2 { font-family: var(--font-caps, serif); font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: var(--argent-clair, #d4d5d8); margin: 24px 0 16px; }
+.booking h2 small { font-family: var(--font-serif, serif); text-transform: none; letter-spacing: 0; font-size: 18px; color: var(--argent, #a9abb0); margin-left: 8px; }
+.booking h2:focus { outline: none; }
+.steps { display: flex; flex-wrap: wrap; gap: 8px 16px; list-style: none; padding: 0; margin: 0; color: #8e9095; font-size: 12px; } /* contraste ≥ 4,5:1 (NFR-04) */
+.steps li.current { color: var(--os, #f1f0ec); }
+.steps li.past button { background: none; border: 0; padding: 0; color: var(--argent, #a9abb0); font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; text-decoration: underline; }
+.choices { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.choice { width: 100%; text-align: left; display: grid; grid-template-columns: 1fr auto; gap: 2px 16px; background: var(--charbon, #141416); color: var(--os, #f1f0ec); border: 1px solid var(--graphite, #232326); padding: 14px 16px; cursor: pointer; font: inherit; }
+.choice:hover, .choice:focus-visible { border-color: var(--argent, #a9abb0); }
+.choice .name { font-size: 21px; font-weight: 600; }
+.choice .meta { font-family: var(--font-caps, serif); font-size: 13px; letter-spacing: .1em; color: var(--argent-clair, #d4d5d8); align-self: center; white-space: nowrap; }
+.choice .desc { grid-column: 1 / -1; color: var(--argent, #a9abb0); font-style: italic; font-size: 17px; }
+.times { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; }
+.time { width: 100%; padding: 12px 0; background: var(--charbon, #141416); color: var(--os, #f1f0ec); border: 1px solid var(--fer, #4a4b50); font-family: var(--font-caps, serif); letter-spacing: .1em; cursor: pointer; font-size: 15px; }
+.time:hover, .time:focus-visible { border-color: var(--os, #f1f0ec); }
+.calendar { max-width: 420px; }
+.cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; text-transform: capitalize; }
+.cal-head button { background: none; border: 1px solid var(--fer, #4a4b50); color: var(--os, #f1f0ec); width: 40px; height: 40px; cursor: pointer; font-size: 20px; }
+.cal-head button:disabled { opacity: .3; cursor: default; }
+.grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.wd { text-align: center; font-family: var(--font-caps, serif); font-size: 11px; color: var(--argent, #a9abb0); padding-bottom: 4px; text-transform: uppercase; }
+.day { aspect-ratio: 1; background: var(--charbon, #141416); color: var(--os, #f1f0ec); border: 1px solid var(--graphite, #232326); cursor: pointer; font: inherit; font-size: 17px; }
+.day:disabled { background: transparent; color: var(--fer, #4a4b50); border-color: transparent; cursor: default; text-decoration: line-through; }
+.day:not(:disabled):hover, .day.selected { border-color: var(--os, #f1f0ec); }
+.booking form label { display: block; margin-top: 14px; color: var(--argent, #a9abb0); font-family: var(--font-caps, serif); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
+.booking form input { width: 100%; font: inherit; font-size: 19px; color: var(--os, #f1f0ec); background: var(--noir, #0a0a0b); border: 1px solid var(--fer, #4a4b50); padding: 12px 14px; margin-top: 6px; }
+.booking form input:focus { outline: none; border-color: var(--argent-clair, #d4d5d8); }
+.booking form .btn { margin-top: 20px; }
+.booking .err { color: #ff8a80; margin: 4px 0 0; font-size: 16px; }
+.booking .message { border: 1px solid var(--argent, #a9abb0); padding: 10px 14px; margin: 16px 0; }
+.booking .recap { border-left: 2px solid var(--argent, #a9abb0); padding-left: 12px; color: var(--argent-clair, #d4d5d8); }
+.booking .back { margin-top: 24px; background: none; border: 0; color: var(--argent, #a9abb0); cursor: pointer; font: inherit; padding: 0; text-decoration: underline; }
+.booking .done h2 { font-family: var(--font-display, serif); text-transform: none; letter-spacing: 0; font-size: 56px; color: var(--os, #f1f0ec); }
+.trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }

@@ -11,6 +11,8 @@ for v in ${BARBIER_DB_VERSIONS:-8.4 8.0}; do
     ensure_php_image
     ensure_vendor
     ensure_db
+    ensure_mailpit
+ensure_mailpit
     reset_database barbier_test
     DB_NAME=barbier_test php_run "$BARBIER_PHP_IMAGE" php harness/integration/migrations.php
     reset_database barbier_test

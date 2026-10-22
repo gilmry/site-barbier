@@ -192,6 +192,219 @@ export interface Created {
   id: Uuid;
 }
 
+export interface PublicService {
+  id: Uuid;
+  category: string;
+  name: string;
+  description: string;
+  priceCents: number;
+  price: string;
+  durationMin: number;
+}
+
+export interface PublicServiceList {
+  services: PublicService[];
+}
+
+export interface PublicBarber {
+  id: Uuid;
+  firstName: string;
+  specialty: string;
+  photo: string | null;
+}
+
+export interface PublicBarberList {
+  barbers: PublicBarber[];
+}
+
+export interface DayList {
+  days: string[];
+}
+
+export interface Slot {
+  start: string;
+  time: string;
+}
+
+export interface SlotList {
+  slots: Slot[];
+}
+
+export interface BookingInput {
+  serviceId: Uuid;
+  barberId: string;
+  start: string;
+  name: string;
+  phone: string;
+  email: string;
+  lang: "fr" | "nl" | "en";
+  website?: string;
+}
+
+export interface BookingSummary {
+  id: Uuid;
+  service: string;
+  barber: string;
+  start: string;
+  date: string;
+  time: string;
+  durationMin: number;
+  price: string;
+  state?: "confirmed" | "cancelled";
+}
+
+export interface CancelInput {
+  token: string;
+}
+
+export interface AvailabilityRange {
+  weekday: number;
+  starts: string;
+  ends: string;
+}
+
+export interface Availability {
+  ranges: AvailabilityRange[];
+}
+
+export interface Absence {
+  id: Uuid;
+  barberId: Uuid | null;
+  barberName: string | null;
+  startsAt: string;
+  endsAt: string;
+  startsLocal: string;
+  endsLocal: string;
+}
+
+export interface AbsenceList {
+  absences: Absence[];
+}
+
+export interface AbsenceInput {
+  barberId: Uuid | null;
+  startsAt: string;
+  endsAt: string;
+}
+
+export interface AdminBooking {
+  id: Uuid;
+  barberId: Uuid;
+  barberName: string;
+  serviceName: string;
+  time: string;
+  endTime: string;
+  durationMin: number;
+  priceCents: number;
+  state: "confirmed" | "cancelled";
+  lang: string;
+  clientName: string;
+  clientPhone: string;
+  clientEmail: string;
+  cancelledBy: string | null;
+}
+
+export interface AdminBookingList {
+  bookings: AdminBooking[];
+}
+
+export interface SalonCancelInput {
+  message?: string;
+}
+
+export interface MailEntry {
+  id: Uuid;
+  bookingId: Uuid | null;
+  kind: string;
+  recipient: string;
+  state: "sent" | "failed";
+  error: string | null;
+  attempts: number;
+  createdAt: string;
+  sentAt: string | null;
+}
+
+export interface MailLogView {
+  entries: MailEntry[];
+  failed: number;
+}
+
+export interface RetryInput {
+  ids: Uuid[];
+}
+
+export interface RetryResult {
+  results: ({
+  id: Uuid;
+  state: "sent" | "failed";
+})[];
+}
+
+export interface EmailInput {
+  email: string;
+}
+
+export interface EraseInput {
+  email: string;
+  confirmWithoutEmail: boolean;
+}
+
+export interface ClientBooking {
+  id: Uuid;
+  barberName: string;
+  startsAt: string;
+  state: string;
+  clientName: string;
+  clientPhone: string;
+  clientEmail: string;
+}
+
+export interface ClientBookingList {
+  bookings: ClientBooking[];
+}
+
+export interface ClientExport {
+  email: string;
+  exportedAt: string;
+  bookings: {
+  service: string;
+  barber: string;
+  startsAt: string;
+  state: string;
+  name: string;
+  phone: string;
+  email: string;
+  lang: string;
+  createdAt: string;
+}[];
+}
+
+export interface EraseResult {
+  erased: number;
+  notified: number;
+  notifyFailed: number;
+}
+
+export interface AdminHealth {
+  version: string;
+  php: string;
+  phpSecurityEnd: string | null;
+  phpSupport: "ok" | "ending" | "ended" | "unknown";
+  pendingMigrations: string[];
+  failedMails: number;
+  lastPurge: string | null;
+  lastBackup: string | null;
+  backupDue: boolean;
+  uploadsBytes: number;
+  logWritable: boolean;
+  smtpConfigured: boolean;
+}
+
+export interface Migrations {
+  applied: string[];
+  pending: string[];
+}
+
 export function createClient(transport: Transport) {
   return {
     /** État du service et de la base */
@@ -281,6 +494,72 @@ export function createClient(transport: Transport) {
     /** Supprimer une image inutilisée */
     deleteMedia: (id: string): Promise<void> =>
       transport(`/api/v1/admin/media/${encodeURIComponent(id)}`, { method: 'DELETE' }) as Promise<void>,
+    /** Prestations réservables */
+    listBookableServices: (query: { "lang": "fr" | "nl" | "en" }): Promise<PublicServiceList> =>
+      transport(`/api/v1/services`, { method: 'GET', query }) as Promise<PublicServiceList>,
+    /** Barbiers qui réalisent la prestation */
+    listBookableBarbers: (query: { "service": string; "lang": "fr" | "nl" | "en" }): Promise<PublicBarberList> =>
+      transport(`/api/v1/barbers`, { method: 'GET', query }) as Promise<PublicBarberList>,
+    /** Jours ayant au moins un créneau libre */
+    listBookableDays: (query: { "service": string; "barber": string; "from": string; "to": string }): Promise<DayList> =>
+      transport(`/api/v1/availability/days`, { method: 'GET', query }) as Promise<DayList>,
+    /** Créneaux libres d'un jour */
+    listFreeSlots: (query: { "service": string; "barber": string; "date": string }): Promise<SlotList> =>
+      transport(`/api/v1/availability/slots`, { method: 'GET', query }) as Promise<SlotList>,
+    /** Réserver un créneau */
+    bookSlot: (input: BookingInput): Promise<BookingSummary> =>
+      transport(`/api/v1/bookings`, { method: 'POST', body: JSON.stringify(input) }) as Promise<BookingSummary>,
+    /** Annuler par le lien reçu par e-mail */
+    cancelBooking: (input: CancelInput): Promise<BookingSummary> =>
+      transport(`/api/v1/bookings/cancel`, { method: 'POST', body: JSON.stringify(input) }) as Promise<BookingSummary>,
+    /** Disponibilités d'un barbier */
+    getAvailability: (id: string): Promise<Availability> =>
+      transport(`/api/v1/admin/barbers/${encodeURIComponent(id)}/availability`, { method: 'GET' }) as Promise<Availability>,
+    /** Modifier les disponibilités */
+    setAvailability: (id: string, input: Availability): Promise<Availability> =>
+      transport(`/api/v1/admin/barbers/${encodeURIComponent(id)}/availability`, { method: 'PUT', body: JSON.stringify(input) }) as Promise<Availability>,
+    /** Absences et fermetures à venir */
+    listAbsences: (): Promise<AbsenceList> =>
+      transport(`/api/v1/admin/absences`, { method: 'GET' }) as Promise<AbsenceList>,
+    /** Absence d'un barbier ou fermeture du salon (barberId null) */
+    addAbsence: (input: AbsenceInput): Promise<Created> =>
+      transport(`/api/v1/admin/absences`, { method: 'POST', body: JSON.stringify(input) }) as Promise<Created>,
+    /** Retirer une absence */
+    deleteAbsence: (id: string): Promise<void> =>
+      transport(`/api/v1/admin/absences/${encodeURIComponent(id)}`, { method: 'DELETE' }) as Promise<void>,
+    /** Planning d'un jour */
+    listBookings: (query: { "date": string; "barber"?: string; "state"?: "confirmed" | "cancelled" }): Promise<AdminBookingList> =>
+      transport(`/api/v1/admin/bookings`, { method: 'GET', query }) as Promise<AdminBookingList>,
+    /** Annuler une réservation (le client est prévenu) */
+    cancelBookingBySalon: (id: string, input: SalonCancelInput): Promise<void> =>
+      transport(`/api/v1/admin/bookings/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: JSON.stringify(input) }) as Promise<void>,
+    /** Journal des e-mails */
+    getMailLog: (): Promise<MailLogView> =>
+      transport(`/api/v1/admin/mail-log`, { method: 'GET' }) as Promise<MailLogView>,
+    /** Relancer des envois */
+    retryMails: (input: RetryInput): Promise<RetryResult> =>
+      transport(`/api/v1/admin/mail-log/retry`, { method: 'POST', body: JSON.stringify(input) }) as Promise<RetryResult>,
+    /** Réservations d'une adresse e-mail (FR-012) */
+    privacySearch: (input: EmailInput): Promise<ClientBookingList> =>
+      transport(`/api/v1/admin/privacy/search`, { method: 'POST', body: JSON.stringify(input) }) as Promise<ClientBookingList>,
+    /** Exporter les données d'une adresse */
+    privacyExport: (input: EmailInput): Promise<ClientExport> =>
+      transport(`/api/v1/admin/privacy/export`, { method: 'POST', body: JSON.stringify(input) }) as Promise<ClientExport>,
+    /** Effacer les données d'une adresse */
+    privacyErase: (input: EraseInput): Promise<EraseResult> =>
+      transport(`/api/v1/admin/privacy/erase`, { method: 'POST', body: JSON.stringify(input) }) as Promise<EraseResult>,
+    /** Santé du site et rappels (tableau de bord) */
+    getAdminHealth: (): Promise<AdminHealth> =>
+      transport(`/api/v1/admin/health`, { method: 'GET' }) as Promise<AdminHealth>,
+    /** Sauvegarde SQL complète (TOTP récent exigé) */
+    downloadBackup: (): Promise<unknown> =>
+      transport(`/api/v1/admin/backup`, { method: 'GET' }) as Promise<unknown>,
+    /** Migrations appliquées et en attente */
+    getMigrations: (): Promise<Migrations> =>
+      transport(`/api/v1/admin/migrations`, { method: 'GET' }) as Promise<Migrations>,
+    /** Appliquer les migrations en attente (TOTP récent exigé) */
+    applyMigrations: (): Promise<Migrations> =>
+      transport(`/api/v1/admin/migrations`, { method: 'POST' }) as Promise<Migrations>,
   };
 }
 

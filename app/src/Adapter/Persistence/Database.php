@@ -6,7 +6,7 @@ namespace Barbier\Adapter\Persistence;
 
 use PDO;
 
-/** Fabrique de connexion PDO/MySQL : exceptions, requêtes préparées natives, UTC. */
+/** Fabrique de connexion PDO/MySQL : exceptions, requêtes préparées natives, UTC, READ COMMITTED. */
 final class Database
 {
     /** @param array{host?:string, port?:int, database?:string, username?:string, password?:string} $db */
@@ -24,6 +24,9 @@ final class Database
             PDO::ATTR_EMULATE_PREPARES => false,
         ]);
         $pdo->exec("SET time_zone = '+00:00'");
+        // READ COMMITTED : après le verrou d'agenda (SELECT … FOR UPDATE), chaque lecture voit les réservations
+        // validées entre-temps ; en REPEATABLE READ, l'instantané pris avant le verrou les masquerait (ADR-006).
+        $pdo->exec('SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED');
 
         return $pdo;
     }

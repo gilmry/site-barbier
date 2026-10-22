@@ -22,6 +22,12 @@ final class Errors
         'has_future_bookings' => 409,
         'too_late' => 422,
         'rate_limited' => 429,
+        'already_cancelled' => 422,
+        'in_past' => 422,
+        'outside_hours' => 422,
+        'overlap' => 422,
+        'notify_failed' => 409,
+        'rejected' => 422,
     ];
 
     public static function fromDomain(DomainException $e): Response

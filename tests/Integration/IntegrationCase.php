@@ -49,7 +49,8 @@ abstract class IntegrationCase extends TestCase
     protected static function config(): array
     {
         return ['env' => 'test', 'db' => self::dbConfig(), 'app_key' => (string) getenv('APP_KEY'), 'install_code' => (string) getenv('INSTALL_CODE'),
-            'uploads_dir' => dirname(__DIR__, 2) . '/app/var/test-uploads'];
+            'uploads_dir' => dirname(__DIR__, 2) . '/app/var/test-uploads', 'base_url' => 'https://www.lecorbeau.test',
+            'smtp' => ['host' => (string) getenv('SMTP_HOST'), 'port' => (int) getenv('SMTP_PORT'), 'secure' => 'none', 'from' => 'reservations@lecorbeau.be', 'from_name' => 'Le Corbeau']];
     }
 
     protected function kernel(): Kernel
@@ -135,6 +136,26 @@ abstract class IntegrationCase extends TestCase
                 $this->jar[$m[1]] = $m[2];
             }
         }
+    }
+
+    /** Vide la boîte de capture Mailpit. */
+    protected static function clearMails(): void
+    {
+        $ctx = stream_context_create(['http' => ['method' => 'DELETE', 'ignore_errors' => true]]);
+        @file_get_contents((string) getenv('MAILPIT_API') . '/api/v1/messages', false, $ctx);
+    }
+
+    /** @return list<array{to:string, subject:string, text:string, attachments:int}> e-mails capturés (du plus ancien au plus récent) */
+    protected static function mails(): array
+    {
+        $list = json_decode((string) @file_get_contents((string) getenv('MAILPIT_API') . '/api/v1/messages'), true)['messages'] ?? [];
+        $out = [];
+        foreach (array_reverse($list) as $m) {
+            $full = json_decode((string) @file_get_contents((string) getenv('MAILPIT_API') . '/api/v1/message/' . $m['ID']), true);
+            $out[] = ['to' => (string) ($m['To'][0]['Address'] ?? ''), 'subject' => (string) $m['Subject'], 'text' => (string) ($full['Text'] ?? ''), 'attachments' => count($full['Attachments'] ?? [])];
+        }
+
+        return $out;
     }
 
     /** @return array<string,mixed> */

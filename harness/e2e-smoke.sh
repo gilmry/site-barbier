@@ -6,6 +6,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 ensure_php_image
 ensure_vendor
 ensure_db
+ensure_mailpit
 reset_database barbier_e2e
 PORT="${E2E_PORT:-18080}"
 NAME="barbier-e2e-$$"

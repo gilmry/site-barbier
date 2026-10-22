@@ -62,23 +62,17 @@ final class PdoVitrineRepository implements VitrineRepository
 
     public function saveSection(string $key, int $expectedVersion, array $fields, ?string $mediaId): bool
     {
-        $this->pdo->beginTransaction();
-        try {
+        $saved = false;
+        $this->tx(function () use ($key, $expectedVersion, $fields, $mediaId, &$saved): void {
             $st = $this->pdo->prepare('UPDATE section SET version = version + 1, media_id = ? WHERE section_key = ? AND version = ?');
             $st->execute([$mediaId, $key, $expectedVersion]);
-            if ($st->rowCount() !== 1) {
-                $this->pdo->rollBack();
-
-                return false;
+            if ($st->rowCount() === 1) {
+                $this->writeTranslations('section', $key, $fields);
+                $saved = true;
             }
-            $this->writeTranslations('section', $key, $fields);
-            $this->pdo->commit();
+        });
 
-            return true;
-        } catch (\Throwable $e) {
-            $this->pdo->rollBack();
-            throw $e;
-        }
+        return $saved;
     }
 
     public function salon(): array
@@ -92,16 +86,11 @@ final class PdoVitrineRepository implements VitrineRepository
 
     public function saveSalon(string $name, string $phone, string $email, array $address, array $access): void
     {
-        $this->pdo->beginTransaction();
-        try {
+        $this->tx(function () use ($name, $phone, $email, $address, $access): void {
             $this->pdo->prepare('INSERT INTO salon (id, name, phone, email) VALUES (1, ?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), phone = VALUES(phone), email = VALUES(email)')
                 ->execute([$name, $phone, $email]);
             $this->writeTranslations('salon', '1', ['address' => $address, 'access' => $access]);
-            $this->pdo->commit();
-        } catch (\Throwable $e) {
-            $this->pdo->rollBack();
-            throw $e;
-        }
+        });
     }
 
     public function catalog(bool $publishedOnly): array
@@ -154,8 +143,7 @@ final class PdoVitrineRepository implements VitrineRepository
 
     public function saveOpeningHours(array $days): void
     {
-        $this->pdo->beginTransaction();
-        try {
+        $this->tx(function () use ($days): void {
             $this->pdo->exec('DELETE FROM opening_hours');
             $ins = $this->pdo->prepare('INSERT INTO opening_hours (weekday, opens, closes) VALUES (?, ?, ?)');
             foreach ($days as $weekday => $d) {
@@ -163,11 +151,7 @@ final class PdoVitrineRepository implements VitrineRepository
                     $ins->execute([$weekday, $d['opens'] === '24:00' ? '23:59:59' : $d['opens'] . ':00', $d['closes'] === '24:00' ? '23:59:59' : $d['closes'] . ':00']);
                 }
             }
-            $this->pdo->commit();
-        } catch (\Throwable $e) {
-            $this->pdo->rollBack();
-            throw $e;
-        }
+        });
     }
 
     public function media(): array

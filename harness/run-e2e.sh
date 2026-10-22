@@ -7,6 +7,7 @@ ensure_php_image
 ensure_vendor
 ensure_browser_image
 ensure_db
+ensure_mailpit
 start_web 18081 barbier_e2e
 trap stop_web EXIT
 run_journeys e2e 18081

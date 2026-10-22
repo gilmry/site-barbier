@@ -146,6 +146,11 @@ final class StrictJson
             return [['field' => 'status', 'message' => "statut $status non déclaré au contrat"]];
         }
         $media = str_starts_with($contentType, 'application/problem+json') ? 'application/problem+json' : 'application/json';
+        foreach (array_keys($resp['content'] ?? []) as $declared) {
+            if (!str_contains((string) $declared, 'json') && str_starts_with($contentType, (string) $declared)) {
+                return []; // média non JSON déclaré (ex. application/sql) : le type suffit
+            }
+        }
         if (!isset($resp['content'])) {
             return trim($body) === '' ? [] : [['field' => 'body', 'message' => 'aucun corps déclaré']];
         }

@@ -64,6 +64,19 @@ ensure_db() {
   return 1
 }
 
+# Serveur SMTP de capture (Mailpit) : les e-mails des tests y arrivent ; API sur 127.0.0.1:18025.
+BARBIER_MAILPIT_IMAGE="axllent/mailpit:v1.20.4"
+ensure_mailpit() {
+  ensure_docker
+  if ! docker ps --filter "name=^barbier-mailpit$" --format '{{.Names}}' | grep -qx barbier-mailpit; then
+    docker rm -f barbier-mailpit >/dev/null 2>&1 || true
+    docker run -d --name barbier-mailpit -p 127.0.0.1:11025:1025 -p 127.0.0.1:18025:8025 "$BARBIER_MAILPIT_IMAGE" >/dev/null
+  fi
+  local i
+  for i in $(seq 1 40); do curl -s -o /dev/null http://127.0.0.1:18025/api/v1/messages && return 0; sleep 0.25; done
+  echo "[harnais] Mailpit ne répond pas." >&2; return 1
+}
+
 # (Re)crée une base vide sur le serveur de dev.
 reset_database() {
   docker exec "$BARBIER_DB_CONTAINER" mysql --protocol=TCP -h127.0.0.1 -uroot -p"$BARBIER_DB_ROOT_PASSWORD" \
@@ -75,7 +88,8 @@ php_run() {
   docker run --rm --network host -v "$BARBIER_ROOT":/app -w /app -u "$(id -u):$(id -g)" \
     -e DB_HOST=127.0.0.1 -e DB_PORT="$BARBIER_DB_PORT" -e DB_USER=root -e DB_PASSWORD="$BARBIER_DB_ROOT_PASSWORD" \
     -e DB_NAME="${DB_NAME:-barbier}" -e TZ=UTC -e BARBIER_ENV=test -e APP_KEY="$BARBIER_TEST_APP_KEY" \
-    -e INSTALL_CODE="$BARBIER_TEST_INSTALL_CODE" "$@"
+    -e INSTALL_CODE="$BARBIER_TEST_INSTALL_CODE" -e SMTP_HOST=127.0.0.1 -e SMTP_PORT=11025 -e SMTP_SECURE=none \
+    -e SMTP_FROM=reservations@lecorbeau.be -e MAILPIT_API=http://127.0.0.1:18025 "$@"
 }
 
 BARBIER_BROWSER_IMAGE="${BARBIER_BROWSER_IMAGE:-site-barbier-browser:pw1.49}"
@@ -96,12 +110,14 @@ start_web() {
   local port="$1" db="$2"
   BARBIER_WEB_CONTAINER="barbier-web-$port"
   reset_database "$db"
+  curl -s -X DELETE http://127.0.0.1:18025/api/v1/messages >/dev/null 2>&1 || true   # boîte de capture vide
   DB_NAME="$db" php_run "$BARBIER_PHP_IMAGE" php app/bin/migrate.php up >/dev/null
   [ -f "$BARBIER_ROOT/app/bin/seed.php" ] && DB_NAME="$db" php_run "$BARBIER_PHP_IMAGE" php app/bin/seed.php >/dev/null
   docker rm -f "$BARBIER_WEB_CONTAINER" >/dev/null 2>&1 || true
   docker run -d --rm --name "$BARBIER_WEB_CONTAINER" --network host -v "$BARBIER_ROOT":/app -w /app -u "$(id -u):$(id -g)" \
     -e DB_HOST=127.0.0.1 -e DB_PORT="$BARBIER_DB_PORT" -e DB_USER=root -e DB_PASSWORD="$BARBIER_DB_ROOT_PASSWORD" \
     -e DB_NAME="$db" -e BARBIER_ENV=test -e APP_KEY="$BARBIER_TEST_APP_KEY" -e INSTALL_CODE="$BARBIER_TEST_INSTALL_CODE" \
+    -e SMTP_HOST=127.0.0.1 -e SMTP_PORT=11025 -e SMTP_SECURE=none -e SMTP_FROM=reservations@lecorbeau.be \
     ${BARBIER_WEB_ENV:-} "$BARBIER_PHP_IMAGE" \
     php -S "127.0.0.1:$port" -t www harness/dev-router.php >/dev/null
   local i
@@ -114,6 +130,6 @@ stop_web() { docker rm -f "${BARBIER_WEB_CONTAINER:-none}" >/dev/null 2>&1 || tr
 run_journeys() {
   local mode="$1" port="$2"; shift 2
   docker run --rm --network host -v "$BARBIER_ROOT":/app -w /app -u "$(id -u):$(id -g)" -e HOME=/tmp \
-    -e MODE="$mode" -e BASE_URL="http://127.0.0.1:$port" -e JOURNEY="${JOURNEY:-}" "$@" \
+    -e MODE="$mode" -e BASE_URL="http://127.0.0.1:$port" -e JOURNEY="${JOURNEY:-}" -e MAILPIT_API=http://127.0.0.1:18025 "$@" \
     "$BARBIER_BROWSER_IMAGE" node harness/browser/run.mjs
 }
