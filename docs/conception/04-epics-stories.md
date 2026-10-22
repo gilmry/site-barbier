@@ -30,13 +30,13 @@ registre `PROJET.md` à jour (tours, tokens, wall-clock) · un commit par étape
 ### Story 0.0 — Choisir et sonder l'offre d'hébergement
 - **En tant que** PO **je veux** une grille de critères vérifiés sur l'offre envisagée **afin de** ne pas découvrir une impossibilité au moment de la mise en ligne.
 - **Gherkin** : `Étant donné une offre mutualisée candidate, Quand l'agent déroule la grille, Alors chaque critère est noté conforme / non conforme / à contourner, et un critère éliminatoire non conforme fait écarter l'offre.`
-- **4×N** : `@happy` grille : PHP 8.2+ et extensions (`pdo_mysql`, `gd`, `mbstring`, `intl`, `openssl`, `sodium`), MariaDB 10.6+ (un ou deux comptes — ADR-010), SFTP/FTPS, `.htaccess`, `.user.ini`, tâche planifiée, SMTP authentifié + SPF/DKIM, sous-domaine de test, **sauvegarde quotidienne et restauration** (éliminatoire), juridiction UE (éliminatoire), HTTPS gratuit, prix ≤ 5 €/mois · `@negative` critère éliminatoire absent → offre écartée, motif tracé · `@edge` pas de tâche planifiée → contournement « premier passage du jour » (FR-027) ; un seul compte MariaDB → résidu ADR-010 · `@security` aucun identifiant d'hébergement dans le dépôt ; la grille remplie est versionnée (`docs/hebergement.md`). Le **choix final** de l'offre est une décision du PO.
+- **4×N** : `@happy` grille : PHP 8.4+ et extensions (`pdo_mysql`, `gd`, `mbstring`, `intl`, `openssl`, `sodium`), MariaDB 10.11+ (un ou deux comptes — ADR-010), SFTP/FTPS, `.htaccess`, `.user.ini`, tâche planifiée, SMTP authentifié + SPF/DKIM, sous-domaine de test, **sauvegarde quotidienne et restauration** (éliminatoire), juridiction UE (éliminatoire), HTTPS gratuit, prix ≤ 5 €/mois · `@negative` critère éliminatoire absent → offre écartée, motif tracé · `@edge` pas de tâche planifiée → contournement « premier passage du jour » (FR-027) ; un seul compte MariaDB → résidu ADR-010 · `@security` aucun identifiant d'hébergement dans le dépôt ; la grille remplie est versionnée (`docs/hebergement.md`). Le **choix final** de l'offre est une décision du PO.
 - **Couches** : IaC · **Taille** : S · **Tours** : 6
 
 ### Story 0.1 — Socle reproductible depuis le kit
 - **En tant que** développeur **je veux** cloner le dépôt et lancer une commande **afin d'** avoir l'app et tous les gates verts « à vide ».
-- **Gherkin** : `Étant donné un clone neuf et Docker, Quand je lance ./go, Alors l'app répond sur localhost, MariaDB 10.6 tourne et bash harness/ci.sh passe au vert ; relancer ./go ne produit aucun diff.`
-- **4×N** : `@happy` socle `kit-php` instancié, domaine Todo retiré, images épinglées PHP 8.2 + MariaDB 10.6 · `@negative` Docker absent → message clair (seul blocage légitime) · `@edge` relance idempotente, port occupé → `FOYER_PORT` · `@security` **preuve de sensibilité** : un drift artificiel fait passer chaque gate au rouge, puis restauré ; `config.php` ignoré (G1).
+- **Gherkin** : `Étant donné un clone neuf et Docker, Quand je lance ./go, Alors l'app répond sur localhost, MariaDB 10.11 tourne et bash harness/ci.sh passe au vert ; relancer ./go ne produit aucun diff.`
+- **4×N** : `@happy` socle `kit-php` instancié, domaine Todo retiré, images épinglées PHP 8.4 + MariaDB 10.11 · `@negative` Docker absent → message clair (seul blocage légitime) · `@edge` relance idempotente, port occupé → `FOYER_PORT` · `@security` **preuve de sensibilité** : un drift artificiel fait passer chaque gate au rouge, puis restauré ; `config.php` ignoré (G1).
 - **Couches** : IaC · CI · **Taille** : L · **Tours** : 10
 
 ### Story 0.2 — Harnais de contrat matérialisé *(non optionnel, `contrat-api.md`)*
@@ -53,7 +53,7 @@ registre `PROJET.md` à jour (tours, tokens, wall-clock) · un commit par étape
 
 ### Story 0.4 — Paquet de déploiement et hébergement simulé
 - **En tant que** PO **je veux** un paquet unique installable par SFTP **afin de** mettre en ligne sans ligne de commande.
-- **Gherkin** : `Étant donné un commit, Quand harness/package.sh s'exécute, Alors un zip reproductible (SHA-256 identique à entrée égale) est produit ; déposé dans php:8.2-apache + mariadb:10.6 à racine fixe, sa page de santé répond 200.`
+- **Gherkin** : `Étant donné un commit, Quand harness/package.sh s'exécute, Alors un zip reproductible (SHA-256 identique à entrée égale) est produit ; déposé dans php:8.4-apache + mariadb:10.11 à racine fixe, sa page de santé répond 200.`
 - **4×N** : `@happy` zip `app/` + `www/` + `vendor/` + îlots, `.htaccess` versionné · `@negative` extension PHP manquante dans le conteneur → page de santé en erreur explicite · `@edge` `app/` placée sous la racine web → interdite par `.htaccess` (403 vérifié) · `@security` aucun fichier de test, `.git`, `config.php` ni source TS dans le paquet ; `uploads/` sans exécution PHP (requête sur un `.php` déposé → non exécuté).
 - **Couches** : IaC · CI · **Taille** : M · **Tours** : 8
 
@@ -69,7 +69,7 @@ registre `PROJET.md` à jour (tours, tokens, wall-clock) · un commit par étape
 
 ### Story 1.1 — Installer et migrer depuis le navigateur (FR-042)
 - **Gherkin** : `Étant donné une base vide et le paquet déposé, Quand j'ouvre /install avec le code d'installation, Alors les migrations s'appliquent, je crée le compte éditeur et je suis conduit à l'enrôlement du double facteur (Story 1.2) ; /install est désactivé une fois l'enrôlement confirmé.`
-- **4×N** : `@happy` contrôle d'environnement → migrations → compte · `@negative` PHP < 8.2 → arrêt clair ; migration en échec → rollback · `@edge` recréer un compte une fois le compte créé → refus ; migration déjà appliquée → ignorée · `@security` code à usage unique, aucun secret affiché ; la session créée n'est qu'une session pré-enrôlement (la désactivation de `/install` est vérifiée en 1.2).
+- **4×N** : `@happy` contrôle d'environnement → migrations → compte · `@negative` PHP < 8.4 → arrêt clair ; migration en échec → rollback · `@edge` recréer un compte une fois le compte créé → refus ; migration déjà appliquée → ignorée · `@security` code à usage unique, aucun secret affiché ; la session créée n'est qu'une session pré-enrôlement (la désactivation de `/install` est vérifiée en 1.2).
 - **Couches** : Domain · Application · Infra · Frontend · **Taille** : M · **Tours** : 8
 
 ### Story 1.2 — Connexion mot de passe + double facteur (FR-040)

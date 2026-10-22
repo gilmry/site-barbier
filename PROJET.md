@@ -10,7 +10,7 @@
 - **Archétype** : stateful full-stack  <!-- défaut inféré : contenu + demandes persistés, écrans public et admin -->
 - **Niveau CyFun® visé** : Essential  <!-- défaut : le site conserve nom + téléphone des clients et un compte éditeur -->
 - **Substrat d'exécution** : conteneur (Docker 29.7) pour PHP + MariaDB ; Node 22 local pour compiler les îlots  <!-- sonde 0bis du 2026-10-22 : php, mysql, composer absents -->
-- **Kit pressenti** : `kit-php` · HTTP `vanilla` · persistance `cqrs` (ADR-004/005 retenus) · CI pinnée PHP 8.2 + MariaDB 10.6
+- **Kit pressenti** : `kit-php` · HTTP `vanilla` · persistance `cqrs` (ADR-004/005 retenus) · CI pinnée PHP 8.4 + MariaDB 10.11
 - **Démarré le** : 2026-10-22
 - **Dernière mise à jour** : 2026-10-22 (par : agent Claude Code)
 
@@ -130,6 +130,7 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 | Barreau | Scrum, vagues V0–V5, revue = gate review de fin de vague | gilmry | 2026-10-22 | ADR-011 |
 | Ratio de supervision | 2 chantiers en parallèle (scénario B, ≈ 19 j) | gilmry | 2026-10-22 | — |
 | Gantt | Signé (`docs/pilotage/gantt.md` v1.0) | gilmry | 2026-10-22 | — |
+| Versions de la pile | **PHP 8.4** (support de sécurité jusqu'au 31/12/2028 ; 8.2 finit le 31/12/2026) et **MariaDB 10.11 LTS** (10.6 sans support depuis 07/2026) — PHP n'a pas de LTS officielle | gilmry | 2026-10-22 | NFR-02 amendé |
 | Sortie de BMAD | Conception validée (PASS 100/100), livrables v1.1 signés | gilmry | 2026-10-22 | — |
 | Modalité de la bascule différée | Revue à chaque gate review ; déclencheurs : incident de dérive, > 60 routes, hébergeur rendant le poids indifférent | gilmry | 2026-10-22 | ADR-004 |
 | Architecture v1.0 + plan de vulnérabilités | Validés ; responsable sécurité Gilles seul (sans suppléant, mesure compensatoire), signalement gilmry+abuse@gmail.com | gilmry | 2026-10-22 | — |
@@ -158,3 +159,4 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 - 2026-10-22 — Validateur passage 4 : **PASS 100/100** ; mineures M1 (exception /install/reset-2fa) et M2 (Mailer factice en 1.4) corrigées
 - 2026-10-22 — sortie de BMAD validée par le PO ; plan de pilotage v0.1 (33 stories, 6 vagues, 2 barrières, scénarios ratio 1 / ratio 2)
 - 2026-10-22 — PO : ratio 2, Scrum (ADR-011), Gantt signé ; ouverture de V0
+- 2026-10-22 — PO : « prends la version LTS de PHP » → PHP 8.4 + MariaDB 10.11 LTS ; NFR-02, architecture, stories et images mis à jour

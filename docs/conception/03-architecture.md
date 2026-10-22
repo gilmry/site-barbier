@@ -97,7 +97,7 @@ DTO d'entrée/sortie typés ; les pages publiques et l'API appellent **les même
 
 ## Couche 3 — Infrastructure backend *(LSP, DIP)*
 
-- **Persistance** : CQRS SQL pur sur PDO/MariaDB 10.6 (InnoDB, `utf8mb4`), `*Queries` / `*Commands` séparés,
+- **Persistance** : CQRS SQL pur sur PDO/MariaDB 10.11 (InnoDB, `utf8mb4`), `*Queries` / `*Commands` séparés,
   mapping ligne↔entité isolé — **ADR-005**. Heures stockées en UTC (`DATETIME`), converties au bord.
 - **Sérialisation de l'agenda** — **ADR-006** : toute écriture qui touche l'agenda d'un barbier passe par
   `AgendaLock` (`SELECT … FOR UPDATE` sur la ligne `barber`, en transaction), et les réservations occupent
@@ -148,7 +148,7 @@ Pas de serveur à piloter : l'hébergeur porte la plateforme. Ce que le projet p
   si elle doit vivre sous la racine), `php.ini`/`.user.ini` si l'hébergeur l'admet (`expose_php=Off`, sessions).
 - **Contrôle d'environnement** : `/install` et la page « santé » de l'admin vérifient version PHP, extensions,
   droits d'écriture, HTTPS, migrations en attente.
-- **Hébergement simulé** (gate `hebergement`) : `php:8.2-apache` + `mariadb:10.6`, racine web fixe, aucune CLI
+- **Hébergement simulé** (gate `hebergement`) : `php:8.4-apache` + `mariadb:10.11`, racine web fixe, aucune CLI
   dans le conteneur applicatif ; on y dépose le paquet, on rejoue `/install` puis P1 — seule preuve de FR-042/NFR-02.
 
 **Mapping ISO 27001 → mise en œuvre**
@@ -169,7 +169,7 @@ Pas de serveur à piloter : l'hébergeur porte la plateforme. Ce que le projet p
   n'est **pas** créé par l'agent (action externe) : à faire par le PO au moment voulu.
 - **Mêmes commandes en local et en CI** (`harness/*.sh`, Docker) ; hook `pre-commit` (gitleaks, `verify`,
   `unit`) et `pre-push` (CI complète), DRY avec la CI.
-- **Images épinglées** : `php:8.2-cli` / `php:8.2-apache` + `mariadb:10.6` + `node:22` (Vite, Playwright).
+- **Images épinglées** : `php:8.4-cli` / `php:8.4-apache` + `mariadb:10.11` + `node:22` (Vite, Playwright).
 
 | Gate | Registre | Commande (cible) |
 |---|---|---|
@@ -177,7 +177,7 @@ Pas de serveur à piloter : l'hébergeur porte la plateforme. Ce que le projet p
 | `verify` : H1 pureté, échappement, **aucune concaténation SQL** (requêtes préparées seulement), pas d'URL tierce, pas de chaîne en dur, pas de `fetch` hors client généré | bloquant | idem |
 | `unit` + `bdd` (domaine + application, nommés en Gherkin) | bloquant | `bash harness/run-phpunit.sh` |
 | `contrat` : client régénéré = commité ; parité routes ↔ spec | bloquant | `bash harness/run-contract.sh` |
-| `integration` (MariaDB 10.6 réelle, réponses validées contre la spec, tests de concurrence) | bloquant | `bash harness/run-integration.sh` |
+| `integration` (MariaDB 10.11 réelle, réponses validées contre la spec, tests de concurrence) | bloquant | `bash harness/run-integration.sh` |
 | `e2e` (Playwright, P1–P4, axe a11y) | bloquant | `bash harness/run-e2e.sh` |
 | `visuel` (goldens, tolérance 0,5 %) | bloquant à la bascule | `bash harness/run-visual.sh` |
 | `hebergement` (paquet installé en hébergement simulé) | bloquant | `bash harness/run-hosting.sh` |
@@ -364,7 +364,7 @@ le verrou. Annulation et purge libèrent les cellules **dans la même transactio
 contrainte d'exclusion d'intervalles ; les conflits réservation↔absence↔horaires (FR-010/020/021) doivent être
 sérialisés avec les réservations, pas seulement les réservations entre elles. Alternatives écartées : verrou
 applicatif fichier (fragile sur mutualisé) ; vérification sans verrou (course possible). Preuve : tests `@edge`
-de concurrence sur MariaDB 10.6 en CI.
+de concurrence sur MariaDB 10.11 en CI.
 
 ### ADR-007 — Aucun tiers côté navigateur — **retenu**
 Polices Cinzel, Cormorant Garamond, UnifrakturMaguntia (OFL) auto-hébergées ; pas d'analytics, de CDN ni de
