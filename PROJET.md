@@ -10,7 +10,7 @@
 - **Archétype** : stateful full-stack  <!-- défaut inféré : contenu + demandes persistés, écrans public et admin -->
 - **Niveau CyFun® visé** : Essential  <!-- défaut : le site conserve nom + téléphone des clients et un compte éditeur -->
 - **Substrat d'exécution** : conteneur (Docker 29.7) pour PHP + MariaDB ; Node 22 local pour compiler les îlots  <!-- sonde 0bis du 2026-10-22 : php, mysql, composer absents -->
-- **Kit pressenti** : `kit-php` · HTTP `vanilla` · persistance `cqrs` (proposés en ADR-004/005, à valider) · CI pinnée PHP 8.2 + MariaDB 10.6
+- **Kit pressenti** : `kit-php` · HTTP `vanilla` · persistance `cqrs` (ADR-004/005 retenus) · CI pinnée PHP 8.2 + MariaDB 10.6
 - **Démarré le** : 2026-10-22
 - **Dernière mise à jour** : 2026-10-22 (par : agent Claude Code)
 
@@ -33,7 +33,7 @@
 ## Position courante
 
 - **Phase / étape** : Phase A · Conception BMAD · étape 3/5 (Architecte → architecture v0.1 + plan de vulnérabilités rédigés)
-- **Prochaine action attendue** : le PO tranche ADR-004 / ADR-005 / ADR-008 et valide l'architecture → Scrum Master (epics & stories)
+- **Prochaine action attendue** : le PO valide l'architecture v0.1 (ADR-004/005/008 tranchés) → Scrum Master (epics & stories)
 - **Rôle à jouer** : `pilote/roles/conception-bmad.md`
 
 ## Livrables de conception
@@ -78,19 +78,9 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 
 ### 🔴 En attente (l'humain doit trancher une MODALITÉ)
 
-- **Point** : ADR-004 — outillage serveur léger (« vanilla ») plutôt que Symfony/API Platform
-  - **Preuve jointe** : `docs/conception/03-architecture.md` ADR-004 + ADR-002 (résidu de contrat déclaré)
-  - **Question (clair)** : on garde un site léger et simple à envoyer, quitte à passer plus tard sur l'outillage plus lourd ?
-  - **Options** : A. léger (recommandé, réversible) · B. outillage lourd dès le départ
-- **Point** : ADR-005 — stockage en SQL écrit à la main (pas d'ORM) — irréversible une fois en production
-  - **Preuve jointe** : ADR-005 + ADR-006 (verrouillage de l'agenda)
-  - **Question (clair)** : on valide ce mode de stockage, le plus simple à contrôler pour l'agenda ?
-  - **Options** : A. valider (recommandé) · B. ORM Doctrine
-- **Point** : ADR-008 — environnements
-  - **Preuve jointe** : ADR-008
-  - **Question (clair)** : veux-tu un site de test (`test.<domaine>`) avant chaque mise en ligne ?
-  - **Options** : A. oui, un sous-domaine de test (recommandé) · B. non, directement en production après les tests automatiques
 - **Point** : validation de l'architecture v0.1 dans son ensemble (sortie de l'étape Architecte)
+  - **Preuve jointe** : `docs/conception/03-architecture.md` + `03b-plan-vulnerabilites.md`
+  - **À compléter par le PO** : suppléant sécurité, adresse de signalement (plan §1 et §6)
 
 ### ✅ Tranchés
 
@@ -102,6 +92,9 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 | Langues | FR + NL + EN dès le MVP | gilmry | 2026-10-22 | — (Brief §14) |
 | Product Brief v1.0 | Validé, hypothèses restantes acceptées | gilmry | 2026-10-22 | — |
 | PRD v1.0 | Validé, hypothèses introduites acceptées | gilmry | 2026-10-22 | — |
+| Outillage serveur | Léger (vanilla), réversible vers API Platform | gilmry | 2026-10-22 | ADR-004 |
+| Stockage | SQL sur mesure (CQRS), pas d'ORM | gilmry | 2026-10-22 | ADR-005 |
+| Environnements | Recette `test.<domaine>` puis production, envoi SFTP/FTPS par le PO | gilmry | 2026-10-22 | ADR-008 |
 
 ### Défauts annoncés (réversibles, non votés)
 
@@ -116,3 +109,4 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 - 2026-10-22 — réponses métier du PO → Brief v0.2 (Petit, 4 BC, ~20 stories, ~15 j)
 - 2026-10-22 — Brief validé (v1.0) ; PRD v0.1 rédigé : 26 FR, 9 NFR, 4 parcours de référence, contrat API v1 esquissé (commit `10d4115`)
 - 2026-10-22 — PRD validé (v1.0) ; architecture v0.1 (7 couches, 9 ADR, données et flux) + plan de vulnérabilités
+- 2026-10-22 — PO tranche ADR-004 (léger), ADR-005 (SQL sur mesure), ADR-008 (avec site de test)

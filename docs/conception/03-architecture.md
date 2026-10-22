@@ -309,7 +309,7 @@ performance dégradés, JS inutile). Conséquences : les goldens visuels portent
 l'échappement est garanti par un invariant `verify`. Règle de sobriété respectée : JS uniquement là où il y a
 de l'interaction.
 
-### ADR-004 — Adaptateur HTTP « vanilla » plutôt qu'API Platform — **proposé, à valider par le PO (réversible)**
+### ADR-004 — Adaptateur HTTP « vanilla » plutôt qu'API Platform — **retenu** (PO gilmry, 2026-10-22 : « Léger »)
 Décision proposée : routeur maison du kit (`TODO_HTTP=vanilla` → ici seul adaptateur livré au MVP).
 Contexte : la pile cible du kit est Symfony + API Platform (`bootstrap-nouveau-projet.md` §Conditionnement).
 Elle **tourne** sur un mutualisé si `vendor/` est livré dans le paquet ; elle n'est donc **pas exclue** par
@@ -322,7 +322,7 @@ Prix : contrat plus faible (résidu ADR-002). Alternative : API Platform dès le
 lourd. **Question au PO (langage clair)** : « On garde un site léger et simple à envoyer (recommandé), quitte à
 passer plus tard sur l'outillage plus lourd si le projet grandit ? »
 
-### ADR-005 — Persistance CQRS SQL pur sur MariaDB — **proposé, point irréversible 🔴**
+### ADR-005 — Persistance CQRS SQL pur sur MariaDB — **retenu** (PO gilmry, 2026-10-22 : « Sur mesure »)
 Décision proposée : `*Queries`/`*Commands` en PDO, migrations `up`/`down` SQL, pas d'ORM.
 Contexte : modèle de ~15 tables, requêtes d'agenda précises (verrous, cellules) qu'un ORM masquerait ; Doctrine
 ajouterait un cache de métadonnées inscriptible et un paquet lourd. La raison n'est **pas** « zéro Composer » :
@@ -346,11 +346,11 @@ de concurrence sur MariaDB 10.6 en CI.
 Polices Cinzel, Cormorant Garamond, UnifrakturMaguntia (OFL) auto-hébergées ; pas d'analytics, de CDN ni de
 captcha tiers. Racine : sobriété et RGPD (aucune adresse IP de visiteur transmise à un tiers sans base légale).
 
-### ADR-008 — Mapping branche → environnement — **proposé, point irréversible 🔴**
+### ADR-008 — Mapping branche → environnement — **retenu avec recette** (PO gilmry, 2026-10-22 : « Oui, site de test »)
 Proposition : branches de travail → CI seulement ; `main` → paquet candidat ; **production** = dernier paquet de
 `main` promu (gate `promotion` + accord du PO), envoyé par le PO en SFTP/FTPS ; **recette** facultative = un
 sous-domaine du même hébergement (`test.<domaine>`) avec sa propre base, alimenté par le même paquet avant la
-production. Le PO décide s'il veut cette recette (coût : une base de plus, souvent incluse).
+production. **Décision** : la recette est retenue — tout paquet passe par `test.<domaine>` avant la production.
 
 ### ADR-009 — E-mails par le SMTP authentifié de l'hébergeur — **retenu**
 PHPMailer (LGPL-2.1, embarqué) en SMTP + STARTTLS avec le compte e-mail du domaine du salon ; SPF/DKIM à
