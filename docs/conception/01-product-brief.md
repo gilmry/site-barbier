@@ -2,14 +2,14 @@
 livrable: Product Brief
 persona: 01-analyste (BMAD, TOGAF Phase A)
 projet: site-barbier
-version: 0.2 (réponses du PO intégrées, à valider)
+version: 1.0 (validé)
 redige_le: 2026-10-22
 redige_par: agent (Claude Code, pilote Foyer)
 signature_humaine:
-  nom: <à signer>
+  nom: gilmry
   role: PO
-  date: <AAAA-MM-JJ>
-  verdict: <validé | à reprendre>
+  date: 2026-10-22
+  verdict: validé (hypothèses restantes acceptées telles quelles)
 ---
 
 # Product Brief — Site web d'un barbier (site-barbier)

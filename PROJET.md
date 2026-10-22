@@ -32,16 +32,16 @@
 
 ## Position courante
 
-- **Phase / étape** : Phase A · Conception BMAD · étape 1/5 (Analyste → Product Brief v0.2, réponses PO intégrées)
-- **Prochaine action attendue** : le PO valide le Brief v0.2 (et tranche les hypothèses restantes) → Product Manager (PRD)
+- **Phase / étape** : Phase A · Conception BMAD · étape 2/5 (Product Manager → PRD v0.1 rédigé)
+- **Prochaine action attendue** : le PO valide le PRD v0.1 → Architecte (architecture, ADR, plan de vulnérabilités)
 - **Rôle à jouer** : `pilote/roles/conception-bmad.md`
 
 ## Livrables de conception
 
 | # | Livrable | Fichier | État |
 |---|---|---|---|
-| 1 | Product Brief | `docs/conception/01-product-brief.md` | 🟡 v0.2 à valider |
-| 2 | PRD | `docs/conception/02-prd.md` | ⚪ |
+| 1 | Product Brief | `docs/conception/01-product-brief.md` | ✅ v1.0 validé (gilmry, 2026-10-22) |
+| 2 | PRD | `docs/conception/02-prd.md` | 🟡 v0.1 à valider (26 FR × 4 classes) |
 | 3 | Architecture + ADR + plan vulnérabilités | `docs/conception/03-architecture.md` | ⚪ |
 | 4 | Epics & stories | `docs/conception/04-epics-stories.md` | ⚪ |
 | 5 | Validation | `docs/conception/05-validation.md` | ⚪ |
@@ -78,9 +78,9 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 
 ### 🔴 En attente (l'humain doit trancher une MODALITÉ)
 
-- **Point** : validation du Product Brief v0.2 (sortie de l'étape Analyste)
-  - **Preuve jointe** : `docs/conception/01-product-brief.md` v0.2
-  - **Hypothèses restantes** : e-mail client obligatoire · conservation 6 mois · réservation ≥ 2 h à l'avance, annulation jusqu'à 2 h avant · traductions saisies par le gérant · hébergement sans SSH, ≤ 5 €/mois
+- **Point** : validation du PRD v0.1 (sortie de l'étape Product Manager)
+  - **Preuve jointe** : `docs/conception/02-prd.md` v0.1
+  - **Hypothèses introduites** : pas de 15 min · horizon 60 j · image ≤ 8 Mo · 5 réservations/h/IP · session 30 min / 12 h · admin en français · `.ics` joint · purge au premier passage du jour · « sans préférence » réparti équitablement
   - **Options présentées** : valider tel quel / corriger une hypothèse
 
 ### ✅ Tranchés
@@ -92,6 +92,7 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 | Prise de rendez-vous | Réservation en ligne sur créneaux libres, dès le MVP | gilmry | 2026-10-22 | — (Brief §7) |
 | Sort des réservations | Liste dans l'admin + e-mail au salon, purge automatique | gilmry | 2026-10-22 | — (Brief §7) |
 | Langues | FR + NL + EN dès le MVP | gilmry | 2026-10-22 | — (Brief §14) |
+| Product Brief v1.0 | Validé, hypothèses restantes acceptées | gilmry | 2026-10-22 | — |
 
 ### Défauts annoncés (réversibles, non votés)
 
@@ -103,3 +104,4 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 
 - 2026-10-22 — Q0 = nouveau ; projet créé, registre + Brief v0.1 (commit `10ce28c`)
 - 2026-10-22 — réponses métier du PO → Brief v0.2 (Petit, 4 BC, ~20 stories, ~15 j)
+- 2026-10-22 — Brief validé (v1.0) ; PRD v0.1 rédigé : 26 FR, 9 NFR, 4 parcours de référence, contrat API v1 esquissé
