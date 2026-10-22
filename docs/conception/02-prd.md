@@ -2,7 +2,7 @@
 livrable: PRD
 persona: 02-product-manager (BMAD, TOGAF Phases B-C)
 projet: site-barbier
-version: 1.1 (validé)
+version: 1.2 (validé ; §9bis aligné sur l'implémentation — réactivation par /account/totp)
 source: 01-product-brief.md v1.1
 redige_le: 2026-10-22
 redige_par: agent (Claude Code, pilote Foyer)
@@ -347,7 +347,7 @@ Prestation · Catégorie · Carte · Barbier · Horaires · **Disponibilité** �
 - **En tant que** gérant **je veux** des codes de secours **afin de** ne pas perdre l'accès si je perds mon téléphone.
 - **Gherkin** : `Étant donné mes 10 codes de secours, Quand j'en utilise un à la place du code TOTP, Alors je suis connecté et ce code n'est plus valable.`
 - **4×N** :
-  - `@happy` — 10 codes générés à l'enrôlement TOTP (`POST /api/v1/admin/account/totp/confirm`), affichés une seule fois, stockés hachés ; régénération depuis l'admin (`POST /api/v1/admin/account/recovery-codes`) avec un TOTP récent ; connexion par code de secours (`POST /api/v1/admin/session/recovery`). Une session ouverte par code de secours est marquée **« secours »** : elle n'est **pas** un TOTP récent et n'ouvre que la consultation et la **réinitialisation du double facteur** (`POST /api/v1/admin/account/totp/reset` → nouveau secret, confirmé par un premier code ; l'ancien secret et tous les anciens codes sont invalidés, 10 nouveaux codes émis).
+  - `@happy` — 10 codes générés à l'enrôlement TOTP (`POST /api/v1/admin/account/totp/confirm`), affichés une seule fois, stockés hachés ; régénération depuis l'admin (`POST /api/v1/admin/account/recovery-codes`) avec un TOTP récent ; connexion par code de secours (`POST /api/v1/admin/session/recovery`). Une session ouverte par code de secours est marquée **« secours »** : elle n'est **pas** un TOTP récent et n'ouvre que la consultation et la **réinitialisation du double facteur** (`POST /api/v1/admin/account/totp` puis `/account/totp/confirm` → nouveau secret, confirmé par un premier code ; l'ancien secret et tous les anciens codes sont invalidés, 10 nouveaux codes émis, les autres sessions fermées).
   - `@negative` — code de secours déjà utilisé → refus.
   - `@edge` — dernier code utilisé → l'admin exige d'en régénérer ; **téléphone perdu** : connexion par code de secours → réinitialisation du TOTP sur le nouveau téléphone → accès complet rétabli ; **téléphone perdu et plus aucun code** : réinitialisation d'urgence par le propriétaire du serveur — il dépose par SFTP/FTPS un fichier `app/var/reset-2fa.token` contenant un code qu'il choisit, puis ouvre `/install/reset-2fa` avec ce code et le mot de passe : le TOTP est réinitialisé, le fichier supprimé, l'événement journalisé et notifié par e-mail au salon.
   - `@security` — mêmes limites de tentatives que FR-040.
@@ -419,9 +419,8 @@ Version `v1` dans le chemin.
 | POST | `/api/v1/bookings` | public, limité | réserver (201 / 400 / 409 / 429) |
 | POST | `/api/v1/bookings/cancel` | public (jeton) | annuler par le client (200 / 404 / 422) |
 | POST | `/api/v1/admin/session` · `/session/totp` · `/session/recovery` · DELETE `/session` | — | connexion en deux temps (ou code de secours), déconnexion |
-| GET/POST | `/api/v1/admin/account/totp` · `/account/totp/confirm` | session **pré-enrôlement** (créée par `/install`, n'ouvre que ces deux routes) | enrôlement TOTP (secret + URI otpauth, confirmation par un premier code → codes de secours) |
+| POST | `/api/v1/admin/account/totp` · `/account/totp/confirm` | session **pré-enrôlement** (après `/install`), session **« secours »**, ou admin + TOTP récent | (ré)activation du double facteur : secret + URI otpauth, confirmé par un premier code → codes de secours (FR-040, FR-043) |
 | POST | `/api/v1/admin/account/recovery-codes` | admin + TOTP récent | régénérer les codes de secours |
-| POST | `/api/v1/admin/account/totp/reset` · `/account/totp/reset/confirm` | session « secours » ou admin + TOTP récent | réinitialiser le double facteur (FR-043) |
 | GET/POST | `/install/reset-2fa` (rendu serveur, **hors spec** : exclue de la parité routes ↔ spec comme les autres pages rendues côté serveur) | fichier jeton déposé par SFTP/FTPS + mot de passe | réinitialisation d'urgence (FR-043) ; 404 tant que le fichier jeton est absent |
 | GET/PUT | `/api/v1/admin/sections/{key}` | admin | textes traduits d'une section (version pour verrou optimiste) |
 | POST/DELETE | `/api/v1/admin/media` · `/media/{id}` | admin | images |

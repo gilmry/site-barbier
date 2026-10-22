@@ -1,0 +1,9 @@
+O:23:"PHPStan\Cache\CacheItem":2:{s:11:"variableKey";s:80:"v2-22ab858ae438d98f58f41f38ad2191d1b0d59570aebea0463a7948cfae1021b7-8.4-6.73.0.6";s:4:"data";a:22:{s:13:"locatedSource";a:2:{s:5:"class";s:60:"PHPStan\BetterReflection\SourceLocator\Located\LocatedSource";s:4:"data";a:2:{s:4:"name";s:29:"PHPMailer\PHPMailer\Exception";s:8:"filename";s:65:"/app/app/vendor/composer/../phpmailer/phpmailer/src/Exception.php";}}s:9:"namespace";s:19:"PHPMailer\PHPMailer";s:4:"name";s:29:"PHPMailer\PHPMailer\Exception";s:9:"shortName";s:9:"Exception";s:11:"isInterface";b:0;s:7:"isTrait";b:0;s:6:"isEnum";b:0;s:12:"isBackedEnum";b:0;s:9:"modifiers";i:0;s:10:"docComment";s:99:"/**
+ * PHPMailer exception handler.
+ *
+ * @author Marcus Bointon <phpmailer@synchromedia.co.uk>
+ */";s:10:"attributes";a:0:{}s:9:"startLine";i:29;s:7:"endLine";i:40;s:11:"startColumn";i:1;s:9:"endColumn";i:1;s:15:"parentClassName";s:9:"Exception";s:20:"implementsClassNames";a:0:{}s:15:"traitClassNames";a:0:{}s:18:"immediateConstants";a:0:{}s:19:"immediateProperties";a:0:{}s:16:"immediateMethods";a:1:{s:12:"errorMessage";a:20:{s:4:"name";s:12:"errorMessage";s:10:"parameters";a:0:{}s:16:"returnsReference";b:0;s:10:"returnType";N;s:10:"attributes";a:0:{}s:10:"docComment";s:62:"/**
+ * Prettify error message output.
+ *
+ * @return string
+ */";s:9:"startLine";i:36;s:7:"endLine";i:39;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:9:"modifiers";i:1;s:9:"namespace";s:19:"PHPMailer\PHPMailer";s:18:"declaringClassName";s:29:"PHPMailer\PHPMailer\Exception";s:21:"implementingClassName";s:29:"PHPMailer\PHPMailer\Exception";s:16:"currentClassName";s:29:"PHPMailer\PHPMailer\Exception";s:9:"aliasName";N;}}s:10:"traitsData";a:4:{s:7:"aliases";a:0:{}s:9:"modifiers";a:0:{}s:11:"precedences";a:0:{}s:6:"hashes";a:0:{}}}}

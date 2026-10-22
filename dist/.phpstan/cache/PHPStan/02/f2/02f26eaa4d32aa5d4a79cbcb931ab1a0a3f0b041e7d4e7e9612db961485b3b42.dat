@@ -1,0 +1,26 @@
+O:23:"PHPStan\Cache\CacheItem":2:{s:11:"variableKey";s:35:"v3-6.73.0.6-dev-master@e4f5f6c-8.4-";s:4:"data";a:17:{s:4:"name";s:7:"extract";s:10:"parameters";a:3:{s:5:"array";a:13:{s:4:"name";s:5:"array";s:7:"default";N;s:4:"type";a:2:{s:5:"class";s:55:"PHPStan\BetterReflection\Reflection\ReflectionNamedType";s:4:"data";a:2:{s:4:"name";s:5:"array";s:12:"isIdentifier";b:1;}}s:10:"isVariadic";b:0;s:5:"byRef";b:1;s:10:"isPromoted";b:0;s:10:"attributes";a:0:{}s:9:"startLine";i:31;s:7:"endLine";i:31;s:11:"startColumn";i:9;s:9:"endColumn";i:21;s:14:"parameterIndex";i:0;s:10:"isOptional";b:0;}s:5:"flags";a:13:{s:4:"name";s:5:"flags";s:7:"default";a:2:{s:4:"code";s:15:"\EXTR_OVERWRITE";s:10:"attributes";a:6:{s:9:"startLine";i:33;s:7:"endLine";i:33;s:13:"startTokenPos";i:58;s:12:"startFilePos";i:1496;s:11:"endTokenPos";i:58;s:10:"endFilePos";i:1509;}}s:4:"type";a:2:{s:5:"class";s:55:"PHPStan\BetterReflection\Reflection\ReflectionNamedType";s:4:"data";a:2:{s:4:"name";s:3:"int";s:12:"isIdentifier";b:1;}}s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"attributes";a:1:{i:0;a:3:{s:4:"name";s:33:"JetBrains\PhpStorm\ExpectedValues";s:10:"isRepeated";b:0;s:9:"arguments";a:1:{s:5:"flags";a:2:{s:4:"code";s:141:"[\EXTR_OVERWRITE, \EXTR_SKIP, \EXTR_PREFIX_SAME, \EXTR_PREFIX_ALL, \EXTR_PREFIX_INVALID, \EXTR_IF_EXISTS, \EXTR_PREFIX_IF_EXISTS, \EXTR_REFS]";s:10:"attributes";a:6:{s:9:"startLine";i:32;s:7:"endLine";i:32;s:13:"startTokenPos";i:25;s:12:"startFilePos";i:1339;s:11:"endTokenPos";i:48;s:10:"endFilePos";i:1471;}}}}}s:9:"startLine";i:32;s:7:"endLine";i:33;s:11:"startColumn";i:9;s:9:"endColumn";i:35;s:14:"parameterIndex";i:1;s:10:"isOptional";b:1;}s:6:"prefix";a:13:{s:4:"name";s:6:"prefix";s:7:"default";a:2:{s:4:"code";s:2:"""";s:10:"attributes";a:6:{s:9:"startLine";i:34;s:7:"endLine";i:34;s:13:"startTokenPos";i:67;s:12:"startFilePos";i:1537;s:11:"endTokenPos";i:67;s:10:"endFilePos";i:1538;}}s:4:"type";a:2:{s:5:"class";s:55:"PHPStan\BetterReflection\Reflection\ReflectionNamedType";s:4:"data";a:2:{s:4:"name";s:6:"string";s:12:"isIdentifier";b:1;}}s:10:"isVariadic";b:0;s:5:"byRef";b:0;s:10:"isPromoted";b:0;s:10:"attributes";a:0:{}s:9:"startLine";i:34;s:7:"endLine";i:34;s:11:"startColumn";i:9;s:9:"endColumn";i:27;s:14:"parameterIndex";i:2;s:10:"isOptional";b:1;}}s:16:"returnsReference";b:0;s:10:"returnType";a:2:{s:5:"class";s:55:"PHPStan\BetterReflection\Reflection\ReflectionNamedType";s:4:"data";a:2:{s:4:"name";s:3:"int";s:12:"isIdentifier";b:1;}}s:10:"attributes";a:0:{}s:10:"docComment";s:1118:"/**
+ * Import variables into the current symbol table from an array
+ * @link https://php.net/manual/en/function.extract.php
+ * @param array &$array <p>
+ * Note that prefix is only required if
+ * extract_type is EXTR_PREFIX_SAME,
+ * EXTR_PREFIX_ALL, EXTR_PREFIX_INVALID
+ * or EXTR_PREFIX_IF_EXISTS. If
+ * the prefixed result is not a valid variable name, it is not
+ * imported into the symbol table. Prefixes are automatically separated from
+ * the array key by an underscore character.
+ * </p>
+ * @param int $flags <p>
+ * The way invalid/numeric keys and collisions are treated is determined
+ * by the extract_type. It can be one of the
+ * following values:
+ * EXTR_OVERWRITE
+ * If there is a collision, overwrite the existing variable.</p>
+ * @param string $prefix <p>Only overwrite the variable if it already exists in the
+ * current symbol table, otherwise do nothing. This is useful
+ * for defining a list of valid variables and then extracting
+ * only those variables you have defined out of
+ * $_REQUEST, for example.</p>
+ * @return int the number of variables successfully imported into the symbol
+ * table.
+ */";s:9:"startLine";i:30;s:7:"endLine";i:37;s:11:"startColumn";i:5;s:9:"endColumn";i:5;s:10:"couldThrow";b:0;s:9:"isClosure";b:0;s:11:"isGenerator";b:0;s:10:"isVariadic";b:0;s:8:"isStatic";b:0;s:9:"namespace";N;s:13:"locatedSource";a:2:{s:5:"class";s:68:"PHPStan\BetterReflection\SourceLocator\Located\InternalLocatedSource";s:4:"data";a:4:{s:4:"name";s:7:"extract";s:8:"filename";s:39:"phpstorm-stubs:standard/standard_8.stub";s:13:"extensionName";s:8:"standard";s:9:"aliasName";N;}}}}
