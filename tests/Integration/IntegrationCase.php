@@ -41,11 +41,31 @@ abstract class IntegrationCase extends TestCase
         return self::$pdo;
     }
 
+    protected ?\Barbier\Domain\Shared\Clock $clock = null;
+    /** @var array<string,string> cookies du « navigateur » de test */
+    protected array $jar = [];
+
+    /** @return array<string,mixed> */
+    protected static function config(): array
+    {
+        return ['env' => 'test', 'db' => self::dbConfig(), 'app_key' => (string) getenv('APP_KEY'), 'install_code' => (string) getenv('INSTALL_CODE')];
+    }
+
     protected function kernel(): Kernel
     {
         self::pdo();
 
-        return new Kernel(['db' => self::dbConfig()]);
+        return new Kernel(self::config(), $this->clock);
+    }
+
+    /** Vide les tables métier entre deux tests (le schéma reste migré). */
+    protected static function truncate(string ...$tables): void
+    {
+        self::pdo()->exec('SET FOREIGN_KEY_CHECKS = 0');
+        foreach ($tables as $t) {
+            self::pdo()->exec("DELETE FROM `$t`");
+        }
+        self::pdo()->exec('SET FOREIGN_KEY_CHECKS = 1');
     }
 
     /**
@@ -60,11 +80,33 @@ abstract class IntegrationCase extends TestCase
         if ($body !== null) {
             $headers['Content-Type'] = 'application/json';
         }
-        $response = $this->kernel()->handle(new Request($method, $path, $raw, $query, $headers));
+        $response = $this->kernel()->handle(new Request($method, $path, $raw, $query, $headers, $this->jar));
+        $this->remember($response);
         $errors = (new StrictJson(Spec::default()))->responseErrors($method, $pattern, $response->status, $response->body, $response->headers['Content-Type'] ?? '');
         self::assertSame([], $errors, "Réponse hors contrat pour $method $pattern ({$response->status}) : {$response->body}");
 
         return $response;
+    }
+
+    /** Requête de page (hors contrat) avec le même « navigateur ». @param array<string,string> $headers */
+    protected function page(string $method, string $path, string $body = '', array $headers = []): Response
+    {
+        $response = $this->kernel()->handle(new Request($method, $path, $body, [], $headers, $this->jar));
+        $this->remember($response);
+
+        return $response;
+    }
+
+    private function remember(Response $r): void
+    {
+        $c = $r->headers['Set-Cookie'] ?? null;
+        if ($c !== null && preg_match('/^([^=]+)=([^;]*)/', $c, $m) === 1) {
+            if ($m[2] === '') {
+                unset($this->jar[$m[1]]);
+            } else {
+                $this->jar[$m[1]] = $m[2];
+            }
+        }
     }
 
     /** @return array<string,mixed> */

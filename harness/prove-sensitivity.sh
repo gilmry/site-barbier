@@ -54,6 +54,13 @@ tok = 'ghp_' + ''.join(secrets.choice(string.ascii_letters + string.digits) for 
 open('app/src/cle.php', 'w').write('<?php $t = "' + tok + '";\n')
 PY
 }
+drift_v1()   { sed -i 's/<?= $e($email) ?>/<?= $email ?>/' app/templates/install.php; }
+drift_s1()   { python3 - <<'PY'
+p='app/src/Adapter/Persistence/PdoEditorRepository.php'; s=open(p).read()
+open(p,'w').write(s.replace("$st = $this->pdo->prepare('SELECT * FROM editor WHERE id = ?');", "$st = $this->pdo->prepare('SELECT * FROM editor WHERE id = ' . $id);", 1))
+PY
+}
+drift_front() { echo '/* retouche */' >> www/islands/admin.js; }
 drift_e2e()  { sed -i "s#'/api/v1/health'#'/api/v1/sante'#" app/src/Kernel.php; }
 
 # --- Moteur ----------------------------------------------------------------------------------------
@@ -91,6 +98,9 @@ probe "e2e : santé cassée"         drift_e2e    e2e-smoke.sh
 probe "hébergement : uploads exécutables" drift_uploads run-hosting.sh
 probe "hébergement : paquet non reproductible" drift_repro run-hosting.sh
 probe "plancher : secret commité"   drift_secret run-plancher.sh
+probe "V1 sortie non échappée"     drift_v1     run-verify.sh
+probe "S1 SQL concaténé"           drift_s1     run-verify.sh
+probe "front : îlot retouché"      drift_front  run-front.sh
 probe "J1 parcours recopié"        drift_j1     run-verify.sh
 probe "e2e navigateur : attente fausse" drift_journey run-e2e.sh
 probe "visuel : rendu différent du golden" drift_golden run-visual.sh

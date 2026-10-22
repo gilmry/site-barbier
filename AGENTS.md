@@ -44,13 +44,14 @@ Prérequis : Docker seulement (aucun PHP local). Images : `site-barbier-php:8.4`
 
 | Gate | Commande | Base requise | Depuis |
 |---|---|---|---|
-| `verify` / `plancher` structurel (lint PHP 8.4, G1 G2 H1 L1 C1 F1 J1) | `bash harness/run-verify.sh` | non | 0.1 |
+| `verify` / `plancher` structurel (lint PHP 8.4, G1 G2 H1 L1 C1 F1 J1, V1 gabarits échappés, S1 SQL préparé) | `bash harness/run-verify.sh` | non | 0.1 |
 | `unit` + `bdd` | `bash harness/run-phpunit.sh` (un test : `--filter RouterTest`) — suite `bdd` ajoutée en 1.1 | non | 0.1 |
 | `integration` (MySQL réelle, 8.4 puis 8.0 : migrations up → down → up, suite PHPUnit `Integration` avec réponses validées contre la spec) | `bash harness/run-integration.sh` (`BARBIER_DB_VERSIONS="8.4"` pour une seule) | oui (auto) | 0.1 |
 | `e2e` (smoke HTTP via le contrôleur frontal) | `bash harness/e2e-smoke.sh` | oui (auto) | 0.1 |
 | **tous** (miroir de `.github/workflows/ci.yml`) | `bash harness/ci.sh` | oui (auto) | 0.1 |
 | preuve de sensibilité (chaque gate bloque une dérive) | `bash harness/prove-sensitivity.sh` | oui (auto) | 0.1 |
 | `contrat` (parité routes ↔ spec, objets fermés, 400 déclaré, client TS à jour) | `bash harness/run-contract.sh` | non | 0.2 |
+| `front` (îlots compilés `www/islands/` = sources `frontend/`) | `bash harness/run-front.sh` — recompiler : `bash harness/build-front.sh` | non | 1.1 |
 | `e2e` navigateur (chaque parcours de `journeys/`, bureau + mobile) | `bash harness/run-e2e.sh` (`JOURNEY=<id>` pour un seul) | oui (auto) | 0.3 |
 | `visuel` (goldens par parcours et taille d'écran, tolérance 0,5 %) | `bash harness/run-visual.sh` — `VISUAL_MODE=capture` pour réécrire **consciemment** les goldens | oui (auto) | 0.3 |
 | `doc-vivante` (cadence 1 action/1 s, captures + vidéo, **non bloquant**) | `bash harness/run-demo.sh` → `harness/demo/vitrine/index.html` | oui (auto) | 0.3 |
@@ -90,6 +91,17 @@ Les gates s'ajoutent à cette table **dans la même PR** que la story qui les cr
 - Protection de la branche `main` (revue + CI verte obligatoires) : **à poser par le PO** à la création du
   dépôt distant (point irréversible).
 - Signalement des failles : `SECURITY.md`.
+
+## Accès et sécurité de l'administration (Epic 1)
+
+- Installation : `/install` (contrôle d'environnement → migrations → compte → double facteur). Configuration
+  serveur : `app/config.php` (`app_key` 32 octets base64, `install_code`, `db`, `env`).
+- Sessions **en base** (étapes `pre_enrolment` → `password_ok` → `full`, ou `recovery`), cookie HttpOnly
+  SameSite=Strict (Secure + `__Host-` en prod), jeton CSRF `X-CSRF-Token` sur toute écriture ; sans session,
+  `X-Requested-With: barbier`.
+- Actions sensibles : `AccessController::guard($r, [FULL], recentTotp: true)` (code TOTP de moins de 10 min).
+- Réinitialisation d'urgence : déposer `app/var/reset-2fa.token` en SFTP, puis `/install/reset-2fa`.
+- Dev/test : clé et code d'installation fixes dans `harness/lib.sh` (jamais en production).
 
 ## Règles de l'agent
 

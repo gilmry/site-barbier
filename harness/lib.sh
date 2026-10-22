@@ -11,6 +11,9 @@ BARBIER_DB_CONTAINER="${BARBIER_DB_CONTAINER:-barbier-mysql-${BARBIER_DB_VERSION
 case "$BARBIER_DB_VERSION" in 8.0) _port=13309 ;; *) _port=13308 ;; esac
 BARBIER_DB_PORT="${BARBIER_DB_PORT:-$_port}"
 BARBIER_DB_ROOT_PASSWORD="root"   # base de dev éphémère, locale uniquement
+# Clé et code d'installation de DEV/TEST uniquement (jamais en production : config.php du serveur).
+BARBIER_TEST_APP_KEY="Y2xlLWRlLWRldi1ldC10ZXN0LXVuaXF1ZW1lbnQtMzI="
+BARBIER_TEST_INSTALL_CODE="installation-de-test"
 
 ensure_docker() {
   command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1 && return 0
@@ -71,7 +74,8 @@ reset_database() {
 php_run() {
   docker run --rm --network host -v "$BARBIER_ROOT":/app -w /app -u "$(id -u):$(id -g)" \
     -e DB_HOST=127.0.0.1 -e DB_PORT="$BARBIER_DB_PORT" -e DB_USER=root -e DB_PASSWORD="$BARBIER_DB_ROOT_PASSWORD" \
-    -e DB_NAME="${DB_NAME:-barbier}" -e TZ=UTC "$@"
+    -e DB_NAME="${DB_NAME:-barbier}" -e TZ=UTC -e BARBIER_ENV=test -e APP_KEY="$BARBIER_TEST_APP_KEY" \
+    -e INSTALL_CODE="$BARBIER_TEST_INSTALL_CODE" "$@"
 }
 
 BARBIER_BROWSER_IMAGE="${BARBIER_BROWSER_IMAGE:-site-barbier-browser:pw1.49}"
@@ -97,7 +101,8 @@ start_web() {
   docker rm -f "$BARBIER_WEB_CONTAINER" >/dev/null 2>&1 || true
   docker run -d --rm --name "$BARBIER_WEB_CONTAINER" --network host -v "$BARBIER_ROOT":/app -w /app \
     -e DB_HOST=127.0.0.1 -e DB_PORT="$BARBIER_DB_PORT" -e DB_USER=root -e DB_PASSWORD="$BARBIER_DB_ROOT_PASSWORD" \
-    -e DB_NAME="$db" -e BARBIER_ENV=test ${BARBIER_WEB_ENV:-} "$BARBIER_PHP_IMAGE" \
+    -e DB_NAME="$db" -e BARBIER_ENV=test -e APP_KEY="$BARBIER_TEST_APP_KEY" -e INSTALL_CODE="$BARBIER_TEST_INSTALL_CODE" \
+    ${BARBIER_WEB_ENV:-} "$BARBIER_PHP_IMAGE" \
     php -S "127.0.0.1:$port" -t www harness/dev-router.php >/dev/null
   local i
   for i in $(seq 1 60); do curl -s -o /dev/null "http://127.0.0.1:$port/api/v1/health" && return 0; sleep 0.25; done

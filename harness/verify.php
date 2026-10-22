@@ -112,8 +112,30 @@ foreach ($journeys as $file) {
     }
 }
 
+// V1 — gabarits : toute sortie passe par l'échappement ($e) ou par la traduction échappée ($t).
+foreach (rglob($root . '/app/templates') as $file) {
+    foreach (file($file) ?: [] as $n => $line) {
+        if (preg_match_all('/<\?=(?!\s*\$e\(|\s*\$t\()/', $line) > 0) {
+            $failures[] = 'V1: sortie non échappée dans ' . substr($file, strlen($root) + 1) . ':' . ($n + 1);
+        }
+    }
+}
+
+// S1 — SQL : jamais de valeur concaténée dans une requête (requêtes préparées seulement, ADR-010).
+// Exception documentée : le Migrator exécute le contenu des fichiers de migration versionnés.
+foreach (rglob($root . '/app/src') as $file) {
+    if (str_ends_with($file, '/Adapter/Persistence/Migrator.php')) {
+        continue;
+    }
+    $code = strip_php_comments((string) file_get_contents($file));
+    if (preg_match('/->(query|exec|prepare)\(\s*(\$|[\'"][^\'"]*[\'"]\s*\.\s*\$)/', $code) === 1
+        || preg_match('/->(query|exec|prepare)\(\s*"[^"]*\{?\$[a-z]/i', $code) === 1) {
+        $failures[] = 'S1: requête SQL construite par concaténation/interpolation : ' . substr($file, strlen($root) + 1);
+    }
+}
+
 if ($failures === []) {
-    fwrite(STDOUT, "verify: 🟢 G1 G2 H1 L1 C1 F1 J1 verts.\n");
+    fwrite(STDOUT, "verify: 🟢 G1 G2 H1 L1 C1 F1 J1 V1 S1 verts.\n");
     exit(0);
 }
 fwrite(STDERR, "verify: 🔴\n - " . implode("\n - ", $failures) . "\n");

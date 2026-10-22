@@ -27,19 +27,27 @@ const VIEWPORTS = { desktop: { width: 1280, height: 900 }, mobile: { width: 390,
 
 async function loadJourneys() {
   const files = readdirSync(JOURNEYS_DIR).filter((f) => f.endsWith('.journey.mjs')).sort();
-  const out = [];
-  for (const f of files) {
-    const j = (await import(pathToFileURL(join(JOURNEYS_DIR, f)).href)).default;
-    if (!ONLY || j.id === ONLY) out.push(j);
+  const all = [];
+  for (const f of files) all.push((await import(pathToFileURL(join(JOURNEYS_DIR, f)).href)).default);
+  if (!ONLY) return all;
+  // Un parcours filtré emmène les parcours dont il dépend (`requires`), dans l'ordre des fichiers.
+  const wanted = new Set([ONLY]);
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const j of all) if (wanted.has(j.id)) for (const r of j.requires ?? []) if (!wanted.has(r)) { wanted.add(r); grew = true; }
   }
-  return out;
+  return all.filter((j) => wanted.has(j.id));
 }
+
+const SHARED = {}; // état partagé entre parcours d'une même exécution (ex. secret TOTP créé à l'installation)
 
 function makeCtx(journey) {
   return {
     base: BASE,
     lang: journey.lang ?? 'fr',
     state: {},
+    shared: SHARED,
     expect(cond, message) {
       if (!cond) throw new Error(message);
     },
@@ -105,7 +113,8 @@ async function runJourney(browser, journey, viewportName) {
         await stabilise(page);
         const name = `${step.snapshot}-${viewportName}`;
         const p = resolve(RESULTS, `${name}.png`);
-        await page.screenshot({ path: p, fullPage: true, animations: 'disabled', caret: 'hide' });
+        const mask = (step.mask ?? []).map((sel) => page.locator(sel));
+        await page.screenshot({ path: p, fullPage: true, animations: 'disabled', caret: 'hide', mask, maskColor: '#ff00ff' });
         ok = compare(name, p) && ok;
       }
       if (MODE === 'demo') {

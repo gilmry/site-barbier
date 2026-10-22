@@ -8,6 +8,7 @@ run() { echo ""; echo "▶ $*"; "$@"; }
 run bash "$ROOT/harness/run-plancher.sh"
 run bash "$ROOT/harness/run-verify.sh"
 run bash "$ROOT/harness/run-contract.sh"
+run bash "$ROOT/harness/run-front.sh"
 run bash "$ROOT/harness/run-phpunit.sh"
 run bash "$ROOT/harness/run-integration.sh"
 run bash "$ROOT/harness/e2e-smoke.sh"
