@@ -43,7 +43,7 @@
 | 1 | Product Brief | `docs/conception/01-product-brief.md` | ✅ v1.0 validé (gilmry, 2026-10-22) |
 | 2 | PRD | `docs/conception/02-prd.md` | ✅ v1.0 validé (gilmry, 2026-10-22) |
 | 3 | Architecture + ADR + plan vulnérabilités | `docs/conception/03-architecture.md` + `03b-plan-vulnerabilites.md` | ✅ v1.0 validé (gilmry, 2026-10-22) |
-| 4 | Epics & stories | `docs/conception/04-epics-stories.md` | ⚪ |
+| 4 | Epics & stories | `docs/conception/04-epics-stories.md` | 🟡 v0.1 à valider (31 stories, ≈ 28 j) |
 | 5 | Validation | `docs/conception/05-validation.md` | ⚪ |
 
 Référence visuelle : `docs/design/reference-le-corbeau.md`.
@@ -78,7 +78,10 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 
 ### 🔴 En attente (l'humain doit trancher une MODALITÉ)
 
-- *(aucun)*
+- **Point** : validation du backlog v0.1 + **découpage de release** (estimation ≈ 28 j vs target 15 j)
+  - **Preuve jointe** : `docs/conception/04-epics-stories.md` (estimation chiffrée)
+  - **Question (métier)** : mettre d'abord le site vitrine en ligne (R1 ≈ 18 j) puis la réservation (R2 ≈ 10 j), ou tout livrer d'un coup (≈ 28 j) ?
+  - **Options** : A. deux releases (recommandé) · B. une seule release
 
 ### ✅ Tranchés
 
@@ -110,3 +113,4 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 - 2026-10-22 — PRD validé (v1.0) ; architecture v0.1 (7 couches, 9 ADR, données et flux) + plan de vulnérabilités
 - 2026-10-22 — PO tranche ADR-004 (léger), ADR-005 (SQL sur mesure), ADR-008 (avec site de test)
 - 2026-10-22 — architecture v1.0 et plan de vulnérabilités validés
+- 2026-10-22 — backlog v0.1 : 31 stories, ≈ 28 j (recalage ×1,9 vs prior du Brief), proposition R1/R2
