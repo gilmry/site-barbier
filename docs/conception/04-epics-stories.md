@@ -53,7 +53,7 @@ registre `PROJET.md` à jour (tours, tokens, wall-clock) · un commit par étape
 
 ### Story 0.4 — Paquet de déploiement et hébergement simulé
 - **En tant que** PO **je veux** un paquet unique installable par SFTP **afin de** mettre en ligne sans ligne de commande.
-- **Gherkin** : `Étant donné un commit, Quand harness/package.sh s'exécute, Alors un zip reproductible (SHA-256 identique à entrée égale) est produit ; déposé dans php:8.4-apache + mariadb:10.11 à racine fixe, sa page de santé répond 200.`
+- **Gherkin** : `Étant donné un commit, Quand harness/package.sh s'exécute, Alors un zip reproductible (SHA-256 identique à entrée égale) est produit ; déposé dans php:8.4-apache + mysql:8.x (version d'OVH) à racine fixe, sa page de santé répond 200.`
 - **4×N** : `@happy` zip `app/` + `www/` + `vendor/` + îlots, `.htaccess` versionné · `@negative` extension PHP manquante dans le conteneur → page de santé en erreur explicite · `@edge` `app/` placée sous la racine web → interdite par `.htaccess` (403 vérifié) · `@security` aucun fichier de test, `.git`, `config.php` ni source TS dans le paquet ; `uploads/` sans exécution PHP (requête sur un `.php` déposé → non exécuté).
 - **Couches** : IaC · CI · **Taille** : M · **Tours** : 8
 
