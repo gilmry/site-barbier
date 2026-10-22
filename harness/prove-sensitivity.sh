@@ -48,7 +48,12 @@ open(p,'w').write(s.replace('Require all denied', 'Require all granted').replace
 PY
 }
 drift_repro() { sed -i 's/$epoch = mktime(0, 0, 0, 1, 1, 2020);/$epoch = time() + random_int(1, 999);/' harness/package/build.php; }
-drift_secret() { printf '<?php\n$k = "AKIA%s";\n' "$(printf 'Q%.0s' {1..16})" > app/src/cle.php; }
+drift_secret() { python3 - <<'PY'
+import secrets, string
+tok = 'ghp_' + ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(36))
+open('app/src/cle.php', 'w').write('<?php $t = "' + tok + '";\n')
+PY
+}
 drift_e2e()  { sed -i "s#'/api/v1/health'#'/api/v1/sante'#" app/src/Kernel.php; }
 
 # --- Moteur ----------------------------------------------------------------------------------------
