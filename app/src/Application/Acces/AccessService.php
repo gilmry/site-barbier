@@ -25,7 +25,11 @@ use Barbier\Domain\Shared\Random;
 final class AccessService
 {
     public const ISSUER = 'Site du salon';
-    /** Empreinte bcrypt valide d'un mot de passe sans compte : vérifiée quand l'e-mail est inconnu. */
+    /**
+     * Empreinte bcrypt valide d'un mot de passe sans compte : vérifiée quand l'e-mail est inconnu (temps constant).
+     * Ce n'est pas un secret (finding SAST trié : faux positif, docs/revues/gate-review-release-1.md).
+     */
+    // nosemgrep: generic.secrets.security.detected-bcrypt-hash.detected-bcrypt-hash
     private const DUMMY_HASH = '$2y$12$tExlM0IgzBl2lstOTS40reuQKi1W86sgZBR/.pATfPnfk9nf1Oxbi';
 
     public function __construct(
