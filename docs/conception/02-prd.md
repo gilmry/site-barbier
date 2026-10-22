@@ -3,14 +3,14 @@ livrable: PRD
 persona: 02-product-manager (BMAD, TOGAF Phases B-C)
 projet: site-barbier
 version: 1.1 (corrections du Validateur, à revalider)
-source: 01-product-brief.md v1.0 (validé 2026-10-22)
+source: 01-product-brief.md v1.1
 redige_le: 2026-10-22
 redige_par: agent (Claude Code, pilote Foyer)
 signature_humaine:
   nom: gilmry
   role: PO
   date: 2026-10-22
-  verdict: validé (hypothèses introduites acceptées telles quelles)
+  verdict: à revalider (v1.1, corrections du Validateur) — v1.0 validé le 2026-10-22
 ---
 
 # PRD — site-barbier
@@ -66,10 +66,11 @@ Prestation · Catégorie · Carte · Barbier · Horaires · **Disponibilité** �
 
 | BC (Brief §9) | Module | Préfixe FR |
 |---|---|---|
-| Vitrine | `Vitrine` | FR-001…FR-012 |
+| Vitrine | `Vitrine` | FR-001…FR-011 |
+| Agenda (droits RGPD sur les réservations) | `Agenda` | FR-012 — numérotée à la suite de la vitrine, mais elle agit sur `Booking` : cas d'usage dans le module Agenda |
 | Agenda & réservation | `Agenda` | FR-020…FR-027 |
 | Notification | `Notification` | FR-030…FR-032 |
-| Accès | `Acces` | FR-040…FR-044 |
+| Accès & administration | `Acces` | FR-040…FR-044 (FR-044 : sauvegarde, une action d'administration protégée comme l'accès) |
 
 ## 6. Exigences fonctionnelles
 
@@ -191,8 +192,8 @@ Prestation · Catégorie · Carte · Barbier · Horaires · **Disponibilité** �
 - **4×N** :
   - `@happy` — recherche exacte par e-mail ; export JSON téléchargé ; effacement confirmé.
   - `@negative` — adresse sans résultat → message ; adresse invalide → refus.
-  - `@edge` — effacement d'une réservation future → libère ses cellules dans la même transaction (sérialisé avec les réservations) et prévient le client par e-mail d'annulation avant effacement `[hypothèse]`.
-  - `@security` — admin seulement, CSRF ; l'export est généré en mémoire et jamais écrit sur le serveur ; l'action est journalisée sans l'adresse en clair.
+  - `@edge` — effacement d'une réservation future → e-mail d'annulation envoyé **avant** l'effacement ; s'il échoue, l'admin l'indique (« prévenez le client par téléphone ») et demande une confirmation explicite, car aucune relance ne sera possible une fois le journal effacé ; puis les cellules sont libérées dans la même transaction (sérialisé avec les réservations).
+  - `@security` — admin seulement, CSRF ; l'adresse recherchée voyage **dans le corps d'un POST** (jamais dans l'URL, donc jamais dans les journaux d'accès de l'hébergeur) ; l'export est généré en mémoire et jamais écrit sur le serveur ; l'action est journalisée sans l'adresse en clair.
 - **Capacité** : §7.6, Brief §14 (RGPD)
 
 ### Module Agenda
@@ -328,6 +329,7 @@ Prestation · Catégorie · Carte · Barbier · Horaires · **Disponibilité** �
   - `@happy` — cookie `Secure; HttpOnly; SameSite=Strict`, identifiant régénéré à la connexion, déconnexion.
   - `@negative` — cookie altéré → session refusée.
   - `@edge` — expiration d'inactivité 30 min, absolue 12 h `[hypothèse]`.
+  - `@edge` (suite) — **TOTP récent** : la session mémorise l'heure du dernier code TOTP vérifié ; les actions sensibles (sauvegarde, migrations, régénération des codes de secours) exigent un code vérifié depuis moins de 10 min, sinon l'admin redemande un code (`POST /api/v1/admin/session/totp`) ; une session **pré-enrôlement** (après `/install`, avant confirmation du TOTP) n'ouvre que les routes d'enrôlement.
   - `@security` — CSRF sur toute écriture ; HTTPS imposé (HSTS) ; l'admin n'est pas indexée (`noindex`).
 - **Capacité** : §7.7
 
@@ -355,10 +357,10 @@ Prestation · Catégorie · Carte · Barbier · Horaires · **Disponibilité** �
 - **En tant que** gérant **je veux** télécharger une sauvegarde complète de la base depuis l'admin **afin de** ne pas dépendre uniquement des sauvegardes de l'hébergeur.
 - **Gherkin** : `Quand je clique « Télécharger une sauvegarde », Alors je reçois un fichier SQL horodaté qui, réimporté dans une base vide, restaure le site à l'identique.`
 - **4×N** :
-  - `@happy` — export SQL (schéma + données) en flux, sans fichier intermédiaire sur le serveur ; rappel mensuel dans le tableau de bord si aucun export depuis 30 j.
+  - `@happy` — export SQL (schéma + données) en flux, sans fichier intermédiaire sur le serveur ; rappel mensuel dans le tableau de bord si aucun export depuis 30 j. La restauration exige aussi le `config.php` d'origine (clé de chiffrement des secrets TOTP) : l'écran d'export le rappelle ; sans cette clé, l'éditeur ré-enrôle son double facteur via ses codes de secours.
   - `@negative` — export interrompu → aucun fichier partiel laissé sur le serveur.
   - `@edge` — base de plusieurs Mo → export en flux sans dépasser la mémoire du mutualisé ; restauration testée en CI (aller-retour export → import → P1 vert).
-  - `@security` — admin + TOTP récent (re-saisie d'un code si la session a plus de 10 min) ; le fichier contient des données personnelles : avertissement explicite à l'écran.
+  - `@security` — admin + **TOTP récent** (FR-041) ; le fichier contient des données personnelles : avertissement explicite à l'écran, et la politique de confidentialité (FR-011) indique que le gérant conserve ses sauvegardes au plus 6 mois puis les supprime.
 - **Capacité** : §7.6, Brief §14
 
 ## 7. Exigences non-fonctionnelles
@@ -416,7 +418,7 @@ Version `v1` dans le chemin.
 | POST | `/api/v1/bookings` | public, limité | réserver (201 / 400 / 409 / 429) |
 | POST | `/api/v1/bookings/cancel` | public (jeton) | annuler par le client (200 / 404 / 422) |
 | POST | `/api/v1/admin/session` · `/session/totp` · `/session/recovery` · DELETE `/session` | — | connexion en deux temps (ou code de secours), déconnexion |
-| GET/POST | `/api/v1/admin/account/totp` · `/account/totp/confirm` | admin (pendant l'installation) | enrôlement TOTP (secret + URI otpauth, confirmation par un premier code → codes de secours) |
+| GET/POST | `/api/v1/admin/account/totp` · `/account/totp/confirm` | session **pré-enrôlement** (créée par `/install`, n'ouvre que ces deux routes) | enrôlement TOTP (secret + URI otpauth, confirmation par un premier code → codes de secours) |
 | POST | `/api/v1/admin/account/recovery-codes` | admin | régénérer les codes de secours |
 | GET/PUT | `/api/v1/admin/sections/{key}` | admin | textes traduits d'une section (version pour verrou optimiste) |
 | POST/DELETE | `/api/v1/admin/media` · `/media/{id}` | admin | images |
@@ -429,8 +431,8 @@ Version `v1` dans le chemin.
 | GET | `/api/v1/admin/bookings?date=&barber=&state=` | admin | planning / liste |
 | POST | `/api/v1/admin/bookings/{id}/cancel` | admin | annulation salon |
 | GET/POST | `/api/v1/admin/mail-log` · `/mail-log/retry` | admin | journal et relance |
-| GET/POST | `/api/v1/admin/migrations` | admin | migrations en attente / appliquer |
-| GET | `/api/v1/admin/privacy/bookings?email=` · POST `/privacy/export` · `/privacy/erase` | admin | droits RGPD (FR-012) |
+| GET/POST | `/api/v1/admin/migrations` | admin (GET) · admin + TOTP récent (POST) | migrations en attente / appliquer |
+| POST | `/api/v1/admin/privacy/search` · `/privacy/export` · `/privacy/erase` (adresse dans le corps) | admin | droits RGPD (FR-012) |
 | GET | `/api/v1/admin/health` | admin | tableau de bord santé (Story 5.2) |
 | GET | `/api/v1/admin/backup` | admin + TOTP récent | sauvegarde SQL en flux (FR-044) |
 
@@ -456,7 +458,7 @@ Le PO désignera, à l'étape d'arbitrage du bootstrap, lesquels sont « critiqu
 
 | Entité | Table | Colonnes clés | Contraintes |
 |---|---|---|---|
-| Section | `section` | `key`, `version` | PK `key` |
+| Section | `section` | `key`, `page`, `position`, `version` | PK `key` ; `page ∈ {home, legal-notice, privacy}` |
 | Texte traduit | `translation` | `owner_type`, `owner_id`, `field`, `lang`, `value` | UNIQUE (owner_type, owner_id, field, lang) ; `lang ∈ {fr,nl,en}` |
 | Média | `media` | `id`, `path`, `mime`, `width`, `height` | — |
 | Catégorie | `category` | `id`, `position` | — |
@@ -487,9 +489,9 @@ Migrations `NNNN_*.up.sql` / `*.down.sql` réversibles, SQL portable MariaDB.
 
 ## 12. Contraintes et hypothèses
 
-- Contraintes : Brief §14 (mutualisé, FTP, PHP 8.2 + MariaDB, pas de Node serveur, CyFun Essential, RGPD, FR/NL/EN).
+- Contraintes : Brief §14 (mutualisé, SFTP/FTPS, PHP 8.2 + MariaDB, pas de Node serveur, CyFun Essential, RGPD, FR/NL/EN).
 - Hypothèses acceptées à la validation du Brief : e-mail client obligatoire · conservation 6 mois ·
-  délai minimal 2 h, annulation jusqu'à 2 h avant · traductions saisies par le gérant · FTP sans SSH · ≤ 5 €/mois.
+  délai minimal 2 h, annulation jusqu'à 2 h avant · traductions saisies par le gérant · SFTP/FTPS sans SSH · ≤ 5 €/mois.
 - Hypothèses introduites ici (acceptées à la validation du PRD v1.0) : débuts au quart d'heure · horizon 60 jours ·
   image ≤ 8 Mo · 5 réservations/heure/IP · session 30 min / 12 h · admin en français · fichier `.ics` joint ·
   purge « au premier passage du jour » si pas de tâche planifiée · répartition « sans préférence » équitable ·
@@ -502,7 +504,7 @@ Migrations `NNNN_*.up.sql` / `*.down.sql` réversibles, SQL portable MariaDB.
 
 1. Les 4 parcours de référence (P1–P4) passent en E2E sur PHP 8.2 + MariaDB 10.6.
 2. Test de concurrence : 20 réservations simultanées sur un même créneau → exactement 1 confirmée.
-3. Un paquet de déploiement unique, envoyé par FTP sur un hébergement de test, s'installe via `/install`.
+3. Un paquet de déploiement unique, envoyé par SFTP/FTPS sur un hébergement de test, s'installe via `/install`.
 4. Objectifs O1, O2, O5 mesurés et atteints avant mise en ligne.
 5. Gate review CyFun Essential (couche application) sans écart bloquant.
 

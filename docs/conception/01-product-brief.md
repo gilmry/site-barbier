@@ -9,7 +9,7 @@ signature_humaine:
   nom: gilmry
   role: PO
   date: 2026-10-22
-  verdict: validé (hypothèses restantes acceptées telles quelles)
+  verdict: à revalider (v1.1, corrections du Validateur) — v1.0 validé le 2026-10-22
 ---
 
 # Product Brief — Site web d'un barbier (site-barbier)
@@ -164,7 +164,7 @@ bruxelloise, hébergeable pour quelques euros par mois, sans dépendance à une 
 | Traductions incomplètes | Élevée | Faible | Repli sur le FR ; indicateur « à traduire » dans l'admin |
 | Vol du mot de passe éditeur | Moyenne | Élevé | Double facteur (TOTP), sessions durcies |
 | Données de clients conservées sans fin | Moyenne | Moyen (RGPD) | Durée de conservation définie + purge |
-| Déploiement FTP manuel source d'erreurs | Moyenne | Moyen | Paquet de déploiement unique, généré et vérifié par la CI |
+| Déploiement SFTP/FTPS manuel source d'erreurs | Moyenne | Moyen | Paquet de déploiement unique, généré et vérifié par la CI |
 
 ## 16. Principes d'architecture
 Hexagonale, DDD au centre, ordre des couches Foyer (Domaine → Application → Adaptateurs → Contrat → Front) ;

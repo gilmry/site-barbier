@@ -9,7 +9,7 @@ signature_humaine:
   nom: gilmry
   role: PO
   date: 2026-10-22
-  verdict: validé
+  verdict: à revalider (v1.1, corrections du Validateur)
 ---
 
 # Plan de gestion des vulnérabilités — site-barbier

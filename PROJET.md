@@ -44,7 +44,7 @@
 | 2 | PRD | `docs/conception/02-prd.md` | ✅ v1.0 validé (gilmry, 2026-10-22) |
 | 3 | Architecture + ADR + plan vulnérabilités | `docs/conception/03-architecture.md` + `03b-plan-vulnerabilites.md` | ✅ v1.0 validé (gilmry, 2026-10-22) |
 | 4 | Epics & stories | `docs/conception/04-epics-stories.md` | ✅ v1.0 validé (gilmry, 2026-10-22) |
-| 5 | Validation | `docs/conception/05-validation.md` | 🟡 passage 1 : CONCERNS (98/100, 12 à corriger + 9 mineures) → corrections v1.1 faites, passage 2 en cours |
+| 5 | Validation | `docs/conception/05-validation.md` | 🟡 passage 2 : CONCERNS (100/100, 3 à corriger + 9 mineures) → corrigés ; 2 arbitrages PO puis passage 3 |
 
 Référence visuelle : `docs/design/reference-le-corbeau.md`.
 
@@ -78,7 +78,13 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 
 ### 🔴 En attente (l'humain doit trancher une MODALITÉ)
 
-- *(aucun)*
+- **Point** : ADR-004 — précisions de la bascule différée vers l'outillage lourd
+  - **Preuve jointe** : `docs/conception/03-architecture.md` ADR-004, ADR-002 (résidu mesuré)
+  - **Question (clair)** : on revoit ce choix à chaque bilan, et on bascule au premier incident de cohérence, au-delà de 60 routes, ou si l'hébergeur rend le poids indifférent ?
+  - **Options** : A. ces trois déclencheurs, revus à chaque bilan (recommandé) · B. on ne revoit qu'en fin de release
+- **Point** : nouvelle enveloppe ≈ 30 j (au lieu de 28 j acceptés)
+  - **Preuve jointe** : `docs/conception/04-epics-stories.md` §Estimation (33 stories, 24,75 j + 20 %)
+  - **Options** : A. accepter ≈ 30 j · B. retirer une capacité pour rester à 28 j
 
 ### ✅ Tranchés
 
@@ -114,3 +120,4 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 - 2026-10-22 — backlog v0.1 : 31 stories, ≈ 28 j (recalage ×1,9 vs prior du Brief), proposition R1/R2
 - 2026-10-22 — backlog validé, une seule release (≈ 28 j)
 - 2026-10-22 — Validateur passage 1 : CONCERNS 98/100 ; reboucle PM/Architecte/Scrum Master → Brief/PRD/Archi/Stories v1.1 (28 FR, ADR-010, stories 0.0 et 3.11, ≈ 30 j)
+- 2026-10-22 — Validateur passage 2 : CONCERNS 100/100 ; 3 points + 9 mineures corrigés (v1.1 revue) ; arbitrages ADR-004 et enveloppe 30 j posés

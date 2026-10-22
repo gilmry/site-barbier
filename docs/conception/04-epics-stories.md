@@ -10,7 +10,7 @@ signature_humaine:
   nom: gilmry
   role: PO
   date: 2026-10-22
-  verdict: validé — une seule release (≈ 28 j)
+  verdict: à revalider (v1.1, corrections du Validateur) — v1.0 validé le 2026-10-22 (une seule release, ≈ 28 j ; ≈ 30 j en v1.1 à confirmer)
 ---
 
 # Epics & User Stories — site-barbier
@@ -69,12 +69,12 @@ registre `PROJET.md` à jour (tours, tokens, wall-clock) · un commit par étape
 
 ### Story 1.1 — Installer et migrer depuis le navigateur (FR-042)
 - **Gherkin** : `Étant donné une base vide et le paquet déposé, Quand j'ouvre /install avec le code d'installation, Alors les migrations s'appliquent, je crée le compte éditeur et je suis conduit à l'enrôlement du double facteur (Story 1.2) ; /install est désactivé une fois l'enrôlement confirmé.`
-- **4×N** : `@happy` contrôle d'environnement → migrations → compte · `@negative` PHP < 8.2 → arrêt clair ; migration en échec → rollback · `@edge` rejouer après succès → refus ; migration déjà appliquée → ignorée · `@security` code à usage unique, aucun secret affiché, `/install` 404 après usage.
+- **4×N** : `@happy` contrôle d'environnement → migrations → compte · `@negative` PHP < 8.2 → arrêt clair ; migration en échec → rollback · `@edge` recréer un compte une fois le compte créé → refus ; migration déjà appliquée → ignorée · `@security` code à usage unique, aucun secret affiché ; la session créée n'est qu'une session pré-enrôlement (la désactivation de `/install` est vérifiée en 1.2).
 - **Couches** : Domain · Application · Infra · Frontend · **Taille** : M · **Tours** : 8
 
 ### Story 1.2 — Connexion mot de passe + double facteur (FR-040)
 - **Gherkin** : `Étant donné mon compte avec TOTP enrôlé, Quand je saisis e-mail, mot de passe puis un code valide, Alors j'accède à l'admin.`
-- **4×N** : `@happy` **enrôlement TOTP** (QR + secret, confirmé par un premier code — porte l'étape finale de `/install`), connexion en deux temps · `@negative` mauvais mot de passe/code → message unique ; code rejoué → refus · `@edge` décalage ±30 s accepté, 2 min refusé ; vecteurs RFC 6238 · `@security` verrou progressif après 5 échecs, pas d'énumération, liste noire de mots de passe, secret chiffré (sodium).
+- **4×N** : `@happy` **enrôlement TOTP** (QR + secret, confirmé par un premier code — porte l'étape finale de `/install`), connexion en deux temps · `@negative` mauvais mot de passe/code → message unique ; code rejoué → refus · `@edge` décalage ±30 s accepté, 2 min refusé ; vecteurs RFC 6238 · `@security` verrou progressif après 5 échecs, pas d'énumération, liste noire de mots de passe, secret chiffré (sodium) ; `/install` répond 404 une fois l'enrôlement confirmé ; session pré-enrôlement limitée aux routes d'enrôlement.
 - **Couches** : Domain · Application · Infra · Frontend · **Taille** : L · **Tours** : 10
 
 ### Story 1.3 — Session sûre, CSRF, en-têtes (FR-041)
@@ -113,7 +113,7 @@ registre `PROJET.md` à jour (tours, tokens, wall-clock) · un commit par étape
 
 ### Story 2.5 — Horaires et coordonnées (FR-005, FR-010)
 - **Gherkin** : `Étant donné que nous sommes jeudi à Bruxelles, Quand j'ouvre Horaires, Alors jeudi est marqué « Aujourd'hui » ; si je réduis le jeudi à 19:00 dans l'admin, le site l'affiche.`
-- **4×N** : `@happy` 7 jours, fermé/ouvert, copier le numéro, coordonnées traduites · `@negative` fin ≤ début, téléphone invalide → refus · `@edge` jour courant au fuseau de Bruxelles ; fermeture exceptionnelle à venir affichée (le refus d'une réduction qui exclut des réservations est porté par la Story 3.11) · `@security` admin + CSRF.
+- **4×N** : `@happy` 7 jours, fermé/ouvert, copier le numéro, coordonnées traduites · `@negative` fin ≤ début, téléphone invalide → refus · `@edge` jour courant au fuseau de Bruxelles (l'affichage des fermetures exceptionnelles est porté par la 3.3, le refus d'une réduction qui exclut des réservations par la 3.11) · `@security` admin + CSRF.
 - **Couches** : Domain · Application · Infra · Frontend · **Taille** : M · **Tours** : 8
 
 ### Story 2.6 — Textes des sections (FR-006)
@@ -142,12 +142,12 @@ registre `PROJET.md` à jour (tours, tokens, wall-clock) · un commit par étape
 
 ### Story 3.2 — Disponibilités des barbiers (FR-020)
 - **Gherkin** : `Quand je donne à Samir le mardi 12:00–19:00, Alors aucun créneau de Samir ne commence avant 12:00 le mardi.`
-- **4×N** : `@happy` plusieurs plages par jour, défaut = horaires du salon · `@negative` hors horaires, chevauchement → refus · `@edge` modification qui exclut une réservation → refusée, **y compris si la réservation arrive au même instant** (test de concurrence MariaDB) · `@security` admin + CSRF.
+- **4×N** : `@happy` plusieurs plages par jour, défaut = horaires du salon · `@negative` hors horaires, chevauchement → refus · `@edge` plage de 15 min acceptée ; disponibilité qui déborde des horaires du salon → rognée au calcul (`SlotCalculator`) · `@security` admin + CSRF. (Les conflits avec des réservations existantes ou simultanées sont portés par la 3.11, après `BookSlot`.)
 - **Couches** : Domain · Application · Infra (AgendaLock) · Frontend · **Taille** : M · **Tours** : 8
 
 ### Story 3.3 — Absences et fermetures exceptionnelles (FR-021)
-- **Gherkin** : `Quand je pose une absence pour Antoine le 12 novembre, Alors aucun créneau d'Antoine n'est proposé ce jour ; si une réservation existe ce jour, l'absence est refusée.`
-- **4×N** : `@happy` absence barbier, fermeture salon avec motif traduit · `@negative` fin avant début, date passée → refus · `@edge` absence ↔ réservation simultanées → exactement l'une des deux passe ; fermeture salon verrouille tous les barbiers dans l'ordre (pas d'interblocage) · `@security` admin + CSRF.
+- **Gherkin** : `Quand je pose une absence pour Antoine le 12 novembre, Alors aucun créneau d'Antoine n'est proposé ce jour ; quand je ferme le salon le 24 décembre, le site affiche « fermé exceptionnellement le 24 décembre » dans la section Horaires.`
+- **4×N** : `@happy` absence barbier, fermeture salon avec motif traduit · `@negative` fin avant début, date passée → refus · `@edge` absence sur plusieurs semaines ; fermeture salon verrouille tous les barbiers dans l'ordre des identifiants (pas d'interblocage, test de deux fermetures simultanées) ; fermeture dans les 7 jours affichée sur le site (FR-005) · `@security` admin + CSRF. (Absence refusée sur un jour réservé, et course absence ↔ réservation : Story 3.11.)
 - **Couches** : Domain · Application · Infra · Frontend · **Taille** : M · **Tours** : 8
 
 ### Story 3.4 — API publique de réservation en lecture (FR-022 ; prérequis FR-023/024)

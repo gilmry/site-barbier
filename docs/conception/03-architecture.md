@@ -11,7 +11,7 @@ signature_humaine:
   nom: gilmry
   role: PO
   date: 2026-10-22
-  verdict: validé
+  verdict: à revalider (v1.1, corrections du Validateur)
 ---
 
 # Architecture technique — site-barbier
@@ -88,8 +88,8 @@ Toute la logique d'heure (Europe/Brussels, changements d'heure) y vit et se test
 
 Un cas d'usage par FR (ou groupe cohérent), orchestration sans règle métier :
 
-- Vitrine : `RenderHomePage`, `UpdateSection`, `UploadMedia`, `ManageCatalog`, `ManageBarbers`, `UpdateOpeningHours`, `UpdateSalonInfo`, `RenderLegalPage`, `UpdateLegalPage`, `FindClientBookings`, `ExportClientData`, `EraseClientData` (FR-012).
-- Agenda : `ListBookableServices`, `ListBookableBarbers`, `ListBookableDays`, `ListFreeSlots`, `BookSlot`, `CancelBookingByClient`, `CancelBookingBySalon`, `SetAvailability`, `AddAbsence`, `AddClosure`, `ListBookings`, `PurgeExpiredBookings`.
+- Vitrine : `RenderHomePage`, `UpdateSection`, `UploadMedia`, `ManageCatalog`, `ManageBarbers`, `UpdateOpeningHours`, `UpdateSalonInfo`, `RenderLegalPage`, `UpdateLegalPage`.
+- Agenda : `ListBookableServices`, `ListBookableBarbers`, `ListBookableDays`, `ListFreeSlots`, `BookSlot`, `CancelBookingByClient`, `CancelBookingBySalon`, `SetAvailability`, `AddAbsence`, `AddClosure`, `ListBookings`, `PurgeExpiredBookings`, `FindClientBookings`, `ExportClientData`, `EraseClientData` (FR-012 : agissent sur `Booking`).
 - Notification : `NotifySalon`, `NotifyClient`, `RetryFailedMails`.
 - Acces : `Login`, `VerifyTotp`, `EnrollTotp`, `ConfirmTotpEnrollment` (émet les codes de secours), `UseRecoveryCode`, `RegenerateRecoveryCodes`, `Logout`, `InstallApplication`, `ApplyPendingMigrations`, `ExportBackup` (FR-044), `ReadHealth`.
 
@@ -174,7 +174,7 @@ Pas de serveur à piloter : l'hébergeur porte la plateforme. Ce que le projet p
 | Gate | Registre | Commande (cible) |
 |---|---|---|
 | `plancher` : secrets (Gitleaks), SBOM CycloneDX (`cyclonedx-php-composer` + `@cyclonedx/cyclonedx-npm`), migrations réversibles ; *conteneur : N/A, aucun image livrée* | bloquant | `bash harness/run-verify.sh` |
-| `verify` : H1 pureté, échappement, pas d'URL tierce, pas de chaîne en dur, pas de `fetch` hors client généré | bloquant | idem |
+| `verify` : H1 pureté, échappement, **aucune concaténation SQL** (requêtes préparées seulement), pas d'URL tierce, pas de chaîne en dur, pas de `fetch` hors client généré | bloquant | idem |
 | `unit` + `bdd` (domaine + application, nommés en Gherkin) | bloquant | `bash harness/run-phpunit.sh` |
 | `contrat` : client régénéré = commité ; parité routes ↔ spec | bloquant | `bash harness/run-contract.sh` |
 | `integration` (MariaDB 10.6 réelle, réponses validées contre la spec, tests de concurrence) | bloquant | `bash harness/run-integration.sh` |
@@ -257,7 +257,7 @@ importés par les trois harnais — invariant anti-dette). Couverture cible : do
 | Photos | public | oui si visages (barbiers consentants) | `www/uploads/` | non (public) |
 | Réservations (nom, téléphone, e-mail, rendez-vous, langue) | **confidentiel** | **oui** | MariaDB, 6 mois max | non applicatif — base de l'hébergeur ; accès restreint, purge ; à réexaminer en gate review |
 | Compteurs de limitation de débit | interne | pseudonymisé (IP **hachée** avec sel secret) | MariaDB, purgés chaque jour | haché |
-| Sauvegardes exportées par le gérant | **confidentiel** | **oui** | poste du gérant (hors produit) | à la charge du gérant — avertissement à l'export |
+| Sauvegardes exportées par le gérant | **confidentiel** | **oui** | poste du gérant (hors produit), **6 mois au plus** (politique de confidentialité) | à la charge du gérant — avertissement à l'export ; restauration avec le `config.php` d'origine (clé sodium) |
 | Jetons d'annulation | confidentiel | lié | MariaDB | **haché** (SHA-256) |
 | Compte éditeur (e-mail, hash, secret TOTP, codes de secours) | **confidentiel** | oui | MariaDB | hash / **chiffré** (sodium) / hachés |
 | Sessions admin | confidentiel | lié | MariaDB | identifiant seul, données minimales |
@@ -291,10 +291,11 @@ Aucun autre tiers : pas d'analytics, pas de CDN, pas de polices distantes, pas d
 
 - Endpoints publics : lecture seule hors `POST /bookings` et `POST /bookings/cancel` ; aucun ne renvoie de donnée
   d'un autre client ; limitation de débit ; champ piège.
-- Endpoints admin : session + TOTP + CSRF ; `noindex`.
-- RGPD : base légale = exécution du service demandé (réservation) ; consentement explicite à la politique ;
-  conservation 6 mois ; droit d'accès/effacement exécuté par le gérant (recherche par e-mail → export / suppression,
-  à ajouter au backlog comme story `@security`) ; registre de traitement fourni au gérant (modèle).
+- Endpoints admin : session + TOTP + CSRF ; `noindex` ; actions sensibles = **TOTP récent** (< 10 min, FR-041) ; session pré-enrôlement limitée aux routes d'enrôlement.
+- RGPD : base légale = exécution du service demandé (réservation) — **pas de consentement**, information avec lien
+  vers la politique ; conservation 6 mois ; droits d'accès/effacement exécutés par le gérant (FR-012, adresse dans le
+  corps d'un POST) ; sauvegardes exportées conservées 6 mois au plus par le gérant (FR-044) ; registre de traitement
+  fourni au gérant (modèle).
 
 ## ADR (Architecture Decision Records)
 
@@ -335,10 +336,11 @@ plusieurs milliers à envoyer en SFTP ; (b) pas de cache Symfony inscriptible à
 (c) une empreinte mémoire et un temps de réponse meilleurs sur un hébergement d'entrée de gamme.
 **Réversibilité** : le kit prouve qu'API Platform s'enfiche sur **les mêmes cas d'usage** (`src/Http/ApiPlatform/`)
 sans toucher Domaine ni Application ; la bascule reste possible tant que le contrat v1 est respecté.
-**Destination et modalité** : la destination (API Platform, `bootstrap-nouveau-projet.md`) n'est pas remise en cause ;
-le PO a tranché la **modalité** : bascule **différée**, réexaminée à chaque gate review, déclenchée par le premier
-de ces événements — un incident de dérive du contrat, plus de 60 routes, ou une offre d'hébergement qui rend le poids
-indifférent. Date de premier réexamen : la gate review de fin de release.
+**Destination et modalité** : la destination (API Platform, `bootstrap-nouveau-projet.md`) n'est pas remise en cause.
+Le PO a tranché « léger » (bascule **différée**). Précisions de modalité **proposées, à confirmer par le PO** :
+réexamen à chaque gate review ; bascule déclenchée par le premier de ces événements — un incident de dérive du
+contrat, plus de 60 routes, ou une offre d'hébergement qui rend le poids indifférent ; premier réexamen à la gate
+review de fin de release.
 Prix : contrat plus faible (résidu ADR-002). Alternative : API Platform dès le MVP — contrat mécanisé, paquet
 lourd. Question posée au PO (modalité, langage clair) : « On garde un site léger et simple à envoyer, quitte à passer plus
 tard sur l'outillage plus lourd si le projet grandit ? » → « Léger ».
