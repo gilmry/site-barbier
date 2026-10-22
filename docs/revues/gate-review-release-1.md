@@ -5,10 +5,10 @@ redige_le: 2026-10-22
 redige_par: agent (Claude Code, pilote Foyer)
 branche: story/3.x-agenda (chaîne de branches story/0.1 → 0.2 → 0.3 → 0.4 → 0.5 → 1.x → 2.x → 3.x)
 signature_humaine:
-  nom: <à signer>
+  nom: gilmry
   role: PO
-  date: <AAAA-MM-JJ>
-  verdict: <promue | renvoyée avec preuve manquante>
+  date: 2026-10-22
+  verdict: promue sur main (triage des rapports de jalon accepté)
 ---
 
 # Gate review — fin de release 1

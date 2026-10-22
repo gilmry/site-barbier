@@ -33,7 +33,7 @@
 ## Position courante
 
 - **Phase / étape** : Vagues V0 à V4 terminées (32 stories sur 33) · V5 (Story 5.1) en attente du PO
-- **Prochaine action attendue** : le PO arbitre la promotion de la chaîne `story/*` vers `main`, puis commande OVH et déroule `docs/deploiement.md` (recette → production)
+- **Prochaine action attendue** : le PO fait confirmer les 6 points par OVH, commande, crée le dépôt distant (protection de `main`) et déroule `docs/deploiement.md` (recette → production)
 - **Rôle à jouer** : `pilote/roles/harnais.md` + `pilote/roles/gate-runner.md`
 
 ## Livrables de conception
@@ -61,45 +61,45 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 | doc vivante (preuve de valeur) | 🟢 vitrine filmée (P1, P2, P3, P4…) | 2026-10-22 | non bloquant — `bash harness/run-demo.sh` |
 | jalon (SAST · SCA · qualité) | composer 0 · npm 3 (build) · SAST 1 (faux positif) · PHPStan 133 (typage) | 2026-10-22 | rapport trié : `docs/revues/gate-review-release-1.md` |
 
-**Dernière gate review** : 2026-10-22 (fin de release 1) · autoévaluation CyFun Essential couche application : seuils atteints, 0 écart bloquant — `docs/revues/gate-review-release-1.md` (à signer)
+**Dernière gate review** : 2026-10-22 (fin de release 1, signée par gilmry) · autoévaluation CyFun Essential couche application : seuils atteints, 0 écart bloquant — `docs/revues/gate-review-release-1.md`
 
 ## Périmètres / backlog
 
 | Périmètre / story | État | Couches vertes | Bascule | Commit / ADR | Tours | Tokens | Wall-clock |
 |---|---|---|---|---|---|---|---|
 | 0.0 Choisir et sonder l'hébergement (S) | ✅ fait, branche `story/0.0-hebergement` — OVH Perso retenu ; 6 points à confirmer auprès d'OVH par le PO | — | — | `nouveau(hebergement)` ×2 | 4 | ≈ 140 k (étude) | ≈ 20 min |
-| 0.1 Socle reproductible (L) | ✅ fait, branche `story/0.1-socle` — promotion à arbitrer (B0) | socle (Http, Persistence) | — | `nouveau(socle)` ×2 | 14 | ≈ 60 k | ≈ 1 h |
-| 0.2 Harnais de contrat (M) | ✅ fait (`story/0.2-contrat`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 0.3 Parcours partagés et triple harnais (M) | ✅ fait (`story/0.3-harnais`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 0.4 Paquet et hébergement simulé (M) | ✅ fait (`story/0.4-paquet`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 0.5 CI, hooks, plancher (M) | ✅ fait (`story/0.5-ci`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 1.1 Installation sans CLI (M) | ✅ fait (`story/1.x-acces`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 1.2 Connexion 2FA (L) | ✅ fait (`story/1.x-acces`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 1.3 Session, CSRF, TOTP récent (M) | ✅ fait (`story/1.x-acces`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 1.4 Codes de secours, reprise d'accès (M) | ✅ fait (`story/1.x-acces`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 2.1 Accueil Le Corbeau (L) | ✅ fait (`story/2.x-vitrine`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 2.2 Trois langues (M) | ✅ fait (`story/2.x-vitrine`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 2.3 Carte (L) | ✅ fait (`story/2.x-vitrine`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 2.4 Équipe (M) | ✅ fait (`story/2.x-vitrine`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 2.5 Horaires et coordonnées (M) | ✅ fait (`story/2.x-vitrine`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 2.6 Textes des sections (M) | ✅ fait (`story/2.x-vitrine`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 2.7 Images (P3) (M) | ✅ fait (`story/2.x-vitrine`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 2.8 Légal + RGPD (M) | ✅ fait (`story/3.x-agenda`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 3.1 Calcul des créneaux (M) | ✅ fait (`story/3.x-agenda`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 3.2 Disponibilités (M) | ✅ fait (`story/3.x-agenda`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 3.3 Absences et fermetures (M) | ✅ fait (`story/3.x-agenda`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 3.4 API de lecture (S) | ✅ fait (`story/3.x-agenda`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 3.5 Réserver (L) | ✅ fait (`story/3.x-agenda`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 3.11 Garde-fous agenda (P4) (M) | ✅ fait (`story/3.x-agenda`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 3.6 Sans préférence (S) | ✅ fait (`story/3.x-agenda`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 3.7 Îlot de réservation (P1) (L) | ✅ fait (`story/3.x-agenda`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 3.8 Annulation client (P2) (M) | ✅ fait (`story/3.x-agenda`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 3.9 Planning salon (M) | ✅ fait (`story/3.x-agenda`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 3.10 Purge (S) | ✅ fait (`story/3.x-agenda`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 4.1 E-mails (M) | ✅ fait (`story/3.x-agenda`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
-| 4.2 Journal et relance (S) | ✅ fait (`story/3.x-agenda`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 0.1 Socle reproductible (L) | ✅ promu sur main | socle (Http, Persistence) | — | `nouveau(socle)` ×2 | 14 | ≈ 60 k | ≈ 1 h |
+| 0.2 Harnais de contrat (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 0.3 Parcours partagés et triple harnais (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 0.4 Paquet et hébergement simulé (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 0.5 CI, hooks, plancher (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 1.1 Installation sans CLI (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 1.2 Connexion 2FA (L) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 1.3 Session, CSRF, TOTP récent (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 1.4 Codes de secours, reprise d'accès (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 2.1 Accueil Le Corbeau (L) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 2.2 Trois langues (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 2.3 Carte (L) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 2.4 Équipe (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 2.5 Horaires et coordonnées (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 2.6 Textes des sections (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 2.7 Images (P3) (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 2.8 Légal + RGPD (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 3.1 Calcul des créneaux (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 3.2 Disponibilités (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 3.3 Absences et fermetures (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 3.4 API de lecture (S) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 3.5 Réserver (L) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 3.11 Garde-fous agenda (P4) (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 3.6 Sans préférence (S) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 3.7 Îlot de réservation (P1) (L) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 3.8 Annulation client (P2) (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 3.9 Planning salon (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 3.10 Purge (S) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 4.1 E-mails (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 4.2 Journal et relance (S) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
 | 5.1 Recette puis production (M) | 🔴 en attente du PO (points irréversibles : commande OVH, SFTP, config, recette, production) | — | n°prod | — | | | |
-| 5.2 Santé et sauvegarde (M) | ✅ fait (`story/3.x-agenda`) — promotion à arbitrer | D/A/Ad/C/F | — | `nouveau(…)` | | | |
+| 5.2 Santé et sauvegarde (M) | ✅ promu sur main | D/A/Ad/C/F | — | `nouveau(…)` | | | |
 
 ## Promotions
 
@@ -110,9 +110,6 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 
 ### 🔴 En attente (l'humain doit trancher une MODALITÉ)
 
-- **Point** : promotion de la release 1 (chaîne `story/0.0` → … → `story/3.x-agenda`) vers `main`
-  - **Preuve jointe** : `docs/revues/gate-review-release-1.md` (tous gates 🟢, 22 sondes de sensibilité, vitrine)
-  - **Question** : promue telle quelle, ou renvoyée avec quelle preuve manquante ?
 - **Point** : commande OVH Perso (48 mois, GRA) après confirmation des 6 points de `docs/hebergement.md`
 - **Point** : dépôt distant + protection de la branche `main` (CI verte et revue obligatoires)
 - **Point** : recette `test.<domaine>` puis mise en production (`docs/deploiement.md`) ; première migration en production
@@ -137,6 +134,7 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 | Gantt | Signé (`docs/pilotage/gantt.md` v1.0) | gilmry | 2026-10-22 | — |
 | Versions de la pile | **PHP 8.4** (support de sécurité jusqu'au 31/12/2028 ; 8.2 finit le 31/12/2026) et **MariaDB 10.11 LTS** (10.6 sans support depuis 07/2026) — PHP n'a pas de LTS officielle | gilmry | 2026-10-22 | NFR-02 amendé |
 | Hébergeur | **OVH Perso, 48 mois, datacenter GRA** — commande par le PO après confirmation des 6 points de `docs/hebergement.md` ; base **MySQL 8** (remplace MariaDB 10.11), CI sur MySQL 8.0 et 8.4 jusqu'à confirmation | gilmry | 2026-10-22 | ADR-010 (résidu accepté) |
+| Promotion release 1 | Promue sur main ; triage des rapports de jalon accepté (gate review signée) | gilmry | 2026-10-22 | — |
 | Sortie de BMAD | Conception validée (PASS 100/100), livrables v1.1 signés | gilmry | 2026-10-22 | — |
 | Modalité de la bascule différée | Revue à chaque gate review ; déclencheurs : incident de dérive, > 60 routes, hébergeur rendant le poids indifférent | gilmry | 2026-10-22 | ADR-004 |
 | Architecture v1.0 + plan de vulnérabilités | Validés ; responsable sécurité Gilles seul (sans suppléant, mesure compensatoire), signalement gilmry+abuse@gmail.com | gilmry | 2026-10-22 | — |
@@ -171,3 +169,4 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 - 2026-10-22 — Story 0.0 : 5 offres conformes comparées ; PO retient **OVH Perso 48 mois (GRA)** → base MySQL 8 au lieu de MariaDB, conception v1.2 (mentions MariaDB → MySQL), ADR-010 en résidu accepté
 - 2026-10-22 — socle passé sur MySQL 8 : CI verte sur 8.4 et 8.0, sensibilité reprouvée (commit `7419690` sur `story/0.1-socle`)
 - 2026-10-22 — /goal « terminer le site » : stories 0.2 à 5.2 fabriquées (sauf 5.1), CI complète verte, gate review de fin de release rédigée
+- 2026-10-22 — release 1 promue sur main par le PO (merge `2bd9d58`) ; reste la Story 5.1, actions du PO
