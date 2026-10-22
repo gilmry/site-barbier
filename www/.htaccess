@@ -1,5 +1,31 @@
-# Réécriture vers le contrôleur frontal (même règle que harness/dev-router.php).
-# Le durcissement complet (HTTPS, en-têtes, refus de app/) est porté par la Story 0.4.
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^ index.php [QSA,L]
+# Racine web (OVH : dossier www/). Même règle de réécriture que harness/dev-router.php.
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # HTTPS imposé (FR-041) — derrière le proxy OVH, X-Forwarded-Proto porte le schéma d'origine.
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:[0-9]+)?$
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+  # Fichiers cachés (.htaccess, .git…) : jamais servis.
+  RewriteRule (^|/)\. - [F,L]
+  # Tout ce qui n'est pas un fichier existant va au contrôleur frontal.
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "DENY"
+</IfModule>
+
+# Seul le contrôleur frontal est exécutable.
+<FilesMatch "\.(php|phtml|phar)$">
+  Require all denied
+</FilesMatch>
+<Files "index.php">
+  Require all granted
+</Files>

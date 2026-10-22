@@ -54,7 +54,8 @@ Prérequis : Docker seulement (aucun PHP local). Images : `site-barbier-php:8.4`
 | `e2e` navigateur (chaque parcours de `journeys/`, bureau + mobile) | `bash harness/run-e2e.sh` (`JOURNEY=<id>` pour un seul) | oui (auto) | 0.3 |
 | `visuel` (goldens par parcours et taille d'écran, tolérance 0,5 %) | `bash harness/run-visual.sh` — `VISUAL_MODE=capture` pour réécrire **consciemment** les goldens | oui (auto) | 0.3 |
 | `doc-vivante` (cadence 1 action/1 s, captures + vidéo, **non bloquant**) | `bash harness/run-demo.sh` → `harness/demo/vitrine/index.html` | oui (auto) | 0.3 |
-| `hebergement` (paquet en hébergement simulé) | à venir | | 0.4 |
+| `hebergement` (paquet reproductible, sans fichier interdit, installé dans `php:8.4-apache`, durcissement `.htaccess`) | `bash harness/run-hosting.sh` | oui (auto) | 0.4 |
+| paquet de déploiement | `bash harness/package.sh` → `dist/site-barbier-<version>.zip` (procédure : `docs/deploiement.md`) | non | 0.4 |
 | `plancher` sécurité (secrets, SBOM, SCA) + CI distante | à venir | | 0.5 |
 
 Les gates s'ajoutent à cette table **dans la même PR** que la story qui les crée.

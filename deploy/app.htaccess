@@ -1,0 +1,2 @@
+# Filet de sécurité : si l'hébergeur imposait app/ sous la racine web, rien n'y serait servi.
+Require all denied

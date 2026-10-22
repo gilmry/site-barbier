@@ -42,6 +42,12 @@ chunk=lambda t,c: struct.pack('>I',len(c))+t+c+struct.pack('>I',zlib.crc32(t+c)&
 open(f,'wb').write(b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',w,h,8,2,0,0,0))+chunk(b'IDAT',zlib.compress(raw))+chunk(b'IEND',b''))
 PY
 }
+drift_uploads() { python3 - <<'PY'
+p='www/uploads/.htaccess'; s=open(p).read()
+open(p,'w').write(s.replace('Require all denied', 'Require all granted').replace('RemoveHandler', '# RemoveHandler').replace('php_flag engine off', ''))
+PY
+}
+drift_repro() { sed -i 's/$epoch = mktime(0, 0, 0, 1, 1, 2020);/$epoch = time() + random_int(1, 999);/' harness/package/build.php; }
 drift_e2e()  { sed -i "s#'/api/v1/health'#'/api/v1/sante'#" app/src/Kernel.php; }
 
 # --- Moteur ----------------------------------------------------------------------------------------
@@ -76,6 +82,8 @@ probe "client édité à la main"     drift_client run-contract.sh
 probe "integration : down incomplet" drift_down run-integration.sh
 probe "integration : réponse hors contrat" drift_resp run-integration.sh
 probe "e2e : santé cassée"         drift_e2e    e2e-smoke.sh
+probe "hébergement : uploads exécutables" drift_uploads run-hosting.sh
+probe "hébergement : paquet non reproductible" drift_repro run-hosting.sh
 probe "J1 parcours recopié"        drift_j1     run-verify.sh
 probe "e2e navigateur : attente fausse" drift_journey run-e2e.sh
 probe "visuel : rendu différent du golden" drift_golden run-visual.sh
