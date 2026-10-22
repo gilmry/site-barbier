@@ -381,6 +381,9 @@ PHPMailer (LGPL-2.1, embarqué) en SMTP + STARTTLS avec le compte e-mail du doma
 configurer chez l'hébergeur (story de mise en ligne). La réservation ne dépend jamais du succès de l'envoi
 (journal + relance, FR-032). Alternative écartée : service d'envoi tiers (nouveau flux externe, compte, coût).
 
+### ADR-011 — Barreau Scrum — **retenu** (PO gilmry, 2026-10-22)
+Voir `docs/pilotage/gantt.md` §5 : un flux, une personne qui tranche, au plus deux branches ; Nexus et SAFe sans objet.
+
 ### ADR-010 — Comptes MariaDB séparés quand l'hébergeur le permet — **retenu**
 Décision : un compte applicatif limité au DML et un compte de migration (DDL), tous deux dans `config.php` ; le
 second n'est chargé que par `/install` et l'action « appliquer les migrations » (session admin + TOTP récent).

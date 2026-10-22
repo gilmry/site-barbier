@@ -25,16 +25,16 @@
 
 ## Gantt / vagues
 
-- **Gantt** : `docs/pilotage/gantt.md` v0.1 (à signer)
-- **Vague courante** : V0 (pas encore ouverte) · **barrière** : B0 (Sprint 0 vert, offre d'hébergement choisie)
+- **Gantt** : `docs/pilotage/gantt.md` v1.0 (signé le 2026-10-22 par gilmry) — scénario B, ratio 2
+- **Vague courante** : V0 — Fondations (ouverte) · **barrière** : B0 (Sprint 0 vert, offre d'hébergement choisie)
 - **Branches ouvertes** : —
-- **Barreau** : Scrum proposé (ADR-011, à valider)
+- **Barreau** : Scrum (ADR-011)
 
 ## Position courante
 
-- **Phase / étape** : Phase A bis · Pilotage (WBS, Gantt, barreau)
-- **Prochaine action attendue** : le PO tranche barreau + ratio et signe le Gantt → Phase B0 (résoudre le kit) puis V0
-- **Rôle à jouer** : `pilote/roles/pilotage.md`
+- **Phase / étape** : Phase B0/B · Vague V0 · passe 1 : Story 0.1 (socle) ∥ Story 0.0 (hébergement)
+- **Prochaine action attendue** : instancier `kit-php` (0.1) et préparer la grille d'hébergement (0.0)
+- **Rôle à jouer** : `pilote/roles/harnais.md` + `pilote/roles/gate-runner.md`
 
 ## Livrables de conception
 
@@ -78,13 +78,7 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 
 ### 🔴 En attente (l'humain doit trancher une MODALITÉ)
 
-- **Point** : ADR-011 — barreau (cadre de delivery) — irréversible
-  - **Preuve jointe** : `docs/pilotage/gantt.md` §5 (un flux, une personne, ≤ 2 branches)
-  - **Options** : A. Scrum (recommandé) · B. Nexus · C. SAFe
-- **Point** : ratio de supervision (combien de chantiers en parallèle)
-  - **Preuve jointe** : `docs/pilotage/gantt.md` §3–4 (A : ≈ 30 j, un chantier · B : ≈ 19 j, deux chantiers)
-  - **Options** : A. un chantier à la fois · B. deux en parallèle
-- **Point** : signature du Gantt avant la vague V0
+- *(aucun)*
 
 ### ✅ Tranchés
 
@@ -101,6 +95,9 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 | Environnements | Recette `test.<domaine>` puis production, envoi SFTP/FTPS par le PO | gilmry | 2026-10-22 | ADR-008 |
 | Découpage de release | Une seule release (≈ 28 j) ; target recalée 15 → 28 j | gilmry | 2026-10-22 | — |
 | Enveloppe après validation | ≈ 30 j acceptés (33 stories) | gilmry | 2026-10-22 | — |
+| Barreau | Scrum, vagues V0–V5, revue = gate review de fin de vague | gilmry | 2026-10-22 | ADR-011 |
+| Ratio de supervision | 2 chantiers en parallèle (scénario B, ≈ 19 j) | gilmry | 2026-10-22 | — |
+| Gantt | Signé (`docs/pilotage/gantt.md` v1.0) | gilmry | 2026-10-22 | — |
 | Sortie de BMAD | Conception validée (PASS 100/100), livrables v1.1 signés | gilmry | 2026-10-22 | — |
 | Modalité de la bascule différée | Revue à chaque gate review ; déclencheurs : incident de dérive, > 60 routes, hébergeur rendant le poids indifférent | gilmry | 2026-10-22 | ADR-004 |
 | Architecture v1.0 + plan de vulnérabilités | Validés ; responsable sécurité Gilles seul (sans suppléant, mesure compensatoire), signalement gilmry+abuse@gmail.com | gilmry | 2026-10-22 | — |
@@ -128,3 +125,4 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 - 2026-10-22 — Validateur passage 3 : CONCERNS 100/100 (perte du téléphone sans reprise d'accès) → FR-043 complétée, Story 1.4 passe en M (≈ 30 j inchangé)
 - 2026-10-22 — Validateur passage 4 : **PASS 100/100** ; mineures M1 (exception /install/reset-2fa) et M2 (Mailer factice en 1.4) corrigées
 - 2026-10-22 — sortie de BMAD validée par le PO ; plan de pilotage v0.1 (33 stories, 6 vagues, 2 barrières, scénarios ratio 1 / ratio 2)
+- 2026-10-22 — PO : ratio 2, Scrum (ADR-011), Gantt signé ; ouverture de V0

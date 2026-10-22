@@ -2,15 +2,15 @@
 livrable: Plan de pilotage (WBS, dépendances, Gantt en passes, vagues, coût, barreau)
 persona: chef-de-projet (pilote/roles/pilotage.md)
 projet: site-barbier
-version: 0.1 (à valider)
+version: 1.0 (validé)
 source: docs/conception/04-epics-stories.md v1.1 (PASS 100/100)
 redige_le: 2026-10-22
 redige_par: agent (Claude Code, pilote Foyer)
 signature_humaine:
-  nom: <à signer>
+  nom: gilmry
   role: PO
-  date: <AAAA-MM-JJ>
-  verdict: <validé | à reprendre>
+  date: 2026-10-22
+  verdict: validé — scénario B (ratio 2), Scrum (ADR-011)
 ---
 
 # Plan de pilotage — site-barbier
@@ -80,7 +80,7 @@ Le parallélisme est plafonné par le **ratio de supervision** : combien de chan
 33 passes, une story par passe, dans l'ordre de la table ci-dessus.
 **Durée ≈ 25 j + 20 % d'émergence ≈ 30 j.**
 
-### Scénario B — ratio 2 (deux chantiers en parallèle, sur deux branches)
+### Scénario B — ratio 2 (deux chantiers en parallèle, sur deux branches) — **retenu par le PO (2026-10-22)**
 
 | Passe | Chantier 1 | Chantier 2 | Durée de la passe |
 |---|---|---|---|
@@ -125,9 +125,9 @@ Le parallélisme est plafonné par le **ratio de supervision** : combien de chan
 > scénarios (PO seul) : risque accepté, compensé par le registre commité, les ADR et la doc vivante, qui
 > permettent à un tiers de reprendre.
 
-## 5. Barreau proposé — ADR-011 *(point irréversible, à valider par le PO)*
+## 5. Barreau — ADR-011 — **retenu : Scrum** (PO gilmry, 2026-10-22)
 
-**Proposition : Scrum.** Un seul flux de travail, une seule personne qui tranche, au plus deux branches
+**Décision : Scrum.** Un seul flux de travail, une seule personne qui tranche, au plus deux branches
 ouvertes : Nexus (3 équipes Scrum ou plus sur un même produit) et SAFe (plusieurs trains) n'ont rien à
 coordonner ici. Les « sprints » sont les vagues V0–V5 ; la revue de sprint est la gate review de fin de vague.
 Rescaling à réexaminer seulement si un second développeur ou une seconde équipe rejoint le projet.
