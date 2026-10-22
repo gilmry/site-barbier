@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Pré-push : la CI complète, mêmes commandes que GitHub Actions. FOYER_SKIP_PREPUSH=1 pour un push de
+# branche de travail déjà vérifiée (jamais pour main).
+set -euo pipefail
+[ "${FOYER_SKIP_PREPUSH:-0}" = 1 ] && exit 0
+bash "$(git rev-parse --show-toplevel)/harness/ci.sh"

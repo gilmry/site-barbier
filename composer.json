@@ -1,0 +1,26 @@
+{
+    "name": "site-barbier/app",
+    "description": "Site d'un barbier — dépendances embarquées dans le paquet (rien n'est installé sur le serveur).",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.4",
+        "opis/json-schema": "^2.4",
+        "phpmailer/phpmailer": "^6.9"
+    },
+    "config": {
+        "vendor-dir": "app/vendor",
+        "platform": {
+            "php": "8.4.0"
+        },
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "cyclonedx/cyclonedx-php-composer": true
+        }
+    },
+    "require-dev": {
+        "cyclonedx/cyclonedx-php-composer": "^5.2",
+        "phpstan/phpstan": "^2.1"
+    }
+}

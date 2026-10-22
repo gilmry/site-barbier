@@ -1,0 +1,18 @@
+# Montées de version automatiques (plan de vulnérabilités §7, CyFun ID.RA-08.2 E).
+version: 2
+updates:
+  - package-ecosystem: composer
+    directory: /
+    schedule: { interval: weekly }
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule: { interval: weekly }
+  - package-ecosystem: npm
+    directory: /harness/browser
+    schedule: { interval: weekly }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }
+  - package-ecosystem: docker
+    directory: /docker
+    schedule: { interval: weekly }
