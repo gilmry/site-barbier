@@ -2,13 +2,13 @@
 livrable: Rapport de validation croisée
 persona: 05-validateur (BMAD, TOGAF Phase F)
 projet: site-barbier
-version: 0.3
+version: 0.4
 sources:
   - 01-product-brief.md v1.1
   - 02-prd.md v1.1
-  - 03-architecture.md v1.1 + 03b-plan-vulnerabilites.md
+  - 03-architecture.md v1.1 + 03b-plan-vulnerabilites.md v1.0 (contenu inchangé)
   - 04-epics-stories.md v1.1
-  - PROJET.md (Arbitrages tranchés, commit cc5c6c0)
+  - PROJET.md (commit 32b72e6)
 redige_le: 2026-10-22
 redige_par: agent validateur (Claude Code, pilote Foyer)
 signature_humaine:
@@ -27,141 +27,116 @@ Archétype déclaré : **stateful full-stack** · Niveau CyFun® visé : **Essen
 
 | Passage | Livrables | Score | Verdict | Bilan |
 |---|---|---|---|---|
-| 1 (v0.1) | v1.0 — 26 FR, 31 stories | 98/100 | CONCERNS | 12 points à corriger, 9 mineures |
-| 2 (v0.2) | v1.1 — 28 FR, 33 stories (commit `86a8c8b`) | 100/100 | CONCERNS | 3 points à corriger, 9 mineures. Sur les 21 points du passage 1 : 18 levés, 3 partiellement levés |
-| **3 (v0.3)** | v1.1 révisée (commits `5a1fadd`, `cc5c6c0`) | **100/100** | **CONCERNS** | Les 12 points du passage 2 sont levés. Il reste **1 point à corriger** (apparu au passage 3, latent depuis la v1.1) et 4 mineures |
+| 1 (v0.1) | v1.0 (26 FR, 31 stories) | 98/100 | CONCERNS | 12 à corriger, 9 mineures |
+| 2 (v0.2) | v1.1 (28 FR, 33 stories), commit `86a8c8b` | 100/100 | CONCERNS | 3 à corriger, 9 mineures |
+| 3 (v0.3) | v1.1 révisée, commits `5a1fadd` et `cc5c6c0` | 100/100 | CONCERNS | 1 à corriger : aucune reprise d'accès après la perte du téléphone ; 4 mineures |
+| **4 (v0.4)** | v1.1 révisée, commit `32b72e6` | **100/100** | **PASS** | N1 à N5 levés ; **0 bloquante · 0 à corriger · 2 mineures** (en recommandations) |
 
-## Statut global : **CONCERNS**
+## Statut global : **PASS**
 
-- **Fidelity score** : **100/100**.
-- **Contrat matérialisé** : 4/4 au sens du cadre. Les éléments 2 à 4 sont mécanisés. L'élément 1 est remplacé sous ADR-002, avec un résidu mesuré, une destination fixée et une **modalité désormais tranchée par le PO et tracée au registre**.
-- **Ce qui empêche le PASS** : il reste **un point à corriger** (N1). Après la perte du téléphone du gérant, aucun parcours ne permet de réenrôler le double facteur ni de régénérer les codes de secours. Pourtant, FR-044 fait reposer la restauration sur ce réenrôlement. Pour un éditeur **unique**, c'est un risque de blocage définitif de l'administration, et l'agent devrait inventer le parcours.
+**Fidelity score** : **100/100**. Il dépasse le seuil de 80, et il ne reste aucune incohérence bloquante ni « à corriger ».
+
+**Critère explicite « contrat matérialisé »** (`skills/contrat-api.md`) : **4/4 au sens du cadre.**
+- Les éléments 2 à 4 sont mécanisés : `gen-api.mjs` adapté à OpenAPI 3.1, `StrictJson` avec `opis/json-schema`, et la parité routes ↔ spec.
+- L'élément 1 est remplacé sous ADR-002 : spec écrite à la main, résidu mesuré, destination API Platform.
+- La modalité de bascule a été tranchée par le PO et tracée dans `PROJET.md`.
 
 > Calcul : (capacités Brief couvertes en PRD / total capacités) × 25 + (FRs couvertes en Architecture / total FRs) × 25 + (FRs couvertes en Stories / total FRs) × 25 + (4 classes couvertes / total 4×N) × 25
 >
 > = (7/7) × 25 + (28/28) × 25 + (28/28) × 25 + (112/112) × 25 = **100**
 
-Le critère FR → Architecture est inchangé : chaque verbe du « je veux » doit avoir une couche, et dans cette couche un cas d'usage, un endpoint ou un mécanisme nommé. Le détail FR par FR est en v0.2 ; il reste valable, car aucune FR n'a été ajoutée ni retirée.
-- Le PRD v1.1 révisé ne fait que déplacer des cas d'usage : FR-012 passe en Agenda et FR-044 dans « Accès & administration ».
-- Il ajoute aussi des mécanismes : le « TOTP récent », la session pré-enrôlement et `POST /privacy/search`.
-
-N1 n'abaisse pas le score : FR-043 garde un mécanisme pour chacun de ses verbes (générer, utiliser, régénérer). Le défaut porte sur un **chemin d'usage** que les textes promettent mais ne rendent pas possible.
+Le critère FR → Architecture n'a pas changé depuis le passage 1 : chaque verbe du « je veux » doit avoir une couche, et un cas d'usage, un endpoint ou un mécanisme nommé. Le détail FR par FR figure en v0.2. Ce passage n'ajoute aucune FR. Il complète FR-043 avec les cas d'usage `ResetTotp` et `EmergencyResetTotp`, et les routes `totp/reset`, `totp/reset/confirm` et `/install/reset-2fa`.
 
 ## 1. Cohérence DDD
-- Glossaire cohérent Brief→PRD→Archi : ☑.
-- Bounded contexts stables : ☑. FR-012 et ses cas d'usage relèvent désormais d'Agenda (PRD §5, Archi Couche 2). FR-044 est rattachée à « Accès & administration ».
-- Invariants métier présents et codables : ☑.
+- Glossaire (ubiquitous language) cohérent Brief→PRD→Archi : ☑
+- Bounded contexts stables : ☑ (FR-012 en Agenda, FR-044 en « Accès & administration »)
+- Invariants métier présents et codables : ☑
 
 ## 2. Couverture SOLID : ☑
 
 ## 3. Traçabilité
-- Brief → PRD : ☑ (7/7).
-- PRD → Architecture : ☑ (28/28).
-- PRD → Stories : ☑ (28/28). Réserve mineure N2 : le `@edge` de FR-020 n'est plus porté par aucune story.
+- Brief → PRD : ☑ (7/7)
+- PRD → Architecture : ☑ (28/28)
+- PRD → Stories : ☑ (28/28). FR-020 `@edge` et FR-021 sont désormais portées par la Story 3.11 : Gherkin, `@happy` et en-tête (N2 levé).
 
-**Cohérence des chiffres** : ☑. Aucune taille de story n'a changé depuis le passage 2 :
-- 33 stories ;
-- 24,75 j et 264 tours, puis 29,7 j (≈ 30 j) et ≈ 317 tours avec l'émergence de 20 % ;
-- ≈ 140 €.
-
-L'enveloppe de ≈ 30 j est **acceptée par le PO**. C'est tracé dans `PROJET.md` (Tranchés) et dans le frontmatter de `04`.
-
-**Numérotation** : ☑. Les FR sont continues par module. La FR-012 est numérotée à la suite de la vitrine mais rattachée au module Agenda, ce que le PRD §5 explique. Les 33 identifiants de story sont uniques.
+**Cohérence des chiffres : ☑, recalculée.**
+- **Accès** : 1.1 M + 1.2 L + 1.3 M + 1.4 M (passée de S à M) = 0,75 + 1 + 0,75 + 0,75 = 3,25 j. Tours : 8 + 10 + 8 + 8 = 34.
+- **Sous-total** : 4,50 + 3,25 + 6,50 + 8,00 + 1,25 + 1,50 = 25,00 j. Tours : 48 + 34 + 68 + 86 + 14 + 16 = 266.
+- **Émergence (20 %)** : + 5,00 j / + 53,2 tours.
+- **Total** : 30,0 j / ≈ 319 tours.
+- **Coût modèle** : 319 × 0,442 € = 141 €, soit ≈ 140 €.
+- **Écarts annoncés** : « + 1,75 j » est juste (23,25 → 25,00 j). « + 7 % » aussi (30 / 27,9).
+- **Enveloppe** : ≈ 30 j, acceptée par le PO et tracée dans le registre ; elle reste inchangée.
+- **Stories** : 33. **Numérotation** : ☑.
 
 ## 4. Architecture hexagonale
-- Backend : dépendances vers l'intérieur : ☑.
-- Frontend (hexagonale light) : ☑.
+- Backend : dépendances vers l'intérieur : ☑
+- Frontend (hexagonale light) : ☑
 
 ## 4bis. Contrat API matérialisé
+Les 4 éléments sont en place (voir le statut global). Sprint 0 inclut le harnais contrat : ☑ (Story 0.2).
 
-| Élément | Statut |
-|---|---|
-| 1. Source de vérité | Remplacé (spec écrite à la main), conforme à `bootstrap-nouveau-projet.md` §Conditionnement. Le résidu est mesuré en gate review et la destination est API Platform. La **modalité a été tranchée par le PO le 2026-10-22** : réexamen à chaque gate review, trois déclencheurs (`PROJET.md` Tranchés, ADR-004). R1 est levé. |
-| 2. Client généré | ✓ — `gen-api.mjs`, adapté à OpenAPI 3.1 en Story 0.2 |
-| 3. Désérialisation stricte | ✓ — `StrictJson` + `opis/json-schema` |
-| 4. Contract tests CI | ✓ — parité routes ↔ spec ; réponses validées en intégration |
-
-- Sprint 0 inclut le harnais contrat : ☑ (Story 0.2).
-- Contrat complet vis-à-vis des comportements spécifiés : ☐. Le réenrôlement TOTP d'un compte déjà enrôlé n'a pas de route (N1).
+Le contrat est complet vis-à-vis des comportements spécifiés : ☑. La reprise d'accès est couverte en trois chemins :
+- **session « secours »** : elle ne vaut pas « TOTP récent » et n'ouvre que la consultation et `POST /account/totp/reset` (+ `/confirm`), qui invalident l'ancien secret et les anciens codes ;
+- **réinitialisation d'urgence** : un fichier jeton déposé par SFTP/FTPS, plus le mot de passe, ouvrent `/install/reset-2fa`, avec journalisation et notification ;
+- **restauration de sauvegarde** : FR-044 renvoie désormais à la réinitialisation d'urgence.
 
 ## 4ter. Données et flux (obligatoire à Essential) : ☑
-La section est complète. Deux points ont été ajoutés depuis le passage 2 :
-- les sauvegardes exportées sont conservées 6 mois au plus, et leur restauration exige le `config.php` d'origine ;
-- la recherche RGPD transmet l'adresse dans le corps d'un POST, donc hors des journaux d'accès.
-
-Aucun flux externe n'est sans ligne.
+La section est inchangée et reste complète. Le fichier jeton d'urgence est transitoire (`app/var/`, hors racine web) et il est supprimé après usage. Aucun nouveau flux externe : la notification passe par le SMTP déjà cartographié.
 
 ## 5. Glossaire → code (mapping présent) : ☑
-La table `section` comporte désormais une colonne `page` (`home`, `legal-notice`, `privacy`), cohérente avec le mapping.
+## 6. BDD + Documentation Vivante (flux critiques couverts) : ☑ (P1 → 3.7, P2 → 3.8, P3 → 2.7, P4 → 3.11)
 
-## 6. BDD + Documentation Vivante : ☑
-Les parcours ont chacun leur story porteuse : P1 → 3.7, P2 → 3.8, P3 → 2.7, P4 → 3.11. Chaque story porteuse vient après les stories qu'elle vérifie.
+## 7. TDD (stratégie de tests + couverture cible) : ☑
 
-## 7. TDD : ☑
-
-## 7bis. Classes de tests 4×N
-- Matrice 4×N par FR dans le PRD : ☑ (28/28). FR-041 porte un second `@edge`, consacré au TOTP récent et à la session pré-enrôlement.
+## 7bis. Classes de tests 4×N (mécanisé)
+- Matrice 4×N par FR présente dans le PRD : ☑ (28/28 ; FR-043 `@edge` couvre « téléphone perdu » et « plus aucun code »).
 - 4 classes listées dans chaque story : ☑ (33/33).
-- Aucune FR orpheline d'une classe : ☑ au niveau du PRD. Côté stories, voir N2.
+- Aucune FR orpheline d'une classe : ☑.
 
 ## 8. Readiness organisationnelle
-- Scrum : ☑.
-- Nexus et SAFe : non applicables.
-- ITIL (pré-prod) : ☑. Couvert par la Story 0.0, la recette, la check-list de mise en ligne et la page santé.
+- Scrum : ☑ · Nexus : — (non applicable) · SAFe : — (non applicable) · ITIL (pré-prod) : ☑ (0.0, recette, check-list de mise en ligne, page santé)
 
 ## 9. « Agent IA Ready »
-- Specs assez précises pour qu'un agent boucle sans deviner : ☐. Il reste un seul cas où l'agent devrait deviner : le parcours après la perte du téléphone (N1).
-- Critères d'acceptation testables : ☑.
-- Points irréversibles marqués « validation humaine » : ☑. Les décisions humaines attribuées dans les ADR ont désormais toutes leur ligne au registre (ADR-004 compris).
+- Les specs sont assez précises pour qu'un agent boucle sans deviner : ☑. Les deux imprécisions restantes sont mineures et se lèvent dans la story qui les touche (§11).
+- Critères d'acceptation testables : ☑
+- Points irréversibles identifiés et marqués « validation humaine » : ☑. Il s'agit d'ADR-005, d'ADR-008, de la rupture du contrat `v1`, de la protection de branche, de la première mise en production, de la première migration en production et du choix de l'offre d'hébergement. La modalité d'ADR-004 est tracée.
 
-## 10. Incohérences détectées (passage 3)
+## 10. Incohérences détectées (passage 4)
 
-**Gravité → verdict** (inchangée) :
-- **Bloquante** : empêche le Sprint 0 ; donne FAIL.
-- **À corriger** : à lever avant le démarrage de la story concernée ; avec un score ≥ 80, donne CONCERNS.
-- **Mineure** : se corrige en cours de route ; n'empêche pas un PASS et passe en recommandation.
+**Gravité → verdict.**
+- **Bloquante** : empêche le Sprint 0 et donne FAIL.
+- **À corriger** : à lever avant la story concernée ; avec un score ≥ 80, donne CONCERNS.
+- **Mineure** : se corrige en cours de story, n'empêche pas le PASS et part en recommandation.
 
-**Bilan : 0 bloquante · 1 à corriger · 4 mineures → CONCERNS.**
+**Bilan : 0 bloquante · 0 à corriger · 2 mineures → PASS.**
 
 | # | Gravité | Persona | Fichier § | Incohérence |
 |---|---|---|---|---|
-| N1 | **à corriger** | PM + Architecte | `02-prd.md` FR-043 `@happy`, FR-044 `@happy`, §9bis (lignes `/admin/account/totp` et `/account/recovery-codes`) ; `03-architecture.md` Couche 2 (`EnrollTotp`) | **Aucun parcours de récupération après la perte du téléphone.** Le gérant peut se connecter avec un code de secours (`/session/recovery`). En revanche : (a) la régénération des codes exige « un code TOTP valide », impossible sans téléphone ; (b) les routes d'enrôlement ne sont ouvertes qu'à la **session pré-enrôlement** créée par `/install`. Un éditeur déjà enrôlé ne peut donc jamais réenrôler son TOTP : il épuise ses 10 codes, puis il est bloqué. Or FR-043 promet de « ne pas perdre l'accès si je perds mon téléphone », et FR-044 affirme que « l'éditeur ré-enrôle son double facteur via ses codes de secours ». Ce mécanisme n'existe pas. Il manque aussi de dire si une session ouverte par code de secours vaut « TOTP récent ». |
-| N2 | mineure | Scrum Master | `04-epics-stories.md` Stories 3.2 et 3.11 | Le correctif R2 a déplacé les conflits avec les réservations de la 3.2 vers la 3.11. Mais la 3.11 ne cite pas le cas FR-020 `@edge`, « modification des disponibilités d'un barbier qui exclut une réservation future → refusée avec la liste », ni ce même cas en concurrence. Son Gherkin ne vise que la suppression, la désactivation, la réduction d'horaires et l'absence. Son en-tête omet aussi FR-021, alors qu'elle porte le refus d'une absence posée sur un jour réservé. |
-| N3 | mineure | Scrum Master | `04-epics-stories.md` Story 1.3 | Le « TOTP récent », ajouté à FR-041, n'est porté explicitement par aucune story. La 1.3 (FR-041) ne le liste pas ; la 5.2 (export de sauvegarde), la 1.4 (régénération) et la 5.1 (migrations) le **consomment**. Il faut le livrer en 1.3. |
-| N4 | mineure | Architecte | `03b-plan-vulnerabilites.md` frontmatter | Le frontmatter indique `version: 1.0 (validé)` et `verdict: à revalider (v1.1, corrections du Validateur)`, alors que le contenu n'a pas changé depuis la v1.0. Il faut aligner les deux champs. |
-| N5 | mineure | (registre — superviseur) | `PROJET.md` §Livrables de conception | Les lignes 1 à 4 affichent « ✅ v1.0 validé », alors que les livrables sont en v1.1 « à revalider ». La ligne 5 est à mettre à jour avec le résultat de ce passage. |
+| M1 | mineure | PM + Architecte | `02-prd.md` FR-042 (« /install est désactivé »), §8 arborescence (« désactivé après usage »), §9bis (`/install/reset-2fa`) ; `04` Story 1.2 `@security` (« `/install` répond 404 ») | La réinitialisation d'urgence vit sous `/install/reset-2fa`, alors que `/install` est déclaré désactivé (404) après l'enrôlement. Il faut écrire l'exception, par exemple « `/install/*` répond 404, sauf `/install/reset-2fa` lorsqu'un fichier jeton est présent ». Sinon le test 404 de 1.2 et le parcours d'urgence de 1.4 se contredisent. La route est par ailleurs rendue côté serveur mais listée dans le tableau de la spec API : il faut l'exclure de la parité routes ↔ spec, comme les pages publiques. |
+| M2 | mineure | Scrum Master | `04-epics-stories.md` Story 1.4 `@security`, §Ordre | La Story 1.4 vérifie que l'événement d'urgence est « notifié par e-mail ». L'adaptateur SMTP (`Mailer`) n'est livré qu'en 4.1, bien plus tard, ce qui contredit la règle « chaque story ne teste que ce que les précédentes ont livré ». Gravité mineure : le parcours de reprise n'en dépend pas. Il suffit de vérifier la notification avec un `Mailer` factice en 1.4 et de la rejouer avec le vrai SMTP en 4.1. |
 
-## 10bis. Suivi des 12 points du passage 2
+## 10bis. Suivi des 5 points du passage 3
 
 | Point | État | Preuve |
 |---|---|---|
-| R1 ADR-004, modalité attribuée sans trace | levé | `PROJET.md` Tranchés « Modalité de la bascule différée » (gilmry, 2026-10-22) ; ADR-004 « Destination et modalité » |
-| R2 Ordonnancement 2.5 / 3.2 / 3.3 | levé (réserve N2) | 2.5 renvoie à 3.3 et 3.11 ; 3.2 et 3.3 renvoient leurs conflits à 3.11 ; 3.3 porte l'affichage FR-005 |
-| R3 E-mail dans l'URL | levé | PRD §9bis `POST /privacy/search` ; FR-012 `@security` ; Archi §RGPD |
-| R4 §RGPD obsolète | levé | Archi §API · Sécurité & RGPD : « pas de consentement », renvoi à FR-012 |
-| R5 TOTP récent, session pré-enrôlement | levé (réserves N1, N3) | FR-041 `@edge` (suite) ; §9bis ; Archi §API · Sécurité |
-| R6 Bounded contexts de FR-012 et FR-044 | levé | PRD §5 ; Archi Couche 2 |
-| R7 FTP | levé | plus aucune occurrence de « FTP » seul dans 01 à 04 |
-| R8 Effacement, sauvegardes, clé sodium | levé (réserve N1 sur la phrase « ré-enrôle ») | FR-012 `@edge` ; FR-044 `@happy`/`@security` ; Données stockées |
-| R9 Gate SQL, `section.page` | levé | table des gates `verify` ; PRD §10 `section` |
-| R10 Frontmatters | levé (réserve N4) | `signature_humaine.verdict` « à revalider » ; PRD `source` en v1.1 |
-| R11 Enveloppe ≈ 30 j | levé | `PROJET.md` Tranchés « Enveloppe après validation » ; `04` §Estimation |
-| R12 `/install` 404 | levé | 1.1 `@security` renvoie à 1.2 ; 1.2 `@security` vérifie le 404 |
+| N1 Reprise d'accès après perte du téléphone | levé (réserve M1) | FR-043 `@happy`/`@edge` (session « secours », `totp/reset`, réinitialisation d'urgence) ; §9bis (3 lignes) ; Archi Couche 2 `ResetTotp`, `EmergencyResetTotp` ; FR-044 renvoie à FR-043 ; Story 1.4 (Gherkin « téléphone perdu ») |
+| N2 FR-020 `@edge`, FR-021 dans 3.11 | levé | 3.11 : en-tête, Gherkin (« modifie sa disponibilité »), `@happy` |
+| N3 TOTP récent livré | levé | Story 1.3 `@happy` + `@edge` (10 min 01 s), avant 1.4, 5.1 et 5.2 |
+| N4 Frontmatter du plan | levé | `03b` : version 1.0, verdict « validé (contenu inchangé) » |
+| N5 Registre | levé | `PROJET.md` lignes 1–4 « 🟡 v1.1 à revalider », ligne 5 passage 3 |
 
 ## 11. Recommandations
 
-1. **PM + Architecte (N1, avant la Story 1.4)** : spécifier le parcours de récupération. Proposition :
-   - une session ouverte par code de secours donne accès à une route de **réenrôlement TOTP**. Elle prendrait la forme `POST /api/v1/admin/account/totp/reset`, utiliserait le cas d'usage `EnrollTotp` en mode réenrôlement, et ouvrirait une session limitée, comme la session pré-enrôlement ;
-   - la confirmation du nouveau secret invalide l'ancien et régénère les codes de secours ;
-   - FR-043 doit recevoir un `@edge` « téléphone perdu ».
+**Avant le passage en Phase 2**
 
-   Mettre ensuite §9bis, FR-044 et la Story 1.4 en cohérence.
-2. **Mineures, à traiter en cours de route** :
-   - N2 : ajouter à la 3.11 le cas FR-020 et la mention de FR-021 ;
-   - N3 : livrer le « TOTP récent » dans la Story 1.3 ;
-   - N4 : aligner le frontmatter de `03b` ;
-   - N5 : mettre à jour les lignes de livrables du registre.
-3. **Passage 4** : il peut se limiter à N1, et aux mineures si elles ont été traitées. Si N1 est levé sans nouvelle incohérence bloquante ou à corriger, le verdict sera **PASS**. Le PO revalide alors les livrables v1.1, puis le superviseur valide la sortie de BMAD vers la Phase 2.
+1. **Le PO revalide les livrables v1.1.** Les frontmatters de 01, 02, 03 et 04 portent « à revalider ». Il signe ce rapport (`signature_humaine`). La sortie de BMAD est une décision engageante, que **le superviseur valide**.
+2. **Mettre à jour le registre.** La ligne 5 de `PROJET.md` doit indiquer « passage 4 : PASS 100/100 ». Il faut aussi ajouter l'entrée de journal et faire passer les lignes 1 à 4 à ✅ v1.1 après la signature.
+
+**Mineures, à traiter dans la story concernée**
+
+3. **M1** (PM + Architecte, avant ou pendant 1.2 et 1.4) : écrire l'exception `/install/reset-2fa` à la désactivation de `/install`, et l'exclure de la parité routes ↔ spec.
+4. **M2** (Scrum Master, 1.4 et 4.1) : notification d'urgence avec un `Mailer` factice en 1.4, rejouée avec le SMTP réel en 4.1.
 
 ---
 **Si FAIL/CONCERNS** : reboucler vers le(s) persona(s) concerné(s). **Si PASS** : le superviseur valide le passage au chef de projet (Phase 2).

@@ -33,7 +33,7 @@
 ## Position courante
 
 - **Phase / étape** : Phase A · Conception BMAD · étape 5/5 (Validateur)
-- **Prochaine action attendue** : verdict du Validateur ; si PASS, le PO valide la sortie de BMAD → Phase A bis (pilotage)
+- **Prochaine action attendue** : le PO valide la sortie de BMAD (PASS) → Phase A bis (pilotage : WBS, Gantt, barreau)
 - **Rôle à jouer** : `pilote/roles/conception-bmad.md`
 
 ## Livrables de conception
@@ -44,7 +44,7 @@
 | 2 | PRD | `docs/conception/02-prd.md` | 🟡 v1.1 à revalider — v1.0 validé 2026-10-22 |
 | 3 | Architecture + ADR + plan vulnérabilités | `docs/conception/03-architecture.md` + `03b-plan-vulnerabilites.md` | 🟡 architecture v1.1 à revalider (plan inchangé, validé) |
 | 4 | Epics & stories | `docs/conception/04-epics-stories.md` | 🟡 v1.1 à revalider — v1.0 validé 2026-10-22 |
-| 5 | Validation | `docs/conception/05-validation.md` | 🟡 passage 3 : CONCERNS (100/100, 1 à corriger + 4 mineures) → corrigés ; passage 4 en cours |
+| 5 | Validation | `docs/conception/05-validation.md` | ✅ passage 4 : **PASS 100/100** (2 mineures corrigées dans la foulée) — à signer par le PO |
 
 Référence visuelle : `docs/design/reference-le-corbeau.md`.
 
@@ -78,7 +78,10 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 
 ### 🔴 En attente (l'humain doit trancher une MODALITÉ)
 
-- *(aucun — passage 3 du Validateur en cours)*
+- **Point** : **sortie de BMAD** (décision engageante) — revalidation des livrables v1.1 et signature du rapport PASS
+  - **Preuve jointe** : `docs/conception/05-validation.md` v0.4 (PASS 100/100, 4 passages) + livrables 01–04 v1.1
+  - **Question** : valides-tu la conception pour passer au pilotage (calendrier, vagues) ?
+  - **Options** : A. valider · B. relire d'abord
 
 ### ✅ Tranchés
 
@@ -119,3 +122,4 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 - 2026-10-22 — Validateur passage 2 : CONCERNS 100/100 ; 3 points + 9 mineures corrigés (v1.1 revue) ; arbitrages ADR-004 et enveloppe 30 j posés
 - 2026-10-22 — PO : modalité ADR-004 et enveloppe ≈ 30 j acceptées ; passage 3 du Validateur
 - 2026-10-22 — Validateur passage 3 : CONCERNS 100/100 (perte du téléphone sans reprise d'accès) → FR-043 complétée, Story 1.4 passe en M (≈ 30 j inchangé)
+- 2026-10-22 — Validateur passage 4 : **PASS 100/100** ; mineures M1 (exception /install/reset-2fa) et M2 (Mailer factice en 1.4) corrigées

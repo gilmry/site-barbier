@@ -395,7 +395,8 @@ coordonnées, pages légales) → Agenda (disponibilités, absences, fermetures)
 /{fr|nl|en}/mentions-legales     (nl: /juridische-informatie, en: /legal)
 /{fr|nl|en}/confidentialite      (nl: /privacy, en: /privacy)
 /admin/                          administration — îlot Svelte « admin », FR seul
-/install                         assistant d'installation (désactivé après usage)
+/install                         assistant d'installation (404 après l'enrôlement)
+/install/reset-2fa               réinitialisation d'urgence — seule exception, répond 404 sauf si app/var/reset-2fa.token existe
 ```
 
 **i18n** : langue dans l'URL ; FR langue de référence et de repli ; libellés d'interface en fichiers
@@ -421,7 +422,7 @@ Version `v1` dans le chemin.
 | GET/POST | `/api/v1/admin/account/totp` · `/account/totp/confirm` | session **pré-enrôlement** (créée par `/install`, n'ouvre que ces deux routes) | enrôlement TOTP (secret + URI otpauth, confirmation par un premier code → codes de secours) |
 | POST | `/api/v1/admin/account/recovery-codes` | admin + TOTP récent | régénérer les codes de secours |
 | POST | `/api/v1/admin/account/totp/reset` · `/account/totp/reset/confirm` | session « secours » ou admin + TOTP récent | réinitialiser le double facteur (FR-043) |
-| GET/POST | `/install/reset-2fa` (rendu serveur) | fichier jeton déposé par SFTP/FTPS + mot de passe | réinitialisation d'urgence (FR-043) |
+| GET/POST | `/install/reset-2fa` (rendu serveur, **hors spec** : exclue de la parité routes ↔ spec comme les autres pages rendues côté serveur) | fichier jeton déposé par SFTP/FTPS + mot de passe | réinitialisation d'urgence (FR-043) ; 404 tant que le fichier jeton est absent |
 | GET/PUT | `/api/v1/admin/sections/{key}` | admin | textes traduits d'une section (version pour verrou optimiste) |
 | POST/DELETE | `/api/v1/admin/media` · `/media/{id}` | admin | images |
 | GET/POST/PUT/DELETE | `/api/v1/admin/categories[/{id}]` · `/services[/{id}]` | admin | carte |

@@ -74,7 +74,7 @@ registre `PROJET.md` à jour (tours, tokens, wall-clock) · un commit par étape
 
 ### Story 1.2 — Connexion mot de passe + double facteur (FR-040)
 - **Gherkin** : `Étant donné mon compte avec TOTP enrôlé, Quand je saisis e-mail, mot de passe puis un code valide, Alors j'accède à l'admin.`
-- **4×N** : `@happy` **enrôlement TOTP** (QR + secret, confirmé par un premier code — porte l'étape finale de `/install`), connexion en deux temps · `@negative` mauvais mot de passe/code → message unique ; code rejoué → refus · `@edge` décalage ±30 s accepté, 2 min refusé ; vecteurs RFC 6238 · `@security` verrou progressif après 5 échecs, pas d'énumération, liste noire de mots de passe, secret chiffré (sodium) ; `/install` répond 404 une fois l'enrôlement confirmé ; session pré-enrôlement limitée aux routes d'enrôlement.
+- **4×N** : `@happy` **enrôlement TOTP** (QR + secret, confirmé par un premier code — porte l'étape finale de `/install`), connexion en deux temps · `@negative` mauvais mot de passe/code → message unique ; code rejoué → refus · `@edge` décalage ±30 s accepté, 2 min refusé ; vecteurs RFC 6238 · `@security` verrou progressif après 5 échecs, pas d'énumération, liste noire de mots de passe, secret chiffré (sodium) ; `/install` répond 404 une fois l'enrôlement confirmé (seule exception : `/install/reset-2fa`, qui répond 404 tant qu'aucun fichier jeton n'est déposé — Story 1.4) ; session pré-enrôlement limitée aux routes d'enrôlement.
 - **Couches** : Domain · Application · Infra · Frontend · **Taille** : L · **Tours** : 10
 
 ### Story 1.3 — Session sûre, CSRF, en-têtes (FR-041)
@@ -84,7 +84,7 @@ registre `PROJET.md` à jour (tours, tokens, wall-clock) · un commit par étape
 
 ### Story 1.4 — Codes de secours (FR-043)
 - **Gherkin** : `Étant donné que j'ai perdu mon téléphone, Quand je me connecte avec un de mes codes de secours puis réinitialise mon double facteur sur un nouveau téléphone, Alors j'ai de nouveau un accès complet, l'ancien secret et les anciens codes ne valent plus rien.`
-- **4×N** : `@happy` génération, affichage unique, stockage haché ; session « secours » → réinitialisation du TOTP · `@negative` code utilisé → refus ; session « secours » → toute autre écriture refusée · `@edge` dernier code → régénération exigée ; plus aucun code → réinitialisation d'urgence par fichier jeton déposé en SFTP/FTPS · `@security` mêmes limites de tentatives que 1.2 ; jeton d'urgence à usage unique, supprimé après usage, événement notifié par e-mail.
+- **4×N** : `@happy` génération, affichage unique, stockage haché ; session « secours » → réinitialisation du TOTP · `@negative` code utilisé → refus ; session « secours » → toute autre écriture refusée · `@edge` dernier code → régénération exigée ; plus aucun code → réinitialisation d'urgence par fichier jeton déposé en SFTP/FTPS · `@security` mêmes limites de tentatives que 1.2 ; jeton d'urgence à usage unique, supprimé après usage, événement notifié par e-mail (vérifié ici avec un `Mailer` factice, rejoué avec le vrai SMTP en 4.1).
 - **Couches** : Domain · Application · Infra · Frontend · **Taille** : M · **Tours** : 8
 
 ---
