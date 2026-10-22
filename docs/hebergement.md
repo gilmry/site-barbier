@@ -29,4 +29,23 @@ quotidiennes restaurables (9), juridiction UE (10).*
 | Points à vérifier avant commande | SFTP, `.htaccess`, `.user.ini`, Let's Encrypt, racine hors www | tarif 48 mois à la commande, prix belge, procédure de restauration, version MySQL |
 | Extensions `intl` et `sodium` | à vérifier | à vérifier |
 
-**Décision du PO** : *à prendre* (point irréversible : 0.4 reproduit l'offre retenue, 5.1 y déploie).
+## Décision du PO (2026-10-22) : **OVH Perso, engagement 48 mois, datacenter GRA (France)**
+
+Conséquences reportées dans la conception (v1.2) et le socle :
+- base de données **MySQL 8** (et non MariaDB) : la CI teste **MySQL 8.0 et 8.4** tant que la version exacte
+  n'est pas confirmée, puis se fixe sur celle d'OVH ;
+- **un seul utilisateur par base** : résidu ADR-010 accepté (requêtes préparées partout, tests `@security`) ;
+- pas de `php.ini` : version PHP fixée par `.ovhconfig` ; réglages de session faits dans le code (sessions en base) ;
+- pas de SSH : déploiement en **SFTP** uniquement ;
+- sauvegardes OVH « non contractuelles » : l'export mensuel du gérant (FR-044) devient la sauvegarde de référence.
+
+## À faire confirmer par OVH **avant de commander** (le PO commande lui-même)
+
+1. Le tarif 4,83 € TTC/mois sur 48 mois s'applique-t-il à une **nouvelle** commande (et au prix belge) ?
+2. Version exacte de **MySQL** des bases de l'offre Perso.
+3. Extensions PHP 8.4 disponibles : `pdo_mysql`, `gd` (JPEG + WebP), `mbstring`, **`intl`**, `openssl`, **`sodium`**.
+4. Procédure et délai de **restauration** d'une base depuis les sauvegardes quotidiennes.
+5. Choix du datacenter **GRA** à la commande (pas BHS, au Canada).
+6. Boîte e-mail du domaine incluse (MX Plan) utilisable en **SMTP authentifié** depuis PHP.
+
+Les réponses mettent à jour ce document ; une réponse négative sur 2, 3 ou 4 rouvre le choix.
