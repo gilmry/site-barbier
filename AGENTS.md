@@ -45,7 +45,7 @@ Prérequis : Docker seulement (aucun PHP local). Images : `site-barbier-php:8.4`
 | Gate | Commande | Base requise | Depuis |
 |---|---|---|---|
 | `verify` / `plancher` structurel (lint PHP 8.4, G1 G2 H1 L1) | `bash harness/run-verify.sh` | non | 0.1 |
-| `unit` + `bdd` | `bash harness/run-phpunit.sh` (un test : `--filter RouterTest`) | non | 0.1 |
+| `unit` + `bdd` | `bash harness/run-phpunit.sh` (un test : `--filter RouterTest`) — suite `bdd` ajoutée en 1.1 | non | 0.1 |
 | `integration` (MariaDB réelle : up → down → up) | `bash harness/run-integration.sh` | oui (auto) | 0.1 |
 | `e2e` (smoke HTTP via le contrôleur frontal) | `bash harness/e2e-smoke.sh` | oui (auto) | 0.1 |
 | **tous** | `bash harness/ci.sh` | oui (auto) | 0.1 |
