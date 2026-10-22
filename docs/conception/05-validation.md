@@ -2,7 +2,7 @@
 livrable: Rapport de validation croisée
 persona: 05-validateur (BMAD, TOGAF Phase F)
 projet: site-barbier
-version: 0.4
+version: 1.0 (PASS, signé)
 sources:
   - 01-product-brief.md v1.1
   - 02-prd.md v1.1
@@ -12,10 +12,10 @@ sources:
 redige_le: 2026-10-22
 redige_par: agent validateur (Claude Code, pilote Foyer)
 signature_humaine:
-  nom: à signer
+  nom: gilmry
   role: PO
-  date: à signer
-  verdict: à signer
+  date: 2026-10-22
+  verdict: validé (sortie BMAD, PASS 100/100)
 ---
 
 # Rapport de Validation croisée — site-barbier

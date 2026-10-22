@@ -2,14 +2,14 @@
 livrable: Product Brief
 persona: 01-analyste (BMAD, TOGAF Phase A)
 projet: site-barbier
-version: 1.1 (erratum du Validateur, à revalider)
+version: 1.1 (validé)
 redige_le: 2026-10-22
 redige_par: agent (Claude Code, pilote Foyer)
 signature_humaine:
   nom: gilmry
   role: PO
   date: 2026-10-22
-  verdict: à revalider (v1.1, corrections du Validateur) — v1.0 validé le 2026-10-22
+  verdict: validé (sortie BMAD, PASS 100/100)
 ---
 
 # Product Brief — Site web d'un barbier (site-barbier)

@@ -25,26 +25,26 @@
 
 ## Gantt / vagues
 
-- **Gantt** : — (Phase A bis, après le PASS BMAD)
-- **Vague courante** : — · **barrière** : —
+- **Gantt** : `docs/pilotage/gantt.md` v0.1 (à signer)
+- **Vague courante** : V0 (pas encore ouverte) · **barrière** : B0 (Sprint 0 vert, offre d'hébergement choisie)
 - **Branches ouvertes** : —
-- **Barreau** : Scrum pressenti (Micro, un flux) — à confirmer au pilotage
+- **Barreau** : Scrum proposé (ADR-011, à valider)
 
 ## Position courante
 
-- **Phase / étape** : Phase A · Conception BMAD · étape 5/5 (Validateur)
-- **Prochaine action attendue** : le PO valide la sortie de BMAD (PASS) → Phase A bis (pilotage : WBS, Gantt, barreau)
-- **Rôle à jouer** : `pilote/roles/conception-bmad.md`
+- **Phase / étape** : Phase A bis · Pilotage (WBS, Gantt, barreau)
+- **Prochaine action attendue** : le PO tranche barreau + ratio et signe le Gantt → Phase B0 (résoudre le kit) puis V0
+- **Rôle à jouer** : `pilote/roles/pilotage.md`
 
 ## Livrables de conception
 
 | # | Livrable | Fichier | État |
 |---|---|---|---|
-| 1 | Product Brief | `docs/conception/01-product-brief.md` | 🟡 v1.1 (erratum) à revalider — v1.0 validé 2026-10-22 |
-| 2 | PRD | `docs/conception/02-prd.md` | 🟡 v1.1 à revalider — v1.0 validé 2026-10-22 |
-| 3 | Architecture + ADR + plan vulnérabilités | `docs/conception/03-architecture.md` + `03b-plan-vulnerabilites.md` | 🟡 architecture v1.1 à revalider (plan inchangé, validé) |
-| 4 | Epics & stories | `docs/conception/04-epics-stories.md` | 🟡 v1.1 à revalider — v1.0 validé 2026-10-22 |
-| 5 | Validation | `docs/conception/05-validation.md` | ✅ passage 4 : **PASS 100/100** (2 mineures corrigées dans la foulée) — à signer par le PO |
+| 1 | Product Brief | `docs/conception/01-product-brief.md` | ✅ v1.1 validé (gilmry, 2026-10-22, sortie BMAD) |
+| 2 | PRD | `docs/conception/02-prd.md` | ✅ v1.1 validé (gilmry, 2026-10-22, sortie BMAD) |
+| 3 | Architecture + ADR + plan vulnérabilités | `docs/conception/03-architecture.md` + `03b-plan-vulnerabilites.md` | ✅ v1.1 validé (gilmry, 2026-10-22, sortie BMAD) |
+| 4 | Epics & stories | `docs/conception/04-epics-stories.md` | ✅ v1.1 validé (gilmry, 2026-10-22, sortie BMAD) |
+| 5 | Validation | `docs/conception/05-validation.md` | ✅ **PASS 100/100**, signé (gilmry, 2026-10-22) |
 
 Référence visuelle : `docs/design/reference-le-corbeau.md`.
 
@@ -78,10 +78,13 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 
 ### 🔴 En attente (l'humain doit trancher une MODALITÉ)
 
-- **Point** : **sortie de BMAD** (décision engageante) — revalidation des livrables v1.1 et signature du rapport PASS
-  - **Preuve jointe** : `docs/conception/05-validation.md` v0.4 (PASS 100/100, 4 passages) + livrables 01–04 v1.1
-  - **Question** : valides-tu la conception pour passer au pilotage (calendrier, vagues) ?
-  - **Options** : A. valider · B. relire d'abord
+- **Point** : ADR-011 — barreau (cadre de delivery) — irréversible
+  - **Preuve jointe** : `docs/pilotage/gantt.md` §5 (un flux, une personne, ≤ 2 branches)
+  - **Options** : A. Scrum (recommandé) · B. Nexus · C. SAFe
+- **Point** : ratio de supervision (combien de chantiers en parallèle)
+  - **Preuve jointe** : `docs/pilotage/gantt.md` §3–4 (A : ≈ 30 j, un chantier · B : ≈ 19 j, deux chantiers)
+  - **Options** : A. un chantier à la fois · B. deux en parallèle
+- **Point** : signature du Gantt avant la vague V0
 
 ### ✅ Tranchés
 
@@ -98,6 +101,7 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 | Environnements | Recette `test.<domaine>` puis production, envoi SFTP/FTPS par le PO | gilmry | 2026-10-22 | ADR-008 |
 | Découpage de release | Une seule release (≈ 28 j) ; target recalée 15 → 28 j | gilmry | 2026-10-22 | — |
 | Enveloppe après validation | ≈ 30 j acceptés (33 stories) | gilmry | 2026-10-22 | — |
+| Sortie de BMAD | Conception validée (PASS 100/100), livrables v1.1 signés | gilmry | 2026-10-22 | — |
 | Modalité de la bascule différée | Revue à chaque gate review ; déclencheurs : incident de dérive, > 60 routes, hébergeur rendant le poids indifférent | gilmry | 2026-10-22 | ADR-004 |
 | Architecture v1.0 + plan de vulnérabilités | Validés ; responsable sécurité Gilles seul (sans suppléant, mesure compensatoire), signalement gilmry+abuse@gmail.com | gilmry | 2026-10-22 | — |
 
@@ -123,3 +127,4 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 - 2026-10-22 — PO : modalité ADR-004 et enveloppe ≈ 30 j acceptées ; passage 3 du Validateur
 - 2026-10-22 — Validateur passage 3 : CONCERNS 100/100 (perte du téléphone sans reprise d'accès) → FR-043 complétée, Story 1.4 passe en M (≈ 30 j inchangé)
 - 2026-10-22 — Validateur passage 4 : **PASS 100/100** ; mineures M1 (exception /install/reset-2fa) et M2 (Mailer factice en 1.4) corrigées
+- 2026-10-22 — sortie de BMAD validée par le PO ; plan de pilotage v0.1 (33 stories, 6 vagues, 2 barrières, scénarios ratio 1 / ratio 2)

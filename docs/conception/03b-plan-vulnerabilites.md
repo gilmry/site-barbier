@@ -2,14 +2,14 @@
 livrable: Plan de gestion des vulnérabilités
 persona: 03-architecte (annexe de 03-architecture.md, couche 7)
 projet: site-barbier
-version: 1.0 (validé, contenu inchangé en v1.1)
+version: 1.1 (validé)
 redige_le: 2026-10-22
 redige_par: agent (Claude Code, pilote Foyer)
 signature_humaine:
   nom: gilmry
   role: PO
   date: 2026-10-22
-  verdict: validé (contenu inchangé lors des corrections v1.1)
+  verdict: validé (sortie BMAD, PASS 100/100)
 ---
 
 # Plan de gestion des vulnérabilités — site-barbier

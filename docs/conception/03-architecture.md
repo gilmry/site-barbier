@@ -2,7 +2,7 @@
 livrable: Architecture technique
 persona: 03-architecte (BMAD, TOGAF Phases C-D)
 projet: site-barbier
-version: 1.1 (corrections du Validateur, à revalider)
+version: 1.1 (validé)
 source: 02-prd.md v1.1
 redige_le: 2026-10-22
 redige_par: agent (Claude Code, pilote Foyer)
@@ -11,7 +11,7 @@ signature_humaine:
   nom: gilmry
   role: PO
   date: 2026-10-22
-  verdict: à revalider (v1.1, corrections du Validateur)
+  verdict: validé (sortie BMAD, PASS 100/100)
 ---
 
 # Architecture technique — site-barbier

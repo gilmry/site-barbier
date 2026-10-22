@@ -2,7 +2,7 @@
 livrable: Epics & User Stories
 persona: 04-scrum-master (BMAD, TOGAF Phase E)
 projet: site-barbier
-version: 1.1 (corrections du Validateur, à revalider)
+version: 1.1 (validé)
 source: 03-architecture.md v1.1
 redige_le: 2026-10-22
 redige_par: agent (Claude Code, pilote Foyer)
@@ -10,7 +10,7 @@ signature_humaine:
   nom: gilmry
   role: PO
   date: 2026-10-22
-  verdict: à revalider (v1.1, corrections du Validateur) — v1.0 validé le 2026-10-22 (une seule release, ≈ 28 j ; ≈ 30 j en v1.1, accepté par le PO le 2026-10-22)
+  verdict: validé (sortie BMAD, PASS 100/100)
 ---
 
 # Epics & User Stories — site-barbier
