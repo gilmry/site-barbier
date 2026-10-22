@@ -27,6 +27,6 @@ expect() { # méthode chemin statut_attendu motif_attendu libellé
 expect GET  /api/v1/health 200 '"status":"ok"'          "GET /api/v1/health → 200, base joignable"
 expect GET  /api/v1/inconnu 404 '"status":404'          "route inconnue → 404 problem+json"
 expect POST /api/v1/health 405 '"status":405'           "méthode non autorisée → 405"
-expect GET  /index.php/../app/config.example.php 404 '"status":404' "aucun fichier de app/ servi par le web"
+expect GET  /index.php/../app/config.example.php 404 'html' "aucun fichier de app/ servi par le web (page 404)"
 
 [ "$fail" -eq 0 ] && echo -e "\ne2e (smoke HTTP): 🟢" || { echo -e "\ne2e (smoke HTTP): 🔴 ($fail échec(s))"; exit 1; }

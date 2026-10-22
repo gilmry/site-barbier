@@ -36,7 +36,11 @@ final class Router
     public function dispatch(Request $request): Response
     {
         $pathMatched = false;
+        $isApi = str_starts_with($request->path(), '/api/');
         foreach ($this->routes as $route) {
+            if ($isApi && !$route['contract']) {
+                continue; // sous /api/, seules les routes du contrat comptent : jamais une page générique
+            }
             $params = self::match($route['pattern'], $request->path());
             if ($params === null) {
                 continue;

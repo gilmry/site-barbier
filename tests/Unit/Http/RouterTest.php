@@ -15,7 +15,7 @@ final class RouterTest extends TestCase
     {
         $r = new Router();
         $r->api('GET', '/api/v1/barbers/{id}', static fn (Request $q, array $in): Response => Response::json(['id' => $in['path']['id']]));
-        $r->page('GET', '/api/v1/health', static fn (): Response => Response::json(['status' => 'ok']));
+        $r->api('GET', '/api/v1/health', static fn (): Response => Response::json(['status' => 'ok']));
 
         return $r;
     }
@@ -62,8 +62,21 @@ final class RouterTest extends TestCase
     public function testTableDeRoutesIntrospectable(): void
     {
         self::assertSame(
-            [['method' => 'GET', 'pattern' => '/api/v1/barbers/{id}', 'contract' => true], ['method' => 'GET', 'pattern' => '/api/v1/health', 'contract' => false]],
+            [['method' => 'GET', 'pattern' => '/api/v1/barbers/{id}', 'contract' => true], ['method' => 'GET', 'pattern' => '/api/v1/health', 'contract' => true]],
             $this->router()->routes(),
         );
+    }
+
+    /** @negative une page générique (/{a}/{b}/{c}) ne capture jamais un chemin d'API inconnu */
+    public function testPageGeneriqueNeCapturePasLApi(): void
+    {
+        $r = new Router();
+        $r->api('GET', '/api/v1/health', static fn (): Response => Response::json([]));
+        $r->page('GET', '/{lang}/{slug}/{token}', static fn (): Response => Response::html('page'));
+        $r->page('POST', '/{lang}/{slug}/{token}', static fn (): Response => Response::html('page'));
+        self::assertSame(404, $r->dispatch(new Request('GET', '/api/v1/inconnu'))->status);
+        self::assertStringStartsWith('application/problem+json', $r->dispatch(new Request('GET', '/api/v1/inconnu'))->headers['Content-Type']);
+        self::assertSame(405, $r->dispatch(new Request('POST', '/api/v1/health'))->status);
+        self::assertSame('page', $r->dispatch(new Request('GET', '/fr/annuler/abc'))->body);
     }
 }
