@@ -85,11 +85,18 @@ reset_database() {
 
 # Exécute PHP dans l'image de travail, dépôt monté, réseau de l'hôte (accès à MySQL sur 127.0.0.1).
 php_run() {
+  local APP_ENV; app_env "${DB_NAME:-barbier}"
   docker run --rm --network host -v "$BARBIER_ROOT":/app -w /app -u "$(id -u):$(id -g)" \
-    -e DB_HOST=127.0.0.1 -e DB_PORT="$BARBIER_DB_PORT" -e DB_USER=root -e DB_PASSWORD="$BARBIER_DB_ROOT_PASSWORD" \
-    -e DB_NAME="${DB_NAME:-barbier}" -e TZ=UTC -e BARBIER_ENV=test -e APP_KEY="$BARBIER_TEST_APP_KEY" \
-    -e INSTALL_CODE="$BARBIER_TEST_INSTALL_CODE" -e SMTP_HOST=127.0.0.1 -e SMTP_PORT=11025 -e SMTP_SECURE=none \
-    -e SMTP_FROM=reservations@lecorbeau.be -e MAILPIT_API=http://127.0.0.1:18025 "$@"
+    "${APP_ENV[@]}" -e TZ=UTC -e MAILPIT_API=http://127.0.0.1:18025 "$@"
+}
+
+# Environnement de l'application, source unique pour les tests, le serveur de test et ./go :
+# un serveur lancé sans clé ni SMTP ne peut plus diverger de ce que les tests vérifient.
+# Usage : app_env <base> [mode, défaut test] → remplit le tableau APP_ENV.
+app_env() {
+  APP_ENV=(-e DB_HOST=127.0.0.1 -e DB_PORT="$BARBIER_DB_PORT" -e DB_USER=root -e DB_PASSWORD="$BARBIER_DB_ROOT_PASSWORD"
+    -e DB_NAME="$1" -e BARBIER_ENV="${2:-test}" -e APP_KEY="$BARBIER_TEST_APP_KEY" -e INSTALL_CODE="$BARBIER_TEST_INSTALL_CODE"
+    -e SMTP_HOST=127.0.0.1 -e SMTP_PORT=11025 -e SMTP_SECURE=none -e SMTP_FROM=reservations@lecorbeau.be)
 }
 
 BARBIER_BROWSER_IMAGE="${BARBIER_BROWSER_IMAGE:-site-barbier-browser:pw1.49}"
@@ -114,11 +121,9 @@ start_web() {
   DB_NAME="$db" php_run "$BARBIER_PHP_IMAGE" php app/bin/migrate.php up >/dev/null
   [ -f "$BARBIER_ROOT/app/bin/seed.php" ] && DB_NAME="$db" php_run "$BARBIER_PHP_IMAGE" php app/bin/seed.php >/dev/null
   docker rm -f "$BARBIER_WEB_CONTAINER" >/dev/null 2>&1 || true
+  local APP_ENV; app_env "$db"
   docker run -d --rm --name "$BARBIER_WEB_CONTAINER" --network host -v "$BARBIER_ROOT":/app -w /app -u "$(id -u):$(id -g)" \
-    -e DB_HOST=127.0.0.1 -e DB_PORT="$BARBIER_DB_PORT" -e DB_USER=root -e DB_PASSWORD="$BARBIER_DB_ROOT_PASSWORD" \
-    -e DB_NAME="$db" -e BARBIER_ENV=test -e APP_KEY="$BARBIER_TEST_APP_KEY" -e INSTALL_CODE="$BARBIER_TEST_INSTALL_CODE" \
-    -e SMTP_HOST=127.0.0.1 -e SMTP_PORT=11025 -e SMTP_SECURE=none -e SMTP_FROM=reservations@lecorbeau.be \
-    ${BARBIER_WEB_ENV:-} "$BARBIER_PHP_IMAGE" \
+    "${APP_ENV[@]}" ${BARBIER_WEB_ENV:-} "$BARBIER_PHP_IMAGE" \
     php -S "127.0.0.1:$port" -t www harness/dev-router.php >/dev/null
   local i
   for i in $(seq 1 60); do curl -s -o /dev/null "http://127.0.0.1:$port/api/v1/health" && return 0; sleep 0.25; done

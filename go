@@ -8,12 +8,16 @@ git -C "$BARBIER_ROOT" config core.hooksPath .githooks 2>/dev/null || true   # h
 ensure_php_image
 ensure_vendor
 ensure_db
+ensure_mailpit
 php_run "$BARBIER_PHP_IMAGE" php app/bin/migrate.php up
 if [ "${1:-}" = "--no-serve" ]; then echo "✓ prêt (sans serveur)"; exit 0; fi
 if (exec 3<>"/dev/tcp/127.0.0.1/$PORT") 2>/dev/null; then
   echo "Le port $PORT est occupé. Relance avec un autre port : FOYER_PORT=8081 ./go" >&2; exit 3
 fi
-echo "▶ http://127.0.0.1:$PORT  (Ctrl+C pour arrêter)"
+# Même clé, même code d'installation et même SMTP de capture que les tests (harness/lib.sh, app_env).
+app_env barbier dev
+echo "▶ Site     http://127.0.0.1:$PORT  (Ctrl+C pour arrêter)"
+echo "  Admin    http://127.0.0.1:$PORT/install au premier lancement (code : $BARBIER_TEST_INSTALL_CODE), ensuite /admin"
+echo "  E-mails  http://127.0.0.1:18025  (Mailpit : aucun e-mail ne part réellement)"
 exec docker run --rm -it --network host -v "$BARBIER_ROOT":/app -w /app \
-  -e DB_HOST=127.0.0.1 -e DB_PORT="$BARBIER_DB_PORT" -e DB_USER=root -e DB_PASSWORD="$BARBIER_DB_ROOT_PASSWORD" \
-  -e DB_NAME=barbier "$BARBIER_PHP_IMAGE" php -S "127.0.0.1:$PORT" -t www harness/dev-router.php
+  "${APP_ENV[@]}" "$BARBIER_PHP_IMAGE" php -S "127.0.0.1:$PORT" -t www harness/dev-router.php
