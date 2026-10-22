@@ -1,1 +1,0 @@
-O:23:"PHPStan\Cache\CacheItem":2:{s:11:"variableKey";s:8:"v2-enums";s:4:"data";a:1:{s:57:"/app/app/vendor/composer/../phpstan/phpstan/bootstrap.php";a:5:{i:0;s:64:"7e685476f4b179a3b113e8dc5e1f72456f65ec7b770514128eb3d06008e772b7";i:1;s:39:"6457:1791493751:1792678773:1393488:2096";i:2;a:1:{i:0;s:22:"phpstan\pharautoloader";}i:3;a:1:{i:0;s:17:"phpstan\loadclass";}i:4;a:0:{}}}}
