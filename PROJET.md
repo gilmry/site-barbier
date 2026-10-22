@@ -32,8 +32,8 @@
 
 ## Position courante
 
-- **Phase / étape** : Phase B0/B · Vague V0 · passe 1 : Story 0.1 (socle) ∥ Story 0.0 (hébergement)
-- **Prochaine action attendue** : instancier `kit-php` (0.1) et préparer la grille d'hébergement (0.0)
+- **Phase / étape** : Vague V0 · passe 1 : 0.1 ✅ (branche) · 0.0 en cours (étude des offres)
+- **Prochaine action attendue** : grille d'hébergement remplie → choix de l'offre par le PO (0.0) ; puis passe 2 : 0.2 (contrat) ∥ 0.3 (triple harnais)
 - **Rôle à jouer** : `pilote/roles/harnais.md` + `pilote/roles/gate-runner.md`
 
 ## Livrables de conception
@@ -52,11 +52,11 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 
 | Gate | Statut | Quand | Commande |
 |---|---|---|---|
-| plancher (secrets · SBOM · conteneur · migrations si stateful) | ⚪ | | cf. `AGENTS.md` (à écrire en B) |
-| verify structurel | ⚪ | | |
+| plancher (secrets · SBOM · conteneur · migrations si stateful) | 🟡 partiel : migrations réversibles (G2) 🟢 ; secrets/SBOM en 0.5 ; conteneur N/A | 2026-10-22 | `bash harness/run-verify.sh` |
+| verify structurel | 🟢 G1 G2 H1 L1 (+ lint PHP 8.4) | 2026-10-22 | `bash harness/run-verify.sh` |
 | contrat (anti-drift) | ⚪ | | |
-| tests 4 couches | ⚪ | | |
-| E2E (correctness) | ⚪ | | |
+| tests 4 couches | 🟢 unit (10 tests) · integration (migrations up→down→up, MariaDB 10.11) | 2026-10-22 | `bash harness/run-phpunit.sh` · `bash harness/run-integration.sh` |
+| E2E (correctness) | 🟢 smoke HTTP (4 vérifications) ; navigateur en 0.3 | 2026-10-22 | `bash harness/e2e-smoke.sh` |
 | régression visuelle | ⚪ | | |
 | doc vivante (preuve de valeur) | ⚪ | | non bloquant |
 | jalon (SAST · SCA · qualité) | — | | rapport, non bloquant |
@@ -68,7 +68,7 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 | Périmètre / story | État | Couches vertes | Bascule | Commit / ADR | Tours | Tokens | Wall-clock |
 |---|---|---|---|---|---|---|---|
 | 0.0 Choisir et sonder l'hébergement (S) | 🔵 en cours | — | — | — | | | |
-| 0.1 Socle reproductible (L) | 🔵 en cours | — | — | — | | | |
+| 0.1 Socle reproductible (L) | ✅ fait, branche `story/0.1-socle` — promotion à arbitrer (B0) | socle (Http, Persistence) | — | `nouveau(socle)` ×2 | 14 | ≈ 60 k | ≈ 1 h |
 | 0.2 Harnais de contrat (M) | ⚪ à faire | — | — | — | | | |
 | 0.3 Parcours partagés et triple harnais (M) | ⚪ à faire | — | — | — | | | |
 | 0.4 Paquet et hébergement simulé (M) | ⚪ à faire | — | — | — | | | |
@@ -160,3 +160,5 @@ Référence visuelle : `docs/design/reference-le-corbeau.md`.
 - 2026-10-22 — sortie de BMAD validée par le PO ; plan de pilotage v0.1 (33 stories, 6 vagues, 2 barrières, scénarios ratio 1 / ratio 2)
 - 2026-10-22 — PO : ratio 2, Scrum (ADR-011), Gantt signé ; ouverture de V0
 - 2026-10-22 — PO : « prends la version LTS de PHP » → PHP 8.4 + MariaDB 10.11 LTS ; NFR-02, architecture, stories et images mis à jour
+- 2026-10-22 — B0 : kit-php vert à froid (verify, unit, integration CQRS+Doctrine, e2e vanilla+API Platform, visuel) ; aucun résidu
+- 2026-10-22 — Story 0.1 faite sur `story/0.1-socle` : CI socle verte depuis un clone neuf, sensibilité prouvée (7 dérives détectées), `./go` idempotent ; promotion arbitrée par le PO à la barrière B0
