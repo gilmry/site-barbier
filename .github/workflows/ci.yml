@@ -75,6 +75,6 @@ jobs:
       - run: bash harness/run-jalon.sh
       - uses: actions/upload-artifact@v4
         with: { name: jalon, path: dist/reports/ }
-      - uses: github/codeql-action/upload-sarif@v3
+      - uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('dist/reports/sast.sarif') != ''
         with: { sarif_file: dist/reports/sast.sarif }
