@@ -1,7 +1,7 @@
 # Image de travail du projet — base PUBLIQUE php:8.4-cli, la version visée sur l'hébergement mutualisé
 # (NFR-02, ADR-004). Extensions : pdo_mysql, gd (jpeg, webp, freetype), intl, zip (paquet) ; sodium et mbstring
 # sont fournis par l'image officielle. Composer sert uniquement au build (dépendances embarquées).
-FROM php:8.4-cli
+FROM php:8.5-cli
 RUN apt-get update -y \
  && apt-get install -y --no-install-recommends unzip git libicu-dev libjpeg62-turbo-dev libpng-dev \
       libwebp-dev libfreetype6-dev libzip-dev \
