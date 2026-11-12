@@ -1,7 +1,7 @@
 # Hébergement mutualisé SIMULÉ (gate `hebergement`) — base PUBLIQUE php:8.4-apache, comme l'offre OVH
 # Perso : Apache + .htaccess, racine web imposée (www/), aucun accès en ligne de commande pendant le test.
 # Le paquet est déposé tel quel dans /srv/site (équivalent de la racine SFTP).
-FROM php:8.4-apache
+FROM php:8.5-apache
 RUN apt-get update -y \
  && apt-get install -y --no-install-recommends libicu-dev libjpeg62-turbo-dev libpng-dev libwebp-dev libfreetype6-dev \
  && docker-php-ext-configure gd --with-jpeg --with-webp --with-freetype \
